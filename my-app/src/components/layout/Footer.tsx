@@ -102,6 +102,13 @@ export function Footer() {
             </Link>
           </div>
         </div>
+
+        {/* 8B / Forge Automotive-Inspired Grand Editorial Wordmark */}
+        <div className="pt-16 pb-4 select-none pointer-events-none overflow-hidden">
+          <h2 className="text-[14vw] font-black font-serif text-cream/[0.07] tracking-tighter uppercase leading-none text-center whitespace-nowrap">
+            macrosnap
+          </h2>
+        </div>
       </div>
     </footer>
   )

@@ -40,22 +40,22 @@ export function Navbar() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
         {/* Brand Logo */}
-        <Link href="/" className="group flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-xl bg-forest flex items-center justify-center text-chartreuse shadow-sm group-hover:rotate-6 transition-transform">
-            <BotanicalLeaf className="w-6 h-6 text-chartreuse" />
+        <Link href="/" className="group flex items-center gap-2 sm:gap-2.5">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-forest flex items-center justify-center text-chartreuse shadow-sm group-hover:rotate-6 transition-transform flex-shrink-0">
+            <BotanicalLeaf className="w-5 h-5 sm:w-6 sm:h-6 text-chartreuse" />
           </div>
           <div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-2xl font-black tracking-tighter text-forest font-serif uppercase">
+            <div className="flex items-center gap-1 sm:gap-1.5">
+              <span className="text-xl sm:text-2xl font-black tracking-tighter text-forest font-serif uppercase">
                 MACRO<span className="text-tangerine">SNAP</span>
               </span>
-              <span className="text-[10px] font-mono bg-chartreuse/80 text-forest px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
+              <span className="text-[9px] sm:text-[10px] font-mono bg-chartreuse/80 text-forest px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
                 RAW
               </span>
             </div>
-            <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest -mt-1 hidden sm:block">
+            <p className="text-[9px] sm:text-[10px] font-mono text-muted-foreground uppercase tracking-widest -mt-1 hidden sm:block">
               Food intelligence lab
             </p>
           </div>
@@ -82,10 +82,10 @@ export function Navbar() {
         </nav>
 
         {/* Action icons (Basket & Saved library) */}
-        <div className="flex items-center gap-1.5 sm:gap-3">
+        <div className="flex items-center gap-1 sm:gap-2.5 flex-shrink-0">
           <Link
             href="/library"
-            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-full border border-forest/20 text-xs font-medium text-forest hover:bg-forest/5 transition-colors"
+            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-full border border-forest/20 text-xs font-medium text-forest hover:bg-forest/5 transition-colors"
             title="Saved foods and recipes"
           >
             <Bookmark className="w-3.5 h-3.5 text-forest" />
@@ -99,7 +99,7 @@ export function Navbar() {
 
           <Link
             href="/basket"
-            className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-2 rounded-full bg-forest text-cream text-xs font-semibold hover:bg-forest-deep transition-all shadow-sm"
+            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3.5 py-1.5 sm:py-2 rounded-full bg-forest text-cream text-xs font-semibold hover:bg-forest-deep transition-all shadow-sm"
           >
             <ShoppingBag className="w-3.5 h-3.5 text-chartreuse" />
             <span className="hidden sm:inline">Basket</span>
@@ -113,7 +113,7 @@ export function Navbar() {
           {/* Mobile menu toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-1.5 sm:p-2 rounded-xl text-forest hover:bg-forest/5 transition-colors"
+            className="lg:hidden p-1 sm:p-2 rounded-xl text-forest hover:bg-forest/5 transition-colors"
             aria-label="Toggle navigation menu"
           >
             {mobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
