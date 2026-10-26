@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { CinematicOverlay } from '@/components/home/CinematicOverlay'
 import { OpeningHero } from '@/components/home/OpeningHero'
 import { TelemetryLens } from '@/components/home/TelemetryLens'
 import { SpreadingStaples } from '@/components/home/SpreadingStaples'
@@ -13,14 +14,17 @@ import { EditorialTicker } from '@/components/layout/EditorialTicker'
 
 export default function HomePage() {
   return (
-    <main className="relative w-full overflow-x-hidden bg-[#FAF7F0] text-forest selection:bg-chartreuse selection:text-forest">
+    <main className="relative w-full overflow-x-hidden bg-[#050B07] text-cream selection:bg-chartreuse selection:text-forest">
+      {/* 35mm Analog Film Grain, Anamorphic Vignette, and Camera HUD */}
+      <CinematicOverlay />
+
       {/* Global Fixed Cinema Navigation Scrubber Rail */}
       <ScrubberRail />
 
-      {/* Chapter 01: The Stepped Opening */}
+      {/* Chapter 01: Full-Bleed Panoramic Opening Scene */}
       <OpeningHero />
 
-      {/* Chapter 02: Food Made Tangible — Molecular Telemetry */}
+      {/* Chapter 02: Molecular Telemetry Lens */}
       <TelemetryLens />
 
       {/* Chapter 03: The Sovereign Staples — Spreading Architecture */}

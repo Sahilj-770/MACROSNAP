@@ -47,26 +47,26 @@
 }
 
 :root {
-  /* Warm cream/paper white canvas by default (NOT dark-mode) */
-  --background: #FAF7F0;
-  --foreground: #192019;
-  --card: #FFFFFF;
-  --card-foreground: #192019;
-  --popover: #FFFFFF;
-  --popover-foreground: #192019;
-  --primary: #1A3826;
-  --primary-foreground: #FAF7F0;
-  --secondary: #F4EFE6;
-  --secondary-foreground: #1A3826;
-  --muted: #EFE9DC;
-  --muted-foreground: #5B655B;
+  /* MACROSNAP Atelier Obsidian Dark Palette */
+  --background: #050B07;
+  --foreground: #FAF7F0;
+  --card: #0B1710;
+  --card-foreground: #FAF7F0;
+  --popover: #0B1710;
+  --popover-foreground: #FAF7F0;
+  --primary: #D8F343;
+  --primary-foreground: #050B07;
+  --secondary: #112419;
+  --secondary-foreground: #FAF7F0;
+  --muted: #13281C;
+  --muted-foreground: #8FA295;
   --accent: #D8F343;
-  --accent-foreground: #0D2316;
-  --destructive: #E63946;
-  --border: #E5DEC9;
-  --input: #DCD4BC;
-  --ring: #2D6A4F;
-  --radius: 1rem;
+  --accent-foreground: #050B07;
+  --destructive: #FF5E36;
+  --border: rgba(255, 255, 255, 0.12);
+  --input: rgba(255, 255, 255, 0.1);
+  --ring: #D8F343;
+  --radius: 1.25rem;
 }
 
 @layer base {

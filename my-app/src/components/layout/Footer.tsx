@@ -4,9 +4,9 @@ import { BotanicalLeaf, PlantSeedIcon } from '@/components/illustrations/Botanic
 
 export function Footer() {
   return (
-    <footer className="w-full bg-forest text-cream border-t border-forest-deep mt-24">
+    <footer className="w-full bg-[#040805] text-cream border-t border-white/10 mt-0">
       {/* Decorative top border ribbon */}
-      <div className="h-2 w-full bg-gradient-to-r from-chartreuse via-tangerine to-butter" />
+      <div className="h-1.5 w-full bg-gradient-to-r from-chartreuse via-tangerine to-chartreuse" />
 
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12">

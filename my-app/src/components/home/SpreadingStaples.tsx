@@ -6,7 +6,7 @@ import Link from 'next/link'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
-import { ArrowUpRight, Flame, Scale, Sparkles } from 'lucide-react'
+import { ArrowUpRight, Scale, Sparkles, Award } from 'lucide-react'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -131,7 +131,7 @@ export function SpreadingStaples() {
             y: () => toCentre(tile, 'y'),
             rotation: tiltAngles[index % tiltAngles.length],
             scale: 0.82,
-            opacity: 0.4,
+            opacity: 0.35,
           },
           {
             x: 0,
@@ -153,23 +153,25 @@ export function SpreadingStaples() {
     <section
       ref={sectionRef}
       id="staples"
-      className="relative w-full py-28 sm:py-36 px-4 sm:px-8 lg:px-14 bg-[#F4EFE6] text-forest overflow-hidden"
+      className="relative w-full py-28 sm:py-36 px-4 sm:px-8 lg:px-14 bg-transparent text-cream overflow-hidden"
     >
+      {/* Ambient Atmospheric Connecting Beam */}
+      <div className="w-48 h-[1px] bg-gradient-to-r from-transparent via-chartreuse/40 to-transparent mx-auto mb-16 opacity-70" />
       <div className="max-w-7xl mx-auto space-y-16 relative z-10">
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-forest/15 pb-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-8">
           <div className="space-y-3 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-forest text-chartreuse text-xs font-mono font-bold tracking-widest uppercase shadow-sm">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-chartreuse text-forest text-xs font-mono font-bold tracking-widest uppercase shadow-sm">
               <Sparkles className="w-3.5 h-3.5" />
               <span>CHAPTER 03 // THE SOVEREIGN DECK</span>
             </div>
-            <h2 className="text-4xl sm:text-6xl lg:text-7xl font-black font-serif text-forest tracking-tight leading-[0.95]">
+            <h2 className="text-4xl sm:text-6xl lg:text-7xl font-black font-serif text-cream tracking-tight leading-[0.95]">
               Six Pantry <br />
-              <span className="text-tangerine italic font-normal">Sovereigns.</span>
+              <span className="text-chartreuse italic font-normal">Sovereigns.</span>
             </h2>
           </div>
 
-          <p className="text-sm sm:text-base font-mono text-forest/75 max-w-md leading-relaxed">
+          <p className="text-sm sm:text-base font-mono text-cream/75 max-w-md leading-relaxed">
             The fitness advertising complex wants you to believe protein is rare and expensive.
             These six Indian kitchen staples deliver world-class amino density for a fraction of the cost.
           </p>
@@ -183,20 +185,20 @@ export function SpreadingStaples() {
           {SOVEREIGN_FOODS.map((food) => (
             <div
               key={food.id}
-              className="staple-tile group relative rounded-3xl bg-white border border-forest/15 hover:border-forest/50 transition-all duration-300 p-6 flex flex-col justify-between space-y-6 shadow-sm hover:shadow-xl overflow-hidden"
+              className="staple-tile group relative rounded-3xl bg-black/40 backdrop-blur-xl border border-white/10 hover:border-chartreuse/60 transition-all duration-500 p-6 flex flex-col justify-between space-y-6 shadow-2xl hover:shadow-[0_0_35px_rgba(216,243,67,0.15)] overflow-hidden"
             >
               {/* Top Meta */}
               <div className="flex items-center justify-between font-mono text-xs">
-                <span className="text-[10px] font-bold text-forest/50 uppercase tracking-widest">
+                <span className="text-[10px] font-bold text-cream/50 uppercase tracking-widest">
                   STAPLE // {food.num}
                 </span>
-                <span className="px-2.5 py-0.5 rounded-full bg-forest/5 text-forest font-bold text-[10px] uppercase">
+                <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-chartreuse font-bold text-[10px] uppercase border border-white/10">
                   {food.tag}
                 </span>
               </div>
 
               {/* Center Image Frame */}
-              <div className="relative w-full aspect-[16/10] rounded-2xl overflow-hidden bg-forest-deep/10 border border-forest/10">
+              <div className="relative w-full aspect-[16/10] rounded-2xl overflow-hidden bg-black/60 border border-white/10">
                 <Image
                   src={food.image}
                   alt={food.name}
@@ -204,7 +206,7 @@ export function SpreadingStaples() {
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                 <div className="absolute bottom-3 left-4 right-4 flex items-baseline justify-between text-white font-mono">
                   <span className="text-xs text-cream/80">{food.hindi}</span>
                   <span className="text-2xl font-black text-chartreuse">{food.protein}</span>
@@ -214,32 +216,32 @@ export function SpreadingStaples() {
               {/* Typography & Stats */}
               <div className="space-y-3">
                 <div className="flex justify-between items-baseline">
-                  <h3 className="text-2xl font-bold font-serif text-forest group-hover:text-tangerine transition-colors">
+                  <h3 className="text-2xl font-bold font-serif text-cream group-hover:text-chartreuse transition-colors">
                     {food.name}
                   </h3>
                   <div className="text-right font-mono">
-                    <span className="text-lg font-black text-forest block">{food.cost}</span>
-                    <span className="text-[10px] text-forest/50 block">{food.costSub}</span>
+                    <span className="text-xl font-black text-chartreuse block">{food.cost}</span>
+                    <span className="text-[10px] text-cream/50 block">{food.costSub}</span>
                   </div>
                 </div>
 
-                <p className="text-xs text-forest/75 leading-relaxed font-sans line-clamp-3">
+                <p className="text-xs text-cream/70 leading-relaxed font-sans line-clamp-3">
                   {food.desc}
                 </p>
               </div>
 
               {/* Bottom Quick-Compare Link */}
-              <div className="pt-4 border-t border-forest/10 flex items-center justify-between font-mono text-xs font-bold text-forest">
+              <div className="pt-4 border-t border-white/10 flex items-center justify-between font-mono text-xs font-bold">
                 <Link
                   href={food.compareHref}
-                  className="inline-flex items-center gap-1.5 text-forest hover:text-tangerine transition-colors group-hover:translate-x-1 transition-transform"
+                  className="inline-flex items-center gap-1.5 text-cream/80 hover:text-chartreuse transition-colors group-hover:translate-x-1 transition-transform"
                 >
-                  <Scale className="w-3.5 h-3.5" />
+                  <Scale className="w-3.5 h-3.5 text-chartreuse" />
                   <span>Launch Head-to-Head Compare</span>
                 </Link>
                 <Link
                   href={food.compareHref}
-                  className="w-8 h-8 rounded-full bg-forest text-chartreuse flex items-center justify-center hover:bg-tangerine hover:text-white transition-colors"
+                  className="w-8 h-8 rounded-full bg-white/10 text-cream flex items-center justify-center group-hover:bg-chartreuse group-hover:text-forest transition-colors"
                   aria-label={`Compare ${food.name}`}
                 >
                   <ArrowUpRight className="w-4 h-4" />
@@ -250,11 +252,11 @@ export function SpreadingStaples() {
         </div>
 
         {/* Section Footer Banner */}
-        <div className="pt-8 border-t border-forest/15 flex flex-col sm:flex-row items-center justify-between text-xs font-mono text-forest/70 gap-4">
+        <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs font-mono text-cream/60 gap-4">
           <span>DATA PROVENANCE: ICMR-NIN INDIAN FOOD COMPOSITION TABLES (IFCT 2017)</span>
           <Link
             href="/explore"
-            className="text-forest hover:text-tangerine font-bold inline-flex items-center gap-2 underline"
+            className="text-chartreuse hover:text-white font-bold inline-flex items-center gap-2 underline"
           >
             <span>Explore all 30+ categorized staples in directory</span>
             <ArrowUpRight className="w-4 h-4" />

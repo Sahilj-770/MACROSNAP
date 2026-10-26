@@ -13,7 +13,7 @@ export function EditorialTicker() {
   ]
 
   return (
-    <div className="w-full max-w-full bg-forest text-cream overflow-hidden border-y-2 border-forest-deep py-3 select-none relative">
+    <div className="w-full max-w-full bg-[#040905] text-cream overflow-hidden border-y border-white/10 py-3.5 select-none relative">
       <div className="flex w-max animate-[marquee_28s_linear_infinite] hover:[animation-play-state:paused]">
         {[...phrases, ...phrases].map((phrase, idx) => (
           <div key={idx} className="flex items-center gap-6 px-6 font-mono font-bold text-xs tracking-widest uppercase">

@@ -118,8 +118,10 @@ export function TelemetryLens() {
     <section
       ref={containerRef}
       id="telemetry"
-      className="relative w-full py-24 sm:py-32 px-4 sm:px-8 lg:px-14 bg-[#0D2316] text-cream overflow-hidden"
+      className="relative w-full py-28 sm:py-36 px-4 sm:px-8 lg:px-14 bg-transparent text-cream overflow-hidden"
     >
+      {/* Ambient Atmospheric Connecting Beam */}
+      <div className="w-48 h-[1px] bg-gradient-to-r from-transparent via-chartreuse/40 to-transparent mx-auto mb-16 opacity-70" />
       {/* Background Radial Glow */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(216,243,67,0.06)_0%,_transparent_70%)] pointer-events-none" />
 

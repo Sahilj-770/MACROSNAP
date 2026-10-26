@@ -100,8 +100,10 @@ export function ShowdownArena() {
   return (
     <section
       id="showdown"
-      className="relative w-full py-28 sm:py-36 px-4 sm:px-8 lg:px-14 bg-[#08170E] text-cream overflow-hidden"
+      className="relative w-full py-28 sm:py-36 px-4 sm:px-8 lg:px-14 bg-transparent text-cream overflow-hidden"
     >
+      {/* Ambient Atmospheric Connecting Beam */}
+      <div className="w-48 h-[1px] bg-gradient-to-r from-transparent via-chartreuse/40 to-transparent mx-auto mb-16 opacity-70" />
       <div className="max-w-7xl mx-auto space-y-16 relative z-10">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-8">

@@ -6,67 +6,74 @@ import Link from 'next/link'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
-import { ArrowDown, ArrowUpRight, Sparkles, ShieldCheck } from 'lucide-react'
+import { ArrowDown, ArrowUpRight, Sparkles, ShieldCheck, Dna } from 'lucide-react'
 
 gsap.registerPlugin(ScrollTrigger)
 
 const AMINO_NODES = [
-  { code: 'LEU', name: 'Leucine', role: 'mTOR Trigger (2.7g)', pos: 'top-[22%] left-[8%]' },
-  { code: 'ISO', name: 'Isoleucine', role: 'Glucose Uptake', pos: 'top-[18%] right-[10%]' },
-  { code: 'VAL', name: 'Valine', role: 'Tissue Regeneration', pos: 'bottom-[28%] left-[10%]' },
-  { code: 'LYS', name: 'Lysine', role: 'Collagen Matrix', pos: 'bottom-[25%] right-[8%]' },
+  { code: 'LEU', name: 'Leucine', role: 'mTOR Trigger (2.7g)', pos: 'top-[26%] left-[6%]' },
+  { code: 'ISO', name: 'Isoleucine', role: 'Glucose Uptake', pos: 'top-[22%] right-[8%]' },
+  { code: 'VAL', name: 'Valine', role: 'Tissue Synthesis', pos: 'bottom-[32%] left-[8%]' },
+  { code: 'LYS', name: 'Lysine', role: 'Collagen Base', pos: 'bottom-[28%] right-[6%]' },
 ]
 
 export function OpeningHero() {
   const containerRef = useRef<HTMLElement>(null)
   const headlineRef = useRef<HTMLDivElement>(null)
-  const imageFrameRef = useRef<HTMLDivElement>(null)
-  const metaStripRef = useRef<HTMLDivElement>(null)
+  const bgImageRef = useRef<HTMLDivElement>(null)
   const badgesRef = useRef<HTMLDivElement>(null)
+  const promptRef = useRef<HTMLDivElement>(null)
 
   useGSAP(
     () => {
-      // Line reveal timeline
+      // 1. Line-by-line cinematic text reveal
       const lines = headlineRef.current?.querySelectorAll('.hero-line')
       if (lines && lines.length > 0) {
         gsap.from(lines, {
-          y: 70,
+          y: 90,
           opacity: 0,
-          stagger: 0.12,
-          duration: 1.1,
+          stagger: 0.15,
+          duration: 1.3,
           ease: 'power3.out',
           clearProps: 'transform,opacity',
         })
       }
 
-      if (metaStripRef.current) {
-        gsap.from(metaStripRef.current, {
-          y: -20,
-          opacity: 0,
-          duration: 0.8,
-          ease: 'power2.out',
-          delay: 0.2,
-        })
-      }
-
+      // 2. Telemetry badges entrance
       if (badgesRef.current) {
-        const badges = badgesRef.current.children
-        gsap.from(badges, {
+        gsap.from(badgesRef.current.children, {
           y: 40,
           opacity: 0,
-          stagger: 0.1,
-          duration: 0.9,
+          stagger: 0.12,
+          duration: 1,
           ease: 'power3.out',
-          delay: 0.4,
+          delay: 0.5,
           clearProps: 'transform,opacity',
         })
       }
 
-      // Parallax image movement on scroll
-      if (imageFrameRef.current && containerRef.current) {
-        gsap.to(imageFrameRef.current, {
+      // 3. Scroll-driven camera push & zoom into the food
+      if (bgImageRef.current && containerRef.current) {
+        gsap.to(bgImageRef.current, {
+          scale: 1.25,
           y: 120,
-          scale: 1.08,
+          opacity: 0.35,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: 'top top',
+            end: 'bottom top',
+            scrub: true,
+          },
+        })
+      }
+
+      // 4. Headline depth displacement on scroll
+      if (headlineRef.current && containerRef.current) {
+        gsap.to(headlineRef.current, {
+          y: -80,
+          opacity: 0.15,
+          ease: 'none',
           scrollTrigger: {
             trigger: containerRef.current,
             start: 'top top',
@@ -84,7 +91,7 @@ export function OpeningHero() {
     if (nextSection) {
       if ((window as any).__lenis) {
         ;(window as any).__lenis.scrollTo(nextSection, {
-          duration: 1.2,
+          duration: 1.4,
           easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
         })
       } else {
@@ -97,166 +104,155 @@ export function OpeningHero() {
     <section
       ref={containerRef}
       id="opening"
-      className="relative w-full min-h-[92vh] lg:min-h-screen flex flex-col justify-between px-4 sm:px-8 lg:px-14 py-8 bg-[#FAF7F0] text-forest overflow-hidden"
+      className="relative w-full min-h-screen flex flex-col justify-between items-center px-4 sm:px-8 lg:px-14 py-10 bg-[#050B07] text-cream overflow-hidden"
     >
-      {/* Top Editorial Status Strip */}
+      {/* ─────────────────────────────────────────────────────────────
+          FULL-BLEED CINEMATIC PHOTOGRAPHIC BACKDROP WITH PARALLAX PUSH
+      ───────────────────────────────────────────────────────────── */}
       <div
-        ref={metaStripRef}
-        className="w-full flex items-center justify-between font-mono text-[11px] uppercase tracking-widest text-forest/75 z-20 pb-4 border-b border-forest/15"
+        ref={bgImageRef}
+        className="absolute inset-0 w-full h-full pointer-events-none z-0 transform-gpu"
       >
+        <Image
+          src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=2400&q=90"
+          alt="Cinematic macro composition of whole nutrient dense foods"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center brightness-[0.72] contrast-[1.12]"
+        />
+        {/* Cinematic Multi-Layer Lighting Gradients */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#050B07] via-[#050B07]/50 to-[#050B07]/80" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_20%,_rgba(5,11,7,0.85)_80%)]" />
+      </div>
+
+      {/* Top Issue Identifier */}
+      <div className="relative z-20 w-full max-w-7xl flex items-center justify-between font-mono text-[10px] sm:text-[11px] uppercase tracking-widest text-cream/60 pb-4 border-b border-white/10">
         <div className="flex items-center gap-2.5">
-          <span className="w-2 h-2 rounded-full bg-chartreuse border border-forest animate-ping" />
-          <span className="font-bold text-forest">MACROSNAP // ISSUE 2026.1</span>
-          <span className="hidden sm:inline text-forest/40">/</span>
-          <span className="hidden sm:inline text-forest/60">AUTONOMOUS RESEARCH</span>
+          <span className="w-2 h-2 rounded-full bg-chartreuse animate-pulse" />
+          <span className="font-bold text-white tracking-widest">MACROSNAP VOL. 2026</span>
+          <span className="hidden sm:inline text-white/30">/</span>
+          <span className="hidden sm:inline text-chartreuse font-bold">CINEMATIC ATELIER</span>
         </div>
 
-        <div className="flex items-center gap-4 text-xs font-mono">
-          <span className="hidden md:inline text-forest/60">ICMR-NIN IFCT BENCHMARKED</span>
-          <span className="px-2.5 py-0.5 rounded-full bg-forest text-chartreuse font-bold text-[10px]">
+        <div className="flex items-center gap-4">
+          <span className="hidden md:inline text-white/50">NIN-ICMR SPECTROMETRY</span>
+          <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-chartreuse border border-chartreuse/30 font-bold text-[9px]">
             100% UNBRANDED
           </span>
         </div>
       </div>
 
-      {/* Hero Body Composition */}
-      <div className="relative my-auto py-12 lg:py-16 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center z-10">
-        {/* Left Column: Stepped Editorial Typography */}
-        <div ref={headlineRef} className="lg:col-span-7 space-y-6">
-          <div className="overflow-hidden">
-            <div className="hero-line inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-forest text-chartreuse text-xs font-mono font-bold tracking-widest uppercase shadow-sm">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Independent Nutrition Atelier</span>
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <div className="overflow-hidden">
-              <h1 className="hero-line text-6xl sm:text-7xl lg:text-8xl xl:text-[102px] font-black font-serif text-forest tracking-tight leading-[0.9] uppercase">
-                Know What
-              </h1>
-            </div>
-            <div className="overflow-hidden">
-              <h1 className="hero-line text-6xl sm:text-7xl lg:text-8xl xl:text-[102px] font-black font-serif text-forest tracking-tight leading-[0.9] uppercase">
-                Fuels Your
-              </h1>
-            </div>
-            <div className="overflow-hidden">
-              <h1 className="hero-line text-6xl sm:text-7xl lg:text-8xl xl:text-[102px] font-black font-serif text-tangerine italic font-normal tracking-tight leading-[0.9]">
-                Biology.
-              </h1>
-            </div>
-          </div>
-
-          <div className="overflow-hidden pt-2">
-            <p className="hero-line text-base sm:text-lg text-forest/80 max-w-xl font-sans leading-relaxed">
-              Reclaiming nutritional economics from ₹120 ultra-processed fitness bars.
-              Discover authentic whole food density, complete amino profiles, and verified Indian pantry staples.
-            </p>
-          </div>
-
-          <div className="overflow-hidden pt-4 flex flex-wrap items-center gap-4">
-            <button
-              onClick={scrollToNext}
-              className="px-7 py-3.5 rounded-full bg-forest text-chartreuse font-mono text-xs font-bold uppercase tracking-wider hover:bg-forest/90 transition-all shadow-md flex items-center gap-2.5 cursor-pointer active:scale-95"
-            >
-              <span>Enter The Story</span>
-              <ArrowDown className="w-4 h-4 text-chartreuse animate-bounce" />
-            </button>
-
-            <Link
-              href="/explore"
-              className="px-6 py-3.5 rounded-full bg-white border border-forest/20 text-forest font-mono text-xs font-bold uppercase tracking-wider hover:border-forest transition-colors flex items-center gap-2 shadow-2xs"
-            >
-              <span>Explore 30+ Staples</span>
-              <ArrowUpRight className="w-4 h-4" />
-            </Link>
+      {/* ─────────────────────────────────────────────────────────────
+          MONUMENTAL FULL-WIDTH EDITORIAL TITLE CARD
+      ───────────────────────────────────────────────────────────── */}
+      <div
+        ref={headlineRef}
+        className="relative z-20 my-auto text-center space-y-6 max-w-6xl px-2 py-10"
+      >
+        <div className="overflow-hidden">
+          <div className="hero-line inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-chartreuse/40 text-chartreuse text-xs font-mono font-bold tracking-widest uppercase shadow-xl">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>The Independent Food Biology Film</span>
           </div>
         </div>
 
-        {/* Right Column: High-Impact Photography Frame */}
-        <div className="lg:col-span-5 relative">
-          <div className="relative w-full aspect-[4/5] sm:aspect-[1/1] lg:aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-2 border-forest/15 bg-forest-deep">
-            <div ref={imageFrameRef} className="absolute inset-0 w-full h-full">
-              <Image
-                src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1600&q=85"
-                alt="Nutrient dense whole food composition"
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 45vw"
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-forest-deep/80 via-transparent to-black/20" />
-            </div>
-
-            {/* Overlaid Editorial Metadata */}
-            <div className="absolute top-4 left-4 right-4 flex justify-between items-center text-[10px] font-mono uppercase tracking-widest text-cream z-10">
-              <span className="px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/10">
-                PROVENANCE // 01
-              </span>
-              <span className="text-chartreuse font-bold">52% DENSITY</span>
-            </div>
-
-            <div className="absolute bottom-6 left-6 right-6 space-y-2 z-10 font-mono text-cream">
-              <span className="text-[10px] uppercase text-chartreuse font-bold tracking-widest block">
-                THE PANTRY BENCHMARK
-              </span>
-              <p className="text-xl font-black font-serif text-white leading-tight">
-                Soy Chunks: ₹2.30 per 10g Protein
-              </p>
-              <p className="text-xs text-cream/70">
-                26x lower cost than commercial protein snacks. Zero synthetic polyols.
-              </p>
-            </div>
+        {/* Stepped Monumental Heading */}
+        <div className="space-y-1 sm:space-y-2 select-none">
+          <div className="overflow-hidden">
+            <h1 className="hero-line text-5xl sm:text-7xl md:text-8xl lg:text-[116px] xl:text-[132px] font-black font-serif text-white tracking-tighter leading-[0.88] uppercase drop-shadow-2xl">
+              Know What
+            </h1>
           </div>
+
+          <div className="overflow-hidden">
+            <h1 className="hero-line text-5xl sm:text-7xl md:text-8xl lg:text-[116px] xl:text-[132px] font-black font-serif text-white tracking-tighter leading-[0.88] uppercase drop-shadow-2xl">
+              Fuels Your
+            </h1>
+          </div>
+
+          <div className="overflow-hidden">
+            <h1 className="hero-line text-5xl sm:text-7xl md:text-8xl lg:text-[116px] xl:text-[132px] font-black font-serif text-chartreuse italic font-normal tracking-tight leading-[0.88] drop-shadow-[0_0_40px_rgba(216,243,67,0.35)]">
+              Biology.
+            </h1>
+          </div>
+        </div>
+
+        {/* Concise Narrative Subtitle */}
+        <div className="overflow-hidden max-w-2xl mx-auto pt-3">
+          <p className="hero-line text-sm sm:text-base md:text-lg font-mono text-cream/80 uppercase tracking-widest leading-relaxed">
+            Reclaiming human nutrition from ₹120 ultra-processed fitness marketing.
+            Real foods. Verified ileal bioavailability. Zero industrial fillers.
+          </p>
+        </div>
+
+        {/* Primary Action Buttons */}
+        <div className="overflow-hidden pt-6 flex flex-wrap justify-center items-center gap-4">
+          <button
+            onClick={scrollToNext}
+            className="px-8 py-4 rounded-full bg-chartreuse text-forest font-mono text-xs font-black uppercase tracking-wider hover:bg-white hover:scale-105 transition-all shadow-[0_0_30px_rgba(216,243,67,0.4)] flex items-center gap-3 cursor-pointer active:scale-95"
+          >
+            <span>Engage The Film</span>
+            <ArrowDown className="w-4 h-4 text-forest animate-bounce" />
+          </button>
+
+          <Link
+            href="/explore"
+            className="px-8 py-4 rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-cream font-mono text-xs font-bold uppercase tracking-wider hover:border-chartreuse hover:text-chartreuse hover:scale-105 transition-all flex items-center gap-2 shadow-xl"
+          >
+            <span>Explore 30+ Pantry Staples</span>
+            <ArrowUpRight className="w-4 h-4" />
+          </Link>
         </div>
       </div>
 
-      {/* Floating Amino Nodes (Desktop Visual Accents) */}
-      <div className="hidden xl:block absolute inset-0 pointer-events-none z-10">
+      {/* Floating Ambient Amino Nodes (Desktop Film Accents) */}
+      <div className="hidden xl:block absolute inset-0 pointer-events-none z-15">
         {AMINO_NODES.map((node) => (
           <div
             key={node.code}
-            className={`absolute ${node.pos} px-3 py-1.5 rounded-full bg-white/80 border border-forest/15 shadow-sm backdrop-blur-sm text-[10px] font-mono text-forest flex items-center gap-2`}
+            className={`absolute ${node.pos} px-3.5 py-1.5 rounded-full bg-black/60 border border-white/15 shadow-xl backdrop-blur-md text-[10px] font-mono text-cream flex items-center gap-2 animate-pulse`}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-chartreuse border border-forest" />
-            <strong className="font-bold">{node.code}</strong>
-            <span className="text-forest/60">· {node.role}</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-chartreuse shadow-[0_0_8px_#D8F343]" />
+            <strong className="font-bold text-chartreuse">{node.code}</strong>
+            <span className="text-white/60">· {node.role}</span>
           </div>
         ))}
       </div>
 
-      {/* Bottom Telemetry HUD Badges */}
+      {/* ─────────────────────────────────────────────────────────────
+          BOTTOM TELEMETRY HUD TILES (GLASS ARCHITECTURE)
+      ───────────────────────────────────────────────────────────── */}
       <div
         ref={badgesRef}
-        className="w-full grid grid-cols-1 sm:grid-cols-3 gap-3 z-20 pt-6 border-t border-forest/15"
+        className="relative z-20 w-full max-w-7xl grid grid-cols-1 sm:grid-cols-3 gap-3 pt-6 border-t border-white/10"
       >
-        <div className="p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-forest/15 hover:border-forest/40 transition-colors flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 hover:border-chartreuse/40 transition-colors flex items-center justify-between">
           <div>
-            <span className="text-[10px] font-mono uppercase text-forest/60 block">Bioavailability</span>
-            <strong className="text-xl font-black font-serif text-forest">DIAAS &gt; 1.18</strong>
+            <span className="text-[10px] font-mono uppercase text-white/50 block">Bioavailability</span>
+            <strong className="text-xl sm:text-2xl font-black font-serif text-white">DIAAS &gt; 1.18</strong>
           </div>
           <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-chartreuse text-forest">
             Egg Standard
           </span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-forest/15 hover:border-forest/40 transition-colors flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 hover:border-chartreuse/40 transition-colors flex items-center justify-between">
           <div>
-            <span className="text-[10px] font-mono uppercase text-forest/60 block">Protein Density</span>
-            <strong className="text-xl font-black font-serif text-forest">52g / 100g</strong>
+            <span className="text-[10px] font-mono uppercase text-white/50 block">Protein Density</span>
+            <strong className="text-xl sm:text-2xl font-black font-serif text-white">52g / 100g</strong>
           </div>
-          <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-tangerine/15 text-tangerine">
+          <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-[#FF5E36] text-white">
             Soy Chunks
           </span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-forest/15 hover:border-forest/40 transition-colors flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 hover:border-chartreuse/40 transition-colors flex items-center justify-between">
           <div>
-            <span className="text-[10px] font-mono uppercase text-forest/60 block">Scientific Audit</span>
-            <strong className="text-xl font-black font-serif text-forest">Zero Ad Markup</strong>
+            <span className="text-[10px] font-mono uppercase text-white/50 block">Scientific Audit</span>
+            <strong className="text-xl sm:text-2xl font-black font-serif text-white">Zero Marketing Markup</strong>
           </div>
-          <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-forest text-cream">
+          <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-white/10 text-chartreuse border border-chartreuse/30">
             100% Raw Data
           </span>
         </div>

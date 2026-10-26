@@ -23,6 +23,16 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Testing & QA Screenshots
+qa_screenshots/
+capture_qa.py
+capture_final_qa.py
+.agents/
+.claude/
+.cursor/
+.gemini/
+.mcp.json
+
 # Scratch & Submodules
 lenis/
 vanta/

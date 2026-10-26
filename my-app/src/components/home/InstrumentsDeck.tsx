@@ -81,8 +81,10 @@ export function InstrumentsDeck() {
   return (
     <section
       id="instruments"
-      className="relative w-full py-28 sm:py-36 px-4 sm:px-8 lg:px-14 bg-gradient-to-b from-[#0A1E13] via-[#07170E] to-[#051109] text-cream overflow-hidden border-t border-white/5"
+      className="relative w-full py-28 sm:py-36 px-4 sm:px-8 lg:px-14 bg-transparent text-cream overflow-hidden"
     >
+      {/* Ambient Atmospheric Connecting Beam */}
+      <div className="w-48 h-[1px] bg-gradient-to-r from-transparent via-chartreuse/40 to-transparent mx-auto mb-16 opacity-70" />
       <div className="max-w-7xl mx-auto space-y-16 relative z-10">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-8">

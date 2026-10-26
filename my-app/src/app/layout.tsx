@@ -34,7 +34,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-[#FAF7F0] text-forest font-sans selection:bg-chartreuse selection:text-forest">
+      <body className="min-h-full flex flex-col bg-[#050B07] text-cream font-sans selection:bg-chartreuse selection:text-forest">
         <LenisProvider>
           <Navbar />
           <div className="flex-1 w-full">{children}</div>

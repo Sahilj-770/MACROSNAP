@@ -6,7 +6,7 @@ import Link from 'next/link'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
-import { Wallet, ArrowRight, TrendingDown } from 'lucide-react'
+import { Wallet, ArrowRight, TrendingDown, Film } from 'lucide-react'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -103,15 +103,22 @@ export function VelocityTrack() {
     <section
       ref={sectionRef}
       id="budget-rail"
-      className="relative w-full py-28 sm:py-36 px-4 sm:px-8 lg:px-14 bg-[#0A1E13] text-cream overflow-hidden border-t border-white/5"
+      className="relative w-full py-28 sm:py-36 px-4 sm:px-8 lg:px-14 bg-transparent text-cream overflow-hidden"
     >
+      {/* Ambient Atmospheric Connecting Beam */}
+      <div className="w-48 h-[1px] bg-gradient-to-r from-transparent via-chartreuse/40 to-transparent mx-auto mb-16 opacity-70" />
+      {/* 35mm Film Sprocket Ribbon (Top) */}
+      <div className="w-full flex justify-between items-center text-white/10 font-mono text-xs select-none tracking-[0.4em] overflow-hidden whitespace-nowrap mb-8 pb-3 border-b border-white/5 pointer-events-none">
+        <span>▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪</span>
+      </div>
+
       <div className="max-w-7xl mx-auto space-y-14 relative z-10">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-8">
           <div className="space-y-3 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-chartreuse text-forest text-xs font-mono font-bold tracking-widest uppercase">
-              <Wallet className="w-3.5 h-3.5" />
-              <span>CHAPTER 05 // VELOCITY ECONOMIC RAIL</span>
+              <Film className="w-3.5 h-3.5" />
+              <span>CHAPTER 05 // VELOCITY ECONOMIC FILM RAIL</span>
             </div>
             <h2 className="text-4xl sm:text-6xl lg:text-7xl font-black font-serif text-cream tracking-tight leading-[0.95]">
               Protein on <br />
@@ -138,13 +145,13 @@ export function VelocityTrack() {
           {BUDGET_STAPLES.map((item) => (
             <div
               key={item.rank}
-              className="p-6 sm:p-8 rounded-3xl bg-black/40 backdrop-blur-md border border-white/10 hover:border-chartreuse/50 transition-all duration-300 flex flex-col justify-between space-y-6 group shadow-xl"
+              className="p-6 sm:p-8 rounded-3xl bg-black/50 backdrop-blur-xl border border-white/10 hover:border-chartreuse/60 transition-all duration-500 flex flex-col justify-between space-y-6 group shadow-2xl hover:shadow-[0_0_35px_rgba(216,243,67,0.15)]"
             >
               <div className="flex items-center justify-between font-mono text-xs">
-                <span className="px-2.5 py-1 rounded-full bg-white/10 text-cream/80 font-bold">
+                <span className="px-2.5 py-1 rounded-full bg-white/10 text-cream/80 font-bold border border-white/10">
                   RANK {item.rank}
                 </span>
-                <span className="text-chartreuse font-bold">{item.proteinDensity}</span>
+                <span className="text-chartreuse font-bold font-mono text-xs">{item.proteinDensity}</span>
               </div>
 
               {/* Giant Price Typography */}
@@ -152,13 +159,13 @@ export function VelocityTrack() {
                 <span className="text-[10px] font-mono text-cream/50 uppercase tracking-widest block">
                   Cost per 10g Protein
                 </span>
-                <strong className="text-5xl sm:text-6xl font-black font-serif text-chartreuse block tracking-tight">
+                <strong className="text-5xl sm:text-6xl font-black font-serif text-chartreuse block tracking-tight drop-shadow-[0_0_20px_rgba(216,243,67,0.25)]">
                   {item.costPer10g}
                 </strong>
                 <span className="text-xs font-mono text-cream/60 block">{item.batchCost}</span>
               </div>
 
-              <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden border border-white/10">
+              <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden border border-white/10 bg-black/60">
                 <Image
                   src={item.image}
                   alt={item.name}
@@ -166,7 +173,7 @@ export function VelocityTrack() {
                   sizes="(max-width: 768px) 100vw, 33vw"
                   className="object-cover group-hover:scale-108 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent" />
                 <div className="absolute bottom-3 left-4 font-mono text-xs text-cream/90">
                   {item.prepTime}
                 </div>
@@ -198,6 +205,11 @@ export function VelocityTrack() {
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
+      </div>
+
+      {/* 35mm Film Sprocket Ribbon (Bottom) */}
+      <div className="w-full flex justify-between items-center text-white/10 font-mono text-xs select-none tracking-[0.4em] overflow-hidden whitespace-nowrap mt-12 pt-3 border-t border-white/5 pointer-events-none">
+        <span>▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪</span>
       </div>
     </section>
   )

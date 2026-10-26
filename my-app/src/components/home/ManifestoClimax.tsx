@@ -8,8 +8,10 @@ export function ManifestoClimax() {
   return (
     <section
       id="manifesto"
-      className="relative w-full py-32 sm:py-44 px-4 sm:px-8 lg:px-14 bg-[#051109] text-cream flex flex-col justify-between items-center text-center overflow-hidden border-t border-white/5"
+      className="relative w-full py-32 sm:py-44 px-4 sm:px-8 lg:px-14 bg-transparent text-cream flex flex-col justify-between items-center text-center overflow-hidden"
     >
+      {/* Ambient Atmospheric Connecting Beam */}
+      <div className="w-48 h-[1px] bg-gradient-to-r from-transparent via-chartreuse/40 to-transparent mx-auto mb-16 opacity-70" />
       {/* Ambient Bioluminescent Radial Halo */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(216,243,67,0.12)_0%,_transparent_65%)] pointer-events-none filter blur-3xl -z-10" />
 
