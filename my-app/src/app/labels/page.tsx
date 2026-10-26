@@ -1,17 +1,9 @@
 'use client'
 
 import React, { useState } from 'react'
-import Image from 'next/image'
-import { BotanicalLeaf } from '@/components/illustrations/BotanicalIllustrations'
 import {
   FileText,
-  AlertTriangle,
   CheckCircle2,
-  XCircle,
-  Eye,
-  Sparkles,
-  ShieldAlert,
-  Search,
   Scan,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -101,14 +93,14 @@ export default function LabelDecoderPage() {
       <div className="space-y-4 max-w-3xl">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-chartreuse border border-chartreuse/30 text-xs font-mono font-bold tracking-widest uppercase shadow-sm">
           <Scan className="w-3.5 h-3.5" />
-          <span>Section 05 // Supermarket Label Scanner</span>
+          <span>Section 05 // Supermarket Label Decoder (Educational Lab)</span>
         </div>
-        <h1 className="text-5xl sm:text-6xl font-black font-serif text-white tracking-tight">
+        <h1 className="text-4xl sm:text-6xl font-black font-serif text-white tracking-tight">
           Ingredient Label Decoder
         </h1>
         <p className="text-sm sm:text-base text-cream/70 leading-relaxed">
           The front of the box is advertising; the back of the box is the legally bound contract.
-          Tap any glowing scanner marker on the simulated packaging below to unmask the chemical and marketing tricks used on supermarket shelves.
+          Tap any scanner marker on the simulated packaging below to unmask the chemical and marketing tricks used on supermarket shelves.
         </p>
       </div>
 
@@ -118,7 +110,7 @@ export default function LabelDecoderPage() {
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
             <div>
               <span className="text-[10px] font-mono font-bold uppercase text-chartreuse block">Interactive Foil Simulator</span>
-              <h3 className="text-xl font-black font-serif text-white">Commercial Protein Bar (67g)</h3>
+              <h2 className="text-xl font-black font-serif text-white">Commercial Protein Bar (67g)</h2>
             </div>
             <span className="px-2.5 py-1 rounded-md text-[10px] font-mono font-bold bg-chartreuse text-forest shadow-sm">
               TAP SCAN ZONE
@@ -130,7 +122,7 @@ export default function LabelDecoderPage() {
             {/* Zone 1: Serving Size */}
             <button
               onClick={() => setSelectedHotspot('serving-size')}
-              className={`w-full p-3.5 rounded-2xl text-left border transition-all flex items-center justify-between cursor-pointer ${
+              className={`w-full min-h-[50px] p-3.5 rounded-2xl text-left border transition-all flex items-center justify-between cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none ${
                 selectedHotspot === 'serving-size'
                   ? 'border-chartreuse bg-chartreuse/15 shadow-[0_0_15px_rgba(216,243,67,0.2)] scale-102'
                   : 'border-white/10 hover:border-white/25 bg-[#050B07]/80'
@@ -146,7 +138,7 @@ export default function LabelDecoderPage() {
             {/* Zone 2: Protein Claim */}
             <button
               onClick={() => setSelectedHotspot('protein-claims')}
-              className={`w-full p-3.5 rounded-2xl text-left border transition-all flex items-center justify-between cursor-pointer ${
+              className={`w-full min-h-[50px] p-3.5 rounded-2xl text-left border transition-all flex items-center justify-between cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none ${
                 selectedHotspot === 'protein-claims'
                   ? 'border-chartreuse bg-chartreuse/15 shadow-[0_0_15px_rgba(216,243,67,0.2)] scale-102'
                   : 'border-white/10 hover:border-white/25 bg-[#050B07]/80'
@@ -162,7 +154,7 @@ export default function LabelDecoderPage() {
             {/* Zone 3: Hidden Sugars */}
             <button
               onClick={() => setSelectedHotspot('hidden-sugars')}
-              className={`w-full p-3.5 rounded-2xl text-left border transition-all flex items-center justify-between cursor-pointer ${
+              className={`w-full min-h-[50px] p-3.5 rounded-2xl text-left border transition-all flex items-center justify-between cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none ${
                 selectedHotspot === 'hidden-sugars'
                   ? 'border-tangerine bg-tangerine/15 shadow-[0_0_15px_rgba(255,94,54,0.2)] scale-102'
                   : 'border-white/10 hover:border-white/25 bg-[#050B07]/80'
@@ -178,7 +170,7 @@ export default function LabelDecoderPage() {
             {/* Zone 4: Sugar Alcohols */}
             <button
               onClick={() => setSelectedHotspot('maltitol-polyols')}
-              className={`w-full p-3.5 rounded-2xl text-left border transition-all flex items-center justify-between cursor-pointer ${
+              className={`w-full min-h-[50px] p-3.5 rounded-2xl text-left border transition-all flex items-center justify-between cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none ${
                 selectedHotspot === 'maltitol-polyols'
                   ? 'border-tangerine bg-tangerine/15 shadow-[0_0_15px_rgba(255,94,54,0.2)] scale-102'
                   : 'border-white/10 hover:border-white/25 bg-[#050B07]/80'
@@ -194,7 +186,7 @@ export default function LabelDecoderPage() {
             {/* Zone 5: Gums & Emulsifiers */}
             <button
               onClick={() => setSelectedHotspot('emulsifiers-gums')}
-              className={`w-full p-3.5 rounded-2xl text-left border transition-all flex items-center justify-between cursor-pointer ${
+              className={`w-full min-h-[50px] p-3.5 rounded-2xl text-left border transition-all flex items-center justify-between cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none ${
                 selectedHotspot === 'emulsifiers-gums'
                   ? 'border-chartreuse bg-chartreuse/15 shadow-[0_0_15px_rgba(216,243,67,0.2)] scale-102'
                   : 'border-white/10 hover:border-white/25 bg-[#050B07]/80'
@@ -217,8 +209,8 @@ export default function LabelDecoderPage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.35 }}
-              className="p-8 sm:p-10 rounded-3xl bg-[#0B1710]/95 backdrop-blur-md border border-white/10 shadow-2xl space-y-6 text-cream"
+              transition={{ duration: 0.3 }}
+              className="p-6 sm:p-10 rounded-3xl bg-[#0B1710]/95 backdrop-blur-md border border-white/10 shadow-2xl space-y-6 text-cream"
             >
               {/* Badge & Title */}
               <div className="space-y-2">
@@ -228,9 +220,9 @@ export default function LabelDecoderPage() {
                   </span>
                   <span className="text-xs font-mono text-muted-foreground">FSSAI / Scientific Benchmark</span>
                 </div>
-                <h2 className="text-3xl sm:text-4xl font-black font-serif text-white">
+                <h3 className="text-3xl sm:text-4xl font-black font-serif text-white">
                   {active.title}
-                </h2>
+                </h3>
               </div>
 
               {/* Front of Pack vs Back of Pack Reality */}

@@ -35,6 +35,12 @@ export function useLenis() {
 
 export function LenisProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
+    // Respect reduced motion accessibility setting
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (prefersReduced) {
+      return
+    }
+
     // Ultra-smooth liquid momentum interpolation tuned for high-refresh and stepped wheels
     const instance = new Lenis({
       lerp: 0.085,

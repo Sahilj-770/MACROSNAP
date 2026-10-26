@@ -1,18 +1,30 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 
 export function CinematicOverlay() {
-  const [timecode, setTimecode] = useState('00:00:26:04')
+  const timecodeRef = useRef<HTMLSpanElement>(null)
 
   useEffect(() => {
+    // If user prefers reduced motion, show a static calibration timestamp
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (prefersReduced) {
+      if (timecodeRef.current) {
+        timecodeRef.current.textContent = '[00:00:24:00]'
+      }
+      return
+    }
+
+    // Direct DOM mutation on interval - zero React re-renders, 0% CPU thrashing
     const interval = setInterval(() => {
+      if (!timecodeRef.current) return
       const now = new Date()
       const s = String(now.getSeconds()).padStart(2, '0')
       const m = String(now.getMinutes()).padStart(2, '0')
       const ms = String(Math.floor(now.getMilliseconds() / 10)).padStart(2, '0')
-      setTimecode(`00:${m}:${s}:${ms}`)
-    }, 40)
+      timecodeRef.current.textContent = `[00:${m}:${s}:${ms}]`
+    }, 100) // 10fps technical HUD timecode is realistic and lightweight
+
     return () => clearInterval(interval)
   }, [])
 
@@ -59,7 +71,9 @@ export function CinematicOverlay() {
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
             <span className="font-bold text-white/60">REC</span>
-            <span className="text-white/40">[{timecode}]</span>
+            <span ref={timecodeRef} className="text-white/40">
+              [00:00:24:00]
+            </span>
           </div>
 
           <div className="hidden md:flex items-center gap-4 text-[9px]">

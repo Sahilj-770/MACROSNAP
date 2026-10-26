@@ -6,7 +6,7 @@ import Link from 'next/link'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
-import { Activity, ShieldCheck, ArrowRight, Dna } from 'lucide-react'
+import { ShieldCheck, ArrowRight, Dna } from 'lucide-react'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -17,7 +17,6 @@ const BIOMARKERS = [
     value: '2.7g',
     unit: 'Per Serving Trigger',
     desc: 'The essential branched-chain amino acid that initiates muscle protein synthesis (MPS) via intracellular mTOR signaling.',
-    side: 'left',
   },
   {
     num: '02',
@@ -25,7 +24,6 @@ const BIOMARKERS = [
     value: '1.18',
     unit: 'Ileal Digestibility',
     desc: 'Digestible Indispensable Amino Acid Score — the true gold standard of protein quality measured in the human small intestine.',
-    side: 'right',
   },
   {
     num: '03',
@@ -33,7 +31,6 @@ const BIOMARKERS = [
     value: '16.8g',
     unit: 'Per 100g Chana',
     desc: 'Insoluble cellular matrix that slows gastric emptying, feeds colon bifidobacteria, and prevents post-meal insulin spikes.',
-    side: 'left',
   },
   {
     num: '04',
@@ -41,7 +38,6 @@ const BIOMARKERS = [
     value: '0g',
     unit: 'Whole Food Standard',
     desc: 'No maltitol laxatives, polydextrose humectants, artificial sweeteners, or ultra-processed industrial stabilizers.',
-    side: 'right',
   },
 ]
 
@@ -50,66 +46,116 @@ export function TelemetryLens() {
   const lensRef = useRef<HTMLDivElement>(null)
   const ringRef = useRef<SVGSVGElement>(null)
   const innerRingRef = useRef<SVGSVGElement>(null)
-  const notesRef = useRef<HTMLDivElement>(null)
+  const leftNotesRef = useRef<HTMLDivElement>(null)
+  const rightNotesRef = useRef<HTMLDivElement>(null)
 
   useGSAP(
     () => {
-      if (!lensRef.current || !containerRef.current) return
+      const mm = gsap.matchMedia()
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: 'top 80%',
-          end: 'center 45%',
-          scrub: 0.8,
-          invalidateOnRefresh: true,
-        },
+      // ─────────────────────────────────────────────────────────────
+      // 1. DESKTOP ANIMATION ENVIRONMENT (>= 1024px)
+      // Expanding circular lens reveal + orbital rotation
+      // ─────────────────────────────────────────────────────────────
+      mm.add('(min-width: 1024px) and (prefers-reduced-motion: no-preference)', () => {
+        if (!lensRef.current || !containerRef.current) return
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: 'top 80%',
+            end: 'center 45%',
+            scrub: 0.8,
+            invalidateOnRefresh: true,
+          },
+        })
+
+        // Expanding circular lens reveal
+        tl.fromTo(
+          lensRef.current,
+          { clipPath: 'circle(20% at 50% 50%)' },
+          { clipPath: 'circle(50% at 50% 50%)', ease: 'power2.inOut', duration: 1 },
+          0
+        )
+
+        // Inner image subtle zoom
+        const img = lensRef.current.querySelector('img')
+        if (img) {
+          tl.fromTo(img, { scale: 1.25 }, { scale: 1.05, ease: 'power2.out', duration: 1 }, 0)
+        }
+
+        // Orbit ring rotations
+        if (ringRef.current) {
+          tl.fromTo(
+            ringRef.current,
+            { rotation: -90, transformOrigin: '50% 50%' },
+            { rotation: 45, ease: 'none', duration: 1 },
+            0
+          )
+        }
+
+        if (innerRingRef.current) {
+          tl.fromTo(
+            innerRingRef.current,
+            { rotation: 120, transformOrigin: '50% 50%' },
+            { rotation: -30, ease: 'none', duration: 1 },
+            0
+          )
+        }
+
+        // Stagger cards
+        const allCards = containerRef.current.querySelectorAll('.biomarker-card')
+        if (allCards.length > 0) {
+          tl.fromTo(
+            allCards,
+            { opacity: 0, y: 25 },
+            { opacity: 1, y: 0, stagger: 0.12, duration: 0.7, ease: 'power2.out' },
+            0.2
+          )
+        }
       })
 
-      // Expanding circular lens reveal
-      tl.fromTo(
-        lensRef.current,
-        { clipPath: 'circle(18% at 50% 50%)' },
-        { clipPath: 'circle(50% at 50% 50%)', ease: 'power2.inOut', duration: 1 },
-        0
-      )
+      // ─────────────────────────────────────────────────────────────
+      // 2. MOBILE ANIMATION ENVIRONMENT (< 1024px)
+      // Clean circular frame, lightweight vertical reveals, no rotation
+      // ─────────────────────────────────────────────────────────────
+      mm.add('(max-width: 1023px) and (prefers-reduced-motion: no-preference)', () => {
+        if (lensRef.current) {
+          gsap.set(lensRef.current, { clipPath: 'circle(50% at 50% 50%)' })
+        }
 
-      // Inner image subtle zoom
-      const img = lensRef.current.querySelector('img')
-      if (img) {
-        tl.fromTo(img, { scale: 1.3 }, { scale: 1.05, ease: 'power2.out', duration: 1 }, 0)
-      }
+        const cards = containerRef.current?.querySelectorAll('.biomarker-card')
+        if (cards && cards.length > 0) {
+          gsap.from(cards, {
+            opacity: 0,
+            y: 16,
+            stagger: 0.08,
+            duration: 0.5,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: containerRef.current,
+              start: 'top 85%',
+              once: true,
+            },
+          })
+        }
+      })
 
-      // Outer orbit ring rotation
-      if (ringRef.current) {
-        tl.fromTo(
-          ringRef.current,
-          { rotation: -90, transformOrigin: '50% 50%' },
-          { rotation: 45, ease: 'none', duration: 1 },
-          0
-        )
-      }
+      // ─────────────────────────────────────────────────────────────
+      // 3. REDUCED MOTION ENVIRONMENT
+      // Fully resting, zero clip animation, zero rotation
+      // ─────────────────────────────────────────────────────────────
+      mm.add('(prefers-reduced-motion: reduce)', () => {
+        if (lensRef.current) {
+          gsap.set(lensRef.current, { clipPath: 'circle(50% at 50% 50%)' })
+        }
+        const cards = containerRef.current?.querySelectorAll('.biomarker-card')
+        if (cards) {
+          gsap.set(cards, { opacity: 1, y: 0 })
+        }
+      })
 
-      // Inner counter-rotating ring
-      if (innerRingRef.current) {
-        tl.fromTo(
-          innerRingRef.current,
-          { rotation: 120, transformOrigin: '50% 50%' },
-          { rotation: -30, ease: 'none', duration: 1 },
-          0
-        )
-      }
-
-      // Stagger biomarker notes
-      const notes = notesRef.current?.querySelectorAll('.biomarker-card')
-      if (notes && notes.length > 0) {
-        tl.fromTo(
-          notes,
-          { opacity: 0, y: 30 },
-          { opacity: 1, y: 0, stagger: 0.15, duration: 0.8, ease: 'power2.out' },
-          0.2
-        )
-      }
+      return () => mm.revert()
     },
     { scope: containerRef }
   )
@@ -118,14 +164,12 @@ export function TelemetryLens() {
     <section
       ref={containerRef}
       id="telemetry"
-      className="relative w-full py-28 sm:py-36 px-4 sm:px-8 lg:px-14 bg-transparent text-cream overflow-hidden"
+      className="relative w-full py-20 sm:py-32 lg:py-36 px-4 sm:px-8 lg:px-14 bg-transparent text-cream overflow-hidden"
     >
-      {/* Ambient Atmospheric Connecting Beam */}
-      <div className="w-48 h-[1px] bg-gradient-to-r from-transparent via-chartreuse/40 to-transparent mx-auto mb-16 opacity-70" />
-      {/* Background Radial Glow */}
+      <div className="w-48 h-[1px] bg-gradient-to-r from-transparent via-chartreuse/40 to-transparent mx-auto mb-12 sm:mb-16 opacity-70" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(216,243,67,0.06)_0%,_transparent_70%)] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto space-y-16 relative z-10">
+      <div className="max-w-7xl mx-auto space-y-12 sm:space-y-16 relative z-10">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-8">
           <div className="space-y-3 max-w-2xl">
@@ -145,30 +189,30 @@ export function TelemetryLens() {
         </div>
 
         {/* Central Stage: Telemetry Lens with Surrounding Biomarkers */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
           {/* Left Biomarkers */}
-          <div ref={notesRef} className="lg:col-span-3 space-y-6 order-2 lg:order-1">
+          <div ref={leftNotesRef} className="lg:col-span-3 space-y-4 sm:space-y-6 order-2 lg:order-1">
             {BIOMARKERS.slice(0, 2).map((b) => (
               <div
                 key={b.num}
-                className="biomarker-card p-6 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 hover:border-chartreuse/40 transition-colors space-y-2 group"
+                className="biomarker-card p-5 sm:p-6 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 hover:border-chartreuse/40 transition-colors space-y-2 group"
               >
                 <div className="flex justify-between items-center text-[10px] font-mono text-cream/60">
                   <span className="text-chartreuse font-bold">NODE // {b.num}</span>
                   <span className="uppercase">{b.unit}</span>
                 </div>
-                <strong className="text-3xl font-black font-serif text-cream block group-hover:text-chartreuse transition-colors">
+                <strong className="text-2xl sm:text-3xl font-black font-serif text-cream block group-hover:text-chartreuse transition-colors">
                   {b.value}
                 </strong>
-                <h4 className="text-sm font-bold font-mono text-cream uppercase">{b.title}</h4>
+                <h3 className="text-xs sm:text-sm font-bold font-mono text-cream uppercase">{b.title}</h3>
                 <p className="text-xs text-cream/70 leading-relaxed font-sans">{b.desc}</p>
               </div>
             ))}
           </div>
 
           {/* Center Stage: Circular Telemetry Lens with Concentric Rings */}
-          <div className="lg:col-span-6 flex flex-col items-center justify-center relative order-1 lg:order-2 my-6 lg:my-0">
-            <div className="relative w-72 sm:w-96 md:w-[420px] aspect-square flex items-center justify-center">
+          <div className="lg:col-span-6 flex flex-col items-center justify-center relative order-1 lg:order-2 my-4 sm:my-6 lg:my-0">
+            <div className="relative w-64 sm:w-88 md:w-[400px] aspect-square flex items-center justify-center">
               {/* Outer Rotating SVG Orbit Ring */}
               <svg
                 ref={ringRef}
@@ -194,7 +238,7 @@ export function TelemetryLens() {
                 <circle cx="220" cy="430" r="4" fill="#FF5E36" />
               </svg>
 
-              {/* Inner Counter-Rotating Orbit Ring */}
+              {/* Inner Orbit Ring */}
               <svg
                 ref={innerRingRef}
                 viewBox="0 0 440 440"
@@ -212,29 +256,29 @@ export function TelemetryLens() {
                 <circle cx="220" cy="30" r="3" fill="#ffffff" />
               </svg>
 
-              {/* Central Expanding Circular Lens Frame */}
+              {/* Central Circular Lens Frame (defaults to circle 50%) */}
               <div
                 ref={lensRef}
-                className="relative w-64 sm:w-80 md:w-96 aspect-square rounded-full overflow-hidden shadow-2xl border-2 border-chartreuse/50"
-                style={{ clipPath: 'circle(18% at 50% 50%)' }}
+                className="relative w-56 sm:w-72 md:w-88 aspect-square rounded-full overflow-hidden shadow-2xl border-2 border-chartreuse/50"
+                style={{ clipPath: 'circle(50% at 50% 50%)' }}
               >
                 <Image
                   src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1200&q=85"
                   alt="Microscopic whole food nutrient matrix"
                   fill
-                  sizes="400px"
+                  sizes="(max-width: 768px) 250px, 400px"
                   className="object-cover"
                 />
                 <div className="absolute inset-0 bg-radial from-transparent via-black/20 to-black/60 pointer-events-none" />
 
-                {/* Central Crosshair & Scientific Reticle */}
+                {/* Central Reticle */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="w-12 h-12 rounded-full border border-chartreuse/50 flex items-center justify-center">
+                  <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-full border border-chartreuse/50 flex items-center justify-center">
                     <div className="w-1.5 h-1.5 rounded-full bg-chartreuse animate-ping" />
                   </div>
                 </div>
 
-                <div className="absolute bottom-4 left-0 right-0 text-center font-mono text-[10px] uppercase tracking-widest text-cream/90 bg-black/60 py-1 backdrop-blur-xs">
+                <div className="absolute bottom-3 left-0 right-0 text-center font-mono text-[9px] sm:text-[10px] uppercase tracking-widest text-cream/90 bg-black/60 py-1 backdrop-blur-xs">
                   ICMR-NIN SPECTROMETRY // ACTIVE
                 </div>
               </div>
@@ -242,20 +286,20 @@ export function TelemetryLens() {
           </div>
 
           {/* Right Biomarkers */}
-          <div className="lg:col-span-3 space-y-6 order-3">
+          <div ref={rightNotesRef} className="lg:col-span-3 space-y-4 sm:space-y-6 order-3">
             {BIOMARKERS.slice(2, 4).map((b) => (
               <div
                 key={b.num}
-                className="biomarker-card p-6 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 hover:border-chartreuse/40 transition-colors space-y-2 group"
+                className="biomarker-card p-5 sm:p-6 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 hover:border-chartreuse/40 transition-colors space-y-2 group"
               >
                 <div className="flex justify-between items-center text-[10px] font-mono text-cream/60">
                   <span className="text-chartreuse font-bold">NODE // {b.num}</span>
                   <span className="uppercase">{b.unit}</span>
                 </div>
-                <strong className="text-3xl font-black font-serif text-cream block group-hover:text-chartreuse transition-colors">
+                <strong className="text-2xl sm:text-3xl font-black font-serif text-cream block group-hover:text-chartreuse transition-colors">
                   {b.value}
                 </strong>
-                <h4 className="text-sm font-bold font-mono text-cream uppercase">{b.title}</h4>
+                <h3 className="text-xs sm:text-sm font-bold font-mono text-cream uppercase">{b.title}</h3>
                 <p className="text-xs text-cream/70 leading-relaxed font-sans">{b.desc}</p>
               </div>
             ))}
@@ -271,7 +315,7 @@ export function TelemetryLens() {
 
           <Link
             href="/learn"
-            className="text-chartreuse hover:text-white font-bold inline-flex items-center gap-1.5 transition-colors group"
+            className="text-chartreuse hover:text-white font-bold inline-flex items-center gap-1.5 transition-colors group focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
           >
             <span>Read The Biological Manifesto</span>
             <ArrowRight className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" />

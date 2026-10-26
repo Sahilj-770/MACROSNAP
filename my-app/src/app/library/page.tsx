@@ -16,8 +16,6 @@ import {
   Utensils,
   Compass,
   Sparkles,
-  Layers,
-  Heart
 } from 'lucide-react'
 
 export default function LibraryPage() {
@@ -25,15 +23,19 @@ export default function LibraryPage() {
     favoriteFoodIds,
     favoriteRecipeIds,
     savedComparisons,
-    toggleFavoriteFood,
     toggleFavoriteRecipe,
     removeComparison,
+    loadSampleFavorites,
+    loadSampleComparisons,
+    resetAllToCleanState,
   } = useUserStore()
 
   const [activeTab, setActiveTab] = useState<'foods' | 'showdowns' | 'recipes'>('foods')
 
   const favoriteFoods = FOOD_DATABASE.filter((f) => favoriteFoodIds.includes(f.id))
   const favoriteRecipes = RECIPE_DATABASE.filter((r) => favoriteRecipeIds.includes(r.id))
+
+  const totalSavedCount = favoriteFoods.length + savedComparisons.length + favoriteRecipes.length
 
   return (
     <div className="min-h-screen bg-[#050B07] text-cream pb-24 selection:bg-chartreuse selection:text-forest">
@@ -56,11 +58,11 @@ export default function LibraryPage() {
             </p>
           </div>
 
-          {/* Quick Category Tabs */}
-          <div className="flex flex-wrap gap-2">
+          {/* Quick Category Tabs & Clean Actions */}
+          <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => setActiveTab('foods')}
-              className={`px-4 py-2 rounded-2xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`min-h-[44px] px-4 py-2 rounded-2xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none ${
                 activeTab === 'foods'
                   ? 'bg-chartreuse text-forest shadow-[0_0_12px_rgba(216,243,67,0.3)] font-black scale-105'
                   : 'bg-white/5 text-cream/70 border border-white/10 hover:border-chartreuse/30 hover:text-white'
@@ -70,7 +72,7 @@ export default function LibraryPage() {
             </button>
             <button
               onClick={() => setActiveTab('showdowns')}
-              className={`px-4 py-2 rounded-2xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`min-h-[44px] px-4 py-2 rounded-2xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none ${
                 activeTab === 'showdowns'
                   ? 'bg-chartreuse text-forest shadow-[0_0_12px_rgba(216,243,67,0.3)] font-black scale-105'
                   : 'bg-white/5 text-cream/70 border border-white/10 hover:border-chartreuse/30 hover:text-white'
@@ -80,7 +82,7 @@ export default function LibraryPage() {
             </button>
             <button
               onClick={() => setActiveTab('recipes')}
-              className={`px-4 py-2 rounded-2xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`min-h-[44px] px-4 py-2 rounded-2xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none ${
                 activeTab === 'recipes'
                   ? 'bg-chartreuse text-forest shadow-[0_0_12px_rgba(216,243,67,0.3)] font-black scale-105'
                   : 'bg-white/5 text-cream/70 border border-white/10 hover:border-chartreuse/30 hover:text-white'
@@ -88,6 +90,17 @@ export default function LibraryPage() {
             >
               <span>Favorite Recipes ({favoriteRecipes.length})</span>
             </button>
+
+            {totalSavedCount > 0 && (
+              <button
+                onClick={resetAllToCleanState}
+                className="min-h-[44px] px-3 py-2 rounded-2xl text-xs font-mono text-white/40 hover:text-red-400 transition-colors flex items-center gap-1 cursor-pointer"
+                title="Clear all saved bookmarks"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Clear All</span>
+              </button>
+            )}
           </div>
         </div>
       </section>
@@ -101,7 +114,7 @@ export default function LibraryPage() {
           <div className="space-y-6">
             <div className="flex items-center justify-between text-xs font-mono font-bold uppercase tracking-wider text-muted-foreground">
               <span>Personal Bookmarked Foods ({favoriteFoods.length})</span>
-              <Link href="/explore" className="text-chartreuse hover:underline flex items-center gap-1">
+              <Link href="/explore" className="text-chartreuse hover:underline flex items-center gap-1 min-h-[36px] py-1 px-2 rounded focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none">
                 <span>Browse Full 30+ Food Database</span>
                 <ArrowRight className="w-3 h-3" />
               </Link>
@@ -114,21 +127,30 @@ export default function LibraryPage() {
                 ))}
               </div>
             ) : (
-              <div className="p-12 rounded-3xl bg-[#0B1710]/50 border-2 border-dashed border-white/15 text-center space-y-4">
+              <div className="p-8 sm:p-12 rounded-3xl bg-[#0B1710]/50 border-2 border-dashed border-white/15 text-center space-y-4">
                 <Compass className="w-12 h-12 text-white/20 mx-auto" />
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <p className="text-xl font-bold font-serif text-white">No foods bookmarked yet</p>
                   <p className="text-xs font-mono text-cream/60 max-w-sm mx-auto">
-                    Explore the Food Intelligence Index and tap the bookmark ribbon to save foods for quick access.
+                    Explore the Food Intelligence Index to bookmark foods, or load our starter pack to test how the library functions.
                   </p>
                 </div>
-                <Link
-                  href="/explore"
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-chartreuse text-forest font-mono text-xs font-black uppercase tracking-wider hover:bg-white transition-all shadow-[0_0_15px_rgba(216,243,67,0.3)]"
-                >
-                  <span>Explore 30+ Foods</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
+                <div className="flex flex-wrap justify-center gap-3 pt-2">
+                  <button
+                    onClick={loadSampleFavorites}
+                    className="min-h-[44px] inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-chartreuse text-forest font-mono text-xs font-black uppercase tracking-wider hover:bg-white transition-all shadow-[0_0_15px_rgba(216,243,67,0.3)] cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Load Starter Favorites</span>
+                  </button>
+                  <Link
+                    href="/explore"
+                    className="min-h-[44px] inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-cream font-mono text-xs font-bold uppercase tracking-wider transition-all focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
+                  >
+                    <span>Explore 30+ Foods</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
               </div>
             )}
           </div>
@@ -139,7 +161,7 @@ export default function LibraryPage() {
           <div className="space-y-6">
             <div className="flex items-center justify-between text-xs font-mono font-bold uppercase tracking-wider text-muted-foreground">
               <span>Saved Head-to-Head Comparisons ({savedComparisons.length})</span>
-              <Link href="/compare" className="text-chartreuse hover:underline flex items-center gap-1">
+              <Link href="/compare" className="text-chartreuse hover:underline flex items-center gap-1 min-h-[36px] py-1 px-2 rounded focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none">
                 <span>Open Showdown Studio</span>
                 <ArrowRight className="w-3 h-3" />
               </Link>
@@ -165,7 +187,7 @@ export default function LibraryPage() {
                         </span>
                         <button
                           onClick={() => removeComparison(idA, idB)}
-                          className="text-white/40 hover:text-red-400 transition-colors flex items-center gap-1 cursor-pointer"
+                          className="min-h-[36px] px-2 py-1 text-white/40 hover:text-red-400 transition-colors flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
                         >
                           <Trash2 className="w-3.5 h-3.5" /> Remove
                         </button>
@@ -218,7 +240,7 @@ export default function LibraryPage() {
                         </span>
                         <Link
                           href={`/compare?foodA=${foodA.id}&foodB=${foodB.id}`}
-                          className="px-5 py-2 rounded-xl bg-chartreuse text-forest text-xs font-mono font-black uppercase hover:bg-white flex items-center gap-1.5 shadow-[0_0_12px_rgba(216,243,67,0.3)] active:scale-95 transition-all"
+                          className="min-h-[44px] px-5 py-2 rounded-xl bg-chartreuse text-forest text-xs font-mono font-black uppercase hover:bg-white flex items-center gap-1.5 shadow-[0_0_12px_rgba(216,243,67,0.3)] active:scale-95 transition-all focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
                         >
                           <span>Launch Showdown</span>
                           <ArrowRight className="w-3.5 h-3.5" />
@@ -229,21 +251,30 @@ export default function LibraryPage() {
                 })}
               </div>
             ) : (
-              <div className="p-12 rounded-3xl bg-[#0B1710]/50 border-2 border-dashed border-white/15 text-center space-y-4">
+              <div className="p-8 sm:p-12 rounded-3xl bg-[#0B1710]/50 border-2 border-dashed border-white/15 text-center space-y-4">
                 <Scale className="w-12 h-12 text-white/20 mx-auto" />
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <p className="text-xl font-bold font-serif text-white">No matchups saved yet</p>
                   <p className="text-xs font-mono text-cream/60 max-w-sm mx-auto">
-                    Visit the Compare Showdown Studio, pick any two foods, and tap &apos;Save This Showdown&apos;.
+                    Visit the Compare Showdown Studio, pick any two foods, and tap &apos;Save Matchup&apos;.
                   </p>
                 </div>
-                <Link
-                  href="/compare"
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-chartreuse text-forest font-mono text-xs font-black uppercase tracking-wider hover:bg-white transition-all shadow-[0_0_15px_rgba(216,243,67,0.3)]"
-                >
-                  <span>Open Showdown Studio</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
+                <div className="flex flex-wrap justify-center gap-3 pt-2">
+                  <button
+                    onClick={loadSampleComparisons}
+                    className="min-h-[44px] inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-chartreuse text-forest font-mono text-xs font-black uppercase tracking-wider hover:bg-white transition-all shadow-[0_0_15px_rgba(216,243,67,0.3)] cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Load Sample Matchups</span>
+                  </button>
+                  <Link
+                    href="/compare"
+                    className="min-h-[44px] inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-cream font-mono text-xs font-bold uppercase tracking-wider transition-all focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
+                  >
+                    <span>Open Showdown Studio</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
               </div>
             )}
           </div>
@@ -254,7 +285,7 @@ export default function LibraryPage() {
           <div className="space-y-6">
             <div className="flex items-center justify-between text-xs font-mono font-bold uppercase tracking-wider text-muted-foreground">
               <span>Favorite Homemade Lab Formulas ({favoriteRecipes.length})</span>
-              <Link href="/recipes" className="text-chartreuse hover:underline flex items-center gap-1">
+              <Link href="/recipes" className="text-chartreuse hover:underline flex items-center gap-1 min-h-[36px] py-1 px-2 rounded focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none">
                 <span>Explore All Recipes</span>
                 <ArrowRight className="w-3 h-3" />
               </Link>
@@ -286,7 +317,8 @@ export default function LibraryPage() {
                         </span>
                         <button
                           onClick={() => toggleFavoriteRecipe(r.id)}
-                          className="text-white/40 hover:text-red-400 cursor-pointer"
+                          className="min-h-[36px] px-2 py-1 text-white/40 hover:text-red-400 cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
+                          aria-label={`Remove ${r.title} from favorites`}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -303,7 +335,7 @@ export default function LibraryPage() {
                       <div className="pt-2">
                         <Link
                           href="/recipes"
-                          className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-chartreuse hover:underline"
+                          className="min-h-[36px] inline-flex items-center gap-1.5 text-xs font-mono font-bold text-chartreuse hover:underline focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
                         >
                           <span>Open Recipe Walkthrough</span>
                           <ArrowRight className="w-3 h-3" />
@@ -314,21 +346,30 @@ export default function LibraryPage() {
                 ))}
               </div>
             ) : (
-              <div className="p-12 rounded-3xl bg-[#0B1710]/50 border-2 border-dashed border-white/15 text-center space-y-4">
+              <div className="p-8 sm:p-12 rounded-3xl bg-[#0B1710]/50 border-2 border-dashed border-white/15 text-center space-y-4">
                 <Utensils className="w-12 h-12 text-white/20 mx-auto" />
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <p className="text-xl font-bold font-serif text-white">No recipes bookmarked yet</p>
                   <p className="text-xs font-mono text-cream/60 max-w-sm mx-auto">
-                    Explore the Homemade Lab to bookmark high-protein Indian recipes.
+                    Explore the Homemade Lab to bookmark high-protein Indian recipes, or load our starter favorites.
                   </p>
                 </div>
-                <Link
-                  href="/recipes"
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-chartreuse text-forest font-mono text-xs font-black uppercase tracking-wider hover:bg-white transition-all shadow-[0_0_15px_rgba(216,243,67,0.3)]"
-                >
-                  <span>Explore Kitchen Recipes</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
+                <div className="flex flex-wrap justify-center gap-3 pt-2">
+                  <button
+                    onClick={loadSampleFavorites}
+                    className="min-h-[44px] inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-chartreuse text-forest font-mono text-xs font-black uppercase tracking-wider hover:bg-white transition-all shadow-[0_0_15px_rgba(216,243,67,0.3)] cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Load Starter Recipes</span>
+                  </button>
+                  <Link
+                    href="/recipes"
+                    className="min-h-[44px] inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-cream font-mono text-xs font-bold uppercase tracking-wider transition-all focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
+                  >
+                    <span>Explore Kitchen Recipes</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
               </div>
             )}
           </div>
