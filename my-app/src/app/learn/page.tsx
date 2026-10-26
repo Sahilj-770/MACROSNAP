@@ -33,7 +33,7 @@ export default function LearnPage() {
           <div className="space-y-3 max-w-3xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-chartreuse border border-chartreuse/30 text-xs font-mono font-bold tracking-wider uppercase shadow-sm">
               <BookOpen className="w-3.5 h-3.5" />
-              <span>SECTION 07 // PEER-REVIEWED EVIDENCE & CLINICAL DOSSIERS</span>
+              <span>Evidence-Based Nutrition & Myth Busters · Peer-Reviewed Science</span>
             </div>
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black font-serif text-white tracking-tight leading-[0.94]">
               Deconstruct <br />
@@ -251,7 +251,73 @@ export default function LearnPage() {
             </div>
           </div>
         )}
+
+        {/* Complete Lower-Page Experience: Put Science into Practice */}
+        <section className="pt-10 mt-12 border-t border-white/10 space-y-8">
+          <div className="space-y-2">
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-chartreuse block">
+              Translate Evidence to Action
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black font-serif text-white">
+              Put the Scientific Dossiers Into Practice
+            </h2>
+            <p className="text-sm font-mono text-cream/70 max-w-2xl">
+              Now that you&apos;ve deconstructed the marketing myths, check your personal biological requirement or discover real whole foods that meet it.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <Link
+              href="/calculator"
+              className="group p-6 sm:p-8 rounded-3xl bg-[#0B1710]/90 border border-white/10 hover:border-chartreuse/50 transition-all space-y-3 shadow-xl"
+            >
+              <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Step 01</span>
+              <h3 className="text-xl font-bold font-serif text-white group-hover:text-chartreuse transition-colors">
+                Calculate Daily Targets
+              </h3>
+              <p className="text-xs text-cream/75 font-sans leading-relaxed">
+                Determine your exact daily protein requirement based on your body weight and training activity.
+              </p>
+              <div className="flex items-center gap-2 text-xs font-mono font-bold text-chartreuse pt-2 group-hover:underline">
+                <span>Open Calculator →</span>
+              </div>
+            </Link>
+
+            <Link
+              href="/explore"
+              className="group p-6 sm:p-8 rounded-3xl bg-[#0B1710]/90 border border-white/10 hover:border-chartreuse/50 transition-all space-y-3 shadow-xl"
+            >
+              <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Step 02</span>
+              <h3 className="text-xl font-bold font-serif text-white group-hover:text-chartreuse transition-colors">
+                Inspect 30+ Staples
+              </h3>
+              <p className="text-xs text-cream/75 font-sans leading-relaxed">
+                Review laboratory DIAAS scores and cost per 10g protein for unbranded pantry foods.
+              </p>
+              <div className="flex items-center gap-2 text-xs font-mono font-bold text-chartreuse pt-2 group-hover:underline">
+                <span>Explore Food Index →</span>
+              </div>
+            </Link>
+
+            <Link
+              href="/compare"
+              className="group p-6 sm:p-8 rounded-3xl bg-[#0B1710]/90 border border-white/10 hover:border-chartreuse/50 transition-all space-y-3 shadow-xl"
+            >
+              <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Step 03</span>
+              <h3 className="text-xl font-bold font-serif text-white group-hover:text-chartreuse transition-colors">
+                Dual Contender Showdown
+              </h3>
+              <p className="text-xs text-cream/75 font-sans leading-relaxed">
+                Pit any processed supermarket snack against whole food alternatives side-by-side.
+              </p>
+              <div className="flex items-center gap-2 text-xs font-mono font-bold text-chartreuse pt-2 group-hover:underline">
+                <span>Launch Showdown →</span>
+              </div>
+            </Link>
+          </div>
+        </section>
       </main>
+
     </div>
   )
 }

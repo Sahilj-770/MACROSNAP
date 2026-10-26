@@ -159,7 +159,7 @@ export default function CalculatorPage() {
       <div className="space-y-4 max-w-3xl">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-chartreuse border border-chartreuse/30 text-xs font-mono font-bold tracking-widest uppercase shadow-sm">
           <Calculator className="w-3.5 h-3.5" />
-          <span>Section 06 // Individual Physiology Engine</span>
+          <span>Personal Daily Protein Engine · ACSM & ISSN Guidelines</span>
         </div>
         <h1 className="text-4xl sm:text-6xl font-black font-serif text-white tracking-tight">
           Protein Target Calculator
@@ -537,6 +537,68 @@ export default function CalculatorPage() {
           )}
         </div>
       </div>
+
+      {/* Complete Lower-Page Experience: Meal Timing & Distribution Architecture */}
+      <section className="pt-10 border-t border-white/10 space-y-8">
+        <div className="space-y-2">
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-chartreuse block">
+            Physiological Application
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-black font-serif text-white">
+            How to Distribute Your Daily Protein Target
+          </h2>
+          <p className="text-sm font-mono text-cream/70 max-w-2xl">
+            Eating {midpointTargetG}g of protein in one meal can exceed muscle protein synthesis (MPS) saturation. Distributing it across 3 to 4 meals triggers optimal MPS pulses throughout the day.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="p-6 rounded-3xl bg-[#0B1710]/90 border border-white/10 space-y-3 shadow-xl">
+            <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Meal 01 · Morning</span>
+            <div className="text-2xl font-black font-serif text-white">~{Math.round(midpointTargetG * 0.25)}g Target</div>
+            <p className="text-xs text-cream/70 font-sans leading-relaxed">
+              3 Whole Eggs or a glass of chilled Chana Sattu Elixir to kickstart the day.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-3xl bg-[#0B1710]/90 border border-white/10 space-y-3 shadow-xl">
+            <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Meal 02 · Midday</span>
+            <div className="text-2xl font-black font-serif text-white">~{Math.round(midpointTargetG * 0.3)}g Target</div>
+            <p className="text-xs text-cream/70 font-sans leading-relaxed">
+              Yellow Moong Dal khichdi paired with 75g Fresh Cow Milk Paneer.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-3xl bg-[#0B1710]/90 border border-white/10 space-y-3 shadow-xl">
+            <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Meal 03 · Evening</span>
+            <div className="text-2xl font-black font-serif text-white">~{Math.round(midpointTargetG * 0.2)}g Target</div>
+            <p className="text-xs text-cream/70 font-sans leading-relaxed">
+              Roasted Chana (50g) and Roasted Peanuts snack — zero cooking, rich in arginine and fiber.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-3xl bg-[#0B1710]/90 border border-white/10 space-y-3 shadow-xl">
+            <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Meal 04 · Dinner</span>
+            <div className="text-2xl font-black font-serif text-white">~{Math.round(midpointTargetG * 0.25)}g Target</div>
+            <p className="text-xs text-cream/70 font-sans leading-relaxed">
+              Soy Chunks curry (50g dry) or Greek Dahi bowl with slow-digesting micellar casein.
+            </p>
+          </div>
+        </div>
+
+        <div className="p-6 rounded-2xl bg-white/5 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs">
+          <div className="flex items-center gap-2 text-cream/80">
+            <Sparkles className="w-4 h-4 text-chartreuse flex-shrink-0" />
+            <span>Want chef-tested recipes that match this exact distribution?</span>
+          </div>
+          <a
+            href="/recipes"
+            className="min-h-[44px] px-6 py-2.5 rounded-full bg-chartreuse text-forest font-bold uppercase tracking-wider hover:bg-white transition-all shadow-md flex items-center gap-2"
+          >
+            <span>Explore 15-Min Recipes →</span>
+          </a>
+        </div>
+      </section>
     </div>
   )
 }

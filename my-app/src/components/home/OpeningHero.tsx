@@ -177,13 +177,13 @@ export function OpeningHero() {
       <div className="relative z-20 w-full max-w-7xl flex items-center justify-between font-mono text-[10px] sm:text-[11px] uppercase tracking-widest text-cream/60 pb-4 border-b border-white/10">
         <div className="flex items-center gap-2.5">
           <span className="w-2 h-2 rounded-full bg-chartreuse animate-pulse" />
-          <span className="font-bold text-white tracking-widest">MACROSNAP VOL. 2026</span>
-          <span className="hidden sm:inline text-white/30">/</span>
-          <span className="hidden sm:inline text-chartreuse font-bold">CINEMATIC ATELIER</span>
+          <span className="font-bold text-white tracking-widest">MACROSNAP</span>
+          <span className="hidden sm:inline text-white/30">·</span>
+          <span className="hidden sm:inline text-chartreuse font-bold">FOOD INTELLIGENCE ATELIER</span>
         </div>
 
         <div className="flex items-center gap-4">
-          <span className="hidden md:inline text-white/50">NIN-ICMR SPECTROMETRY</span>
+          <span className="hidden md:inline text-white/50">ICMR-NIN IFCT 2017 VERIFIED</span>
           <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-chartreuse border border-chartreuse/30 font-bold text-[9px]">
             100% UNBRANDED
           </span>
@@ -198,7 +198,7 @@ export function OpeningHero() {
         <div className="overflow-hidden">
           <div className="hero-line inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-chartreuse/40 text-chartreuse text-[11px] sm:text-xs font-mono font-bold tracking-widest uppercase shadow-xl">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>The Independent Food Biology Film</span>
+            <span>Independent Food & Nutrition Intelligence</span>
           </div>
         </div>
 
@@ -238,7 +238,7 @@ export function OpeningHero() {
             className="min-h-[44px] px-6 sm:px-8 py-3.5 sm:py-4 rounded-full bg-chartreuse text-forest font-mono text-xs font-black uppercase tracking-wider hover:bg-white hover:scale-105 transition-all shadow-[0_0_30px_rgba(216,243,67,0.4)] flex items-center gap-2.5 sm:gap-3 cursor-pointer active:scale-95 focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
             aria-label="Scroll to Chapter 2 Telemetry"
           >
-            <span>Engage The Film</span>
+            <span>Explore The Science</span>
             <ArrowDown className="w-4 h-4 text-forest animate-bounce" />
           </button>
 
@@ -252,7 +252,7 @@ export function OpeningHero() {
         </div>
       </div>
 
-      {/* Floating Ambient Amino Nodes (Desktop-Only Film Accents) */}
+      {/* Floating Ambient Amino Nodes (Desktop-Only Botanical Accents) */}
       <div className="hidden xl:block absolute inset-0 pointer-events-none z-15">
         {AMINO_NODES.map((node) => (
           <div

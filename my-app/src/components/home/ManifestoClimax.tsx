@@ -17,7 +17,7 @@ export function ManifestoClimax() {
 
       {/* Top Tagline */}
       <div className="w-full max-w-7xl flex items-center justify-between font-mono text-[11px] uppercase tracking-widest text-cream/50 z-10 pb-8 border-b border-white/10">
-        <span>ACT 07 // THE SOVEREIGN CONCLUSION</span>
+        <span>EVIDENCE-BASED NUTRITION</span>
         <span>PEER-REVIEWED BIOAVAILABILITY · ZERO BRANDED BIAS</span>
       </div>
 

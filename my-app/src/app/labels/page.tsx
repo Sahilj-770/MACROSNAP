@@ -92,8 +92,8 @@ export default function LabelDecoderPage() {
       {/* Editorial Header */}
       <div className="space-y-4 max-w-3xl">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-chartreuse border border-chartreuse/30 text-xs font-mono font-bold tracking-widest uppercase shadow-sm">
-          <Scan className="w-3.5 h-3.5" />
-          <span>Section 05 // Supermarket Label Decoder (Educational Lab)</span>
+          <FileText className="w-3.5 h-3.5" />
+          <span>Interactive Food Label Decoder · Educational Simulation</span>
         </div>
         <h1 className="text-4xl sm:text-6xl font-black font-serif text-white tracking-tight">
           Ingredient Label Decoder
@@ -132,7 +132,7 @@ export default function LabelDecoderPage() {
                 <span className="text-[10px] text-muted-foreground uppercase block">Declared Serving Size</span>
                 <strong className="text-sm text-white font-black">1 individual bar (67g) · 250 kcal</strong>
               </div>
-              <span className="w-3 h-3 rounded-full bg-chartreuse animate-ping flex-shrink-0" />
+              <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${selectedHotspot === 'serving-size' ? 'bg-chartreuse shadow-[0_0_8px_#D8F343]' : 'bg-white/20'}`} />
             </button>
 
             {/* Zone 2: Protein Claim */}
@@ -148,7 +148,7 @@ export default function LabelDecoderPage() {
                 <span className="text-[10px] text-muted-foreground uppercase block">Protein Content Declaration</span>
                 <strong className="text-sm text-white font-black">20g Protein (Soy Protein Isolate)</strong>
               </div>
-              <span className="w-3 h-3 rounded-full bg-chartreuse animate-ping flex-shrink-0" />
+              <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${selectedHotspot === 'protein-claims' ? 'bg-chartreuse shadow-[0_0_8px_#D8F343]' : 'bg-white/20'}`} />
             </button>
 
             {/* Zone 3: Hidden Sugars */}
@@ -164,7 +164,7 @@ export default function LabelDecoderPage() {
                 <span className="text-[10px] text-muted-foreground uppercase block">Total Carbohydrates</span>
                 <strong className="text-sm text-white font-black">26g Carbs · 12g Added Sugars (4 Aliases)</strong>
               </div>
-              <span className="w-3 h-3 rounded-full bg-tangerine animate-ping flex-shrink-0" />
+              <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${selectedHotspot === 'hidden-sugars' ? 'bg-tangerine shadow-[0_0_8px_#FF5E36]' : 'bg-white/20'}`} />
             </button>
 
             {/* Zone 4: Sugar Alcohols */}
@@ -180,7 +180,7 @@ export default function LabelDecoderPage() {
                 <span className="text-[10px] text-muted-foreground uppercase block">Sugar Alcohols (Polyols)</span>
                 <strong className="text-sm text-white font-black">14g Maltitol Syrup (Insulin Active)</strong>
               </div>
-              <span className="w-3 h-3 rounded-full bg-tangerine animate-ping flex-shrink-0" />
+              <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${selectedHotspot === 'maltitol-polyols' ? 'bg-tangerine shadow-[0_0_8px_#FF5E36]' : 'bg-white/20'}`} />
             </button>
 
             {/* Zone 5: Gums & Emulsifiers */}
@@ -196,7 +196,7 @@ export default function LabelDecoderPage() {
                 <span className="text-[10px] text-muted-foreground uppercase block">Humectants & Binders</span>
                 <strong className="text-sm text-white font-black">Fractionated Palm Oil, Carrageenan, Gums</strong>
               </div>
-              <span className="w-3 h-3 rounded-full bg-chartreuse animate-ping flex-shrink-0" />
+              <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${selectedHotspot === 'emulsifiers-gums' ? 'bg-chartreuse shadow-[0_0_8px_#D8F343]' : 'bg-white/20'}`} />
             </button>
           </div>
         </div>
@@ -266,6 +266,67 @@ export default function LabelDecoderPage() {
           </AnimatePresence>
         </div>
       </div>
+
+      {/* Complete Lower-Page Experience: The 3-Second Supermarket Checklist */}
+      <section className="pt-10 border-t border-white/10 space-y-8">
+        <div className="space-y-2">
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-chartreuse block">
+            Consumer Defense Framework
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-black font-serif text-white">
+            The 3-Second Supermarket Label Checklist
+          </h2>
+          <p className="text-sm font-mono text-cream/70 max-w-2xl">
+            Never let a flashy front-of-pack fitness marketing badge dictate what enters your digestive tract. Use this simple 3-step test.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="p-6 sm:p-8 rounded-3xl bg-[#0B1710]/90 border border-white/10 space-y-3 shadow-xl">
+            <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Rule 01 · Standardize</span>
+            <h3 className="text-lg font-bold font-serif text-white">Compare Per 100g Only</h3>
+            <p className="text-xs text-cream/75 font-sans leading-relaxed">
+              Ignore the manufacturer&apos;s tiny declared portion size. Look strictly at the standardized 100g column to compare protein density and real sugar across products.
+            </p>
+          </div>
+
+          <div className="p-6 sm:p-8 rounded-3xl bg-[#0B1710]/90 border border-white/10 space-y-3 shadow-xl">
+            <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Rule 02 · Order of Ingredients</span>
+            <h3 className="text-lg font-bold font-serif text-white">The First Three Ingredients</h3>
+            <p className="text-xs text-cream/75 font-sans leading-relaxed">
+              Ingredients are legally listed in descending order by weight. If sugars, maltodextrin, or palm oil appear in the top 3, it is confectionary disguised as fitness fuel.
+            </p>
+          </div>
+
+          <div className="p-6 sm:p-8 rounded-3xl bg-[#0B1710]/90 border border-white/10 space-y-3 shadow-xl">
+            <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Rule 03 · Additive Count</span>
+            <h3 className="text-lg font-bold font-serif text-white">The 5-Additive Ceiling</h3>
+            <p className="text-xs text-cream/75 font-sans leading-relaxed">
+              If a product lists more than 5 synthetic humectants, gums, emulsifiers, or artificial flavorings, switch to real kitchen staples like sattu or roasted chana.
+            </p>
+          </div>
+        </div>
+
+        <div className="p-6 rounded-2xl bg-white/5 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs">
+          <span className="text-cream/80">
+            Want to see how real whole food staples compare to ultra-processed snacks?
+          </span>
+          <div className="flex items-center gap-3">
+            <a
+              href="/kitchen"
+              className="min-h-[44px] px-5 py-2.5 rounded-full bg-white/10 hover:bg-chartreuse hover:text-forest text-cream font-bold transition-all"
+            >
+              Pantry Matcher →
+            </a>
+            <a
+              href="/recipes"
+              className="min-h-[44px] px-5 py-2.5 rounded-full bg-chartreuse text-forest font-bold uppercase tracking-wider hover:bg-white transition-all shadow-md"
+            >
+              15-Min Whole Food Recipes →
+            </a>
+          </div>
+        </div>
+      </section>
     </div>
   )
 }

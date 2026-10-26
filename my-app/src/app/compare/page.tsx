@@ -110,11 +110,11 @@ function CompareContent() {
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-chartreuse text-forest text-xs font-mono font-bold tracking-widest uppercase shadow-md">
             <Scale className="w-3.5 h-3.5" />
-            <span>STUDIO 02 // PRECISION SHOWDOWN</span>
+            <span>Head-to-Head Nutrition Showdown · Verified Benchmarks</span>
           </div>
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black font-serif text-white tracking-tight leading-[0.94]">
-            Head-to-Head <br />
-            <span className="text-chartreuse italic font-normal">Reckoning.</span>
+            Food Contender <br />
+            <span className="text-chartreuse italic font-normal">Showdown.</span>
           </h1>
           <p className="text-sm sm:text-base font-mono text-cream/70 max-w-2xl mx-auto leading-relaxed">
             Normalize biological yields, strip away marketing claims, and calculate the exact rupee cost per 10 grams of usable muscle protein.
@@ -437,6 +437,68 @@ function CompareContent() {
             </button>
           </div>
         </div>
+
+        {/* Complete Lower-Page Experience: Next Showdown Steps */}
+        <section className="pt-10 border-t border-white/10 space-y-8">
+          <div className="space-y-2">
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-chartreuse block">
+              Continue Your Analysis
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black font-serif text-white">
+              Take Action on This Duel
+            </h2>
+            <p className="text-sm font-mono text-cream/70 max-w-2xl">
+              Now that you&apos;ve compared the biological yield and cost efficiency, plan your daily intake or explore protein economics.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="p-6 rounded-3xl bg-[#0B1710]/80 border border-white/10 space-y-4 shadow-xl">
+              <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Step 01 · Planning</span>
+              <h3 className="text-lg font-bold font-serif text-white">Model in Daily Calculator</h3>
+              <p className="text-xs text-cream/75 font-sans leading-relaxed">
+                Add both {foodA.name} and {foodB.name} to a simulated daily plate to see your total protein and rupee spend.
+              </p>
+              <button
+                onClick={() => {
+                  handleAddToBasket(foodA.id, foodA.servingSizeGrams, foodA.name)
+                  handleAddToBasket(foodB.id, foodB.servingSizeGrams, foodB.name)
+                }}
+                className="min-h-[44px] w-full px-4 py-2.5 rounded-full bg-white/10 hover:bg-chartreuse hover:text-forest text-cream font-mono text-xs font-bold transition-all"
+              >
+                + Add Both to Basket
+              </button>
+            </div>
+
+            <div className="p-6 rounded-3xl bg-[#0B1710]/80 border border-white/10 space-y-4 shadow-xl">
+              <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Step 02 · Economics</span>
+              <h3 className="text-lg font-bold font-serif text-white">Rank All 30+ Staples</h3>
+              <p className="text-xs text-cream/75 font-sans leading-relaxed">
+                Explore the complete national wholesale and kirana rankings by rupee cost per 10 grams of protein.
+              </p>
+              <a
+                href="/budget"
+                className="min-h-[44px] w-full px-4 py-2.5 rounded-full bg-white/10 hover:bg-chartreuse hover:text-forest text-cream font-mono text-xs font-bold transition-all flex items-center justify-center gap-2"
+              >
+                <span>View Budget Rankings →</span>
+              </a>
+            </div>
+
+            <div className="p-6 rounded-3xl bg-[#0B1710]/80 border border-white/10 space-y-4 shadow-xl">
+              <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Step 03 · Kitchen</span>
+              <h3 className="text-lg font-bold font-serif text-white">Cook with the Winner</h3>
+              <p className="text-xs text-cream/75 font-sans leading-relaxed">
+                Discover 15-minute high-yield Indian recipes using {isBCheaper ? foodB.name : foodA.name}.
+              </p>
+              <a
+                href="/recipes"
+                className="min-h-[44px] w-full px-4 py-2.5 rounded-full bg-chartreuse text-forest font-mono text-xs font-bold uppercase transition-all flex items-center justify-center gap-2"
+              >
+                <span>Explore Recipes →</span>
+              </a>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   )

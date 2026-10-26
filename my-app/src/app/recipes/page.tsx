@@ -71,7 +71,7 @@ export default function RecipesPage() {
           <div className="space-y-3 max-w-3xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-chartreuse border border-chartreuse/30 text-xs font-mono font-bold tracking-wider uppercase shadow-sm">
               <Utensils className="w-3.5 h-3.5" />
-              <span>THE HOMEMADE LAB // 15-MINUTE WHOLE FOOD RECIPES</span>
+              <span>Whole Food Kitchen Lab · High-Yield Recipes</span>
             </div>
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black font-serif text-white tracking-tight leading-[0.94]">
               Cook Real Food. <br />
@@ -371,6 +371,71 @@ export default function RecipesPage() {
             </motion.div>
           </AnimatePresence>
         </div>
+
+        {/* Complete Lower-Page Experience: Tested Whole Food Staples */}
+        <section className="pt-10 border-t border-white/10 space-y-8">
+          <div className="space-y-2">
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-chartreuse block">
+              Pantry Architecture
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black font-serif text-white">
+              Staples Powering These Recipes
+            </h2>
+            <p className="text-sm font-mono text-cream/70 max-w-2xl">
+              Each recipe relies on unbranded, nutrient-dense Indian staples. Inspect their laboratory nutritional analysis or calculate your daily requirements.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <Link
+              href="/explore"
+              className="group p-6 rounded-3xl bg-[#0B1710]/90 border border-white/10 hover:border-chartreuse/50 transition-all space-y-3 shadow-xl"
+            >
+              <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Explore Pantry</span>
+              <h3 className="text-xl font-bold font-serif text-white group-hover:text-chartreuse transition-colors">
+                Food Intelligence Index
+              </h3>
+              <p className="text-xs text-cream/70 font-sans leading-relaxed">
+                Check DIAAS scores, amino acid profiles, and exact protein density per 100 grams for all 12 staples.
+              </p>
+              <div className="flex items-center gap-2 text-xs font-mono font-bold text-chartreuse pt-2 group-hover:underline">
+                <span>View All Foods →</span>
+              </div>
+            </Link>
+
+            <Link
+              href="/calculator"
+              className="group p-6 rounded-3xl bg-[#0B1710]/90 border border-white/10 hover:border-chartreuse/50 transition-all space-y-3 shadow-xl"
+            >
+              <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Personal Target</span>
+              <h3 className="text-xl font-bold font-serif text-white group-hover:text-chartreuse transition-colors">
+                Plate Protein Simulator
+              </h3>
+              <p className="text-xs text-cream/70 font-sans leading-relaxed">
+                Calculate your body weight targets and simulate a day&apos;s eating using these 15-minute recipes.
+              </p>
+              <div className="flex items-center gap-2 text-xs font-mono font-bold text-chartreuse pt-2 group-hover:underline">
+                <span>Calculate Target →</span>
+              </div>
+            </Link>
+
+            <Link
+              href="/basket"
+              className="group p-6 rounded-3xl bg-[#0B1710]/90 border border-white/10 hover:border-chartreuse/50 transition-all space-y-3 shadow-xl"
+            >
+              <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Weekly Planning</span>
+              <h3 className="text-xl font-bold font-serif text-white group-hover:text-chartreuse transition-colors">
+                Virtual Kitchen Basket
+              </h3>
+              <p className="text-xs text-cream/70 font-sans leading-relaxed">
+                Add recipe ingredients directly to your basket to tally weekly grocery costs and protein totals.
+              </p>
+              <div className="flex items-center gap-2 text-xs font-mono font-bold text-chartreuse pt-2 group-hover:underline">
+                <span>Open Basket →</span>
+              </div>
+            </Link>
+          </div>
+        </section>
       </main>
     </div>
   )

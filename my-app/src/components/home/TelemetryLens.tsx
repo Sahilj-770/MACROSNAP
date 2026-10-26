@@ -271,15 +271,8 @@ export function TelemetryLens() {
                 />
                 <div className="absolute inset-0 bg-radial from-transparent via-black/20 to-black/60 pointer-events-none" />
 
-                {/* Central Reticle */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-full border border-chartreuse/50 flex items-center justify-center">
-                    <div className="w-1.5 h-1.5 rounded-full bg-chartreuse animate-ping" />
-                  </div>
-                </div>
-
                 <div className="absolute bottom-3 left-0 right-0 text-center font-mono text-[9px] sm:text-[10px] uppercase tracking-widest text-cream/90 bg-black/60 py-1 backdrop-blur-xs">
-                  ICMR-NIN SPECTROMETRY // ACTIVE
+                  WHOLE FOOD NUTRIENT MATRIX
                 </div>
               </div>
             </div>

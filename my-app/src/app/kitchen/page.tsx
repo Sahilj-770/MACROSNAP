@@ -89,7 +89,7 @@ export default function KitchenPage() {
           <div className="space-y-3 max-w-3xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-chartreuse border border-chartreuse/30 text-xs font-mono font-bold tracking-wider uppercase shadow-sm">
               <ChefHat className="w-3.5 h-3.5" />
-              <span>THE PANTRY RECOGNIZER // ZERO FOOD WASTE</span>
+              <span>Pantry Ingredient Matcher · Zero Food Waste</span>
             </div>
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black font-serif text-white tracking-tight leading-[0.94]">
               What&apos;s On <br />
@@ -321,6 +321,75 @@ export default function KitchenPage() {
             </div>
           </section>
         )}
+
+        {/* Complete Lower-Page Experience: The ₹300/Week Sovereign Student Pantry */}
+        <section className="pt-10 border-t border-white/10 space-y-8">
+          <div className="space-y-2">
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-chartreuse block">
+              Budget Kitchen Strategy
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black font-serif text-white">
+              The Essential Indian Student Pantry Under ₹300
+            </h2>
+            <p className="text-sm font-mono text-cream/70 max-w-2xl">
+              Equip your room or hostel with these 4 unbranded staples to unlock 10+ recipes and ensure 90g+ daily protein regardless of cafeteria schedules.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="p-6 rounded-3xl bg-[#0B1710]/90 border border-white/10 space-y-3 shadow-xl">
+              <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Staple 01</span>
+              <h3 className="text-lg font-bold font-serif text-white">Chana Sattu (500g)</h3>
+              <p className="text-xs text-cream/70 font-sans leading-relaxed">
+                ~₹60. Zero cooking required. Instant savory electrolyte drink with 20.6g protein per 100g.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-3xl bg-[#0B1710]/90 border border-white/10 space-y-3 shadow-xl">
+              <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Staple 02</span>
+              <h3 className="text-lg font-bold font-serif text-white">Roasted Bengal Gram (500g)</h3>
+              <p className="text-xs text-cream/70 font-sans leading-relaxed">
+                ~₹70. Pocket snack with 22.5g protein + 16.8g prebiotic fiber. Eliminates junk snacking.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-3xl bg-[#0B1710]/90 border border-white/10 space-y-3 shadow-xl">
+              <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Staple 03</span>
+              <h3 className="text-lg font-bold font-serif text-white">Soy Chunks (200g Box)</h3>
+              <p className="text-xs text-cream/70 font-sans leading-relaxed">
+                ~₹25. 52g pure protein per 100g dry weight. Requires only hot water and 5 minutes to rehydrate.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-3xl bg-[#0B1710]/90 border border-white/10 space-y-3 shadow-xl">
+              <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Staple 04</span>
+              <h3 className="text-lg font-bold font-serif text-white">Roasted Peanuts (500g)</h3>
+              <p className="text-xs text-cream/70 font-sans leading-relaxed">
+                ~₹90. Rich in monounsaturated fats, arginine, and 25.8g protein per 100g for sustained caloric energy.
+              </p>
+            </div>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-white/5 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs">
+            <span className="text-cream/80">
+              Want to see detailed laboratory nutritional breakdowns of each pantry item?
+            </span>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/explore"
+                className="min-h-[44px] px-5 py-2.5 rounded-full bg-white/10 hover:bg-chartreuse hover:text-forest text-cream font-bold transition-all flex items-center gap-2"
+              >
+                <span>Browse Food Index →</span>
+              </Link>
+              <Link
+                href="/budget"
+                className="min-h-[44px] px-5 py-2.5 rounded-full bg-chartreuse text-forest font-bold uppercase tracking-wider hover:bg-white transition-all shadow-md flex items-center gap-2"
+              >
+                <span>Compare Costs →</span>
+              </Link>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   )

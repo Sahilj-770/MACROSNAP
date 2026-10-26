@@ -47,7 +47,7 @@ export default function LibraryPage() {
           <div className="space-y-3 max-w-3xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-chartreuse border border-chartreuse/30 text-xs font-mono font-bold tracking-wider uppercase shadow-sm">
               <Bookmark className="w-3.5 h-3.5" />
-              <span>THE PERSONAL TASTING ROOM // OFFLINE LOCAL ARCHIVE</span>
+              <span>Personal Collection · Offline Local Archive</span>
             </div>
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black font-serif text-white tracking-tight leading-[0.94]">
               Saved Food <br />
@@ -374,7 +374,73 @@ export default function LibraryPage() {
             )}
           </div>
         )}
+
+        {/* Complete Lower-Page Experience: Return to Discovery */}
+        <section className="pt-10 mt-12 border-t border-white/10 space-y-8">
+          <div className="space-y-2">
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-chartreuse block">
+              Discover More Staples
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black font-serif text-white">
+              Expand Your Personal Food Collection
+            </h2>
+            <p className="text-sm font-mono text-cream/70 max-w-2xl">
+              Add more high-protein biological foods to your offline library, run custom showdowns, or build a daily plate.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <Link
+              href="/explore"
+              className="group p-6 sm:p-8 rounded-3xl bg-[#0B1710]/90 border border-white/10 hover:border-chartreuse/50 transition-all space-y-3 shadow-xl"
+            >
+              <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Explore</span>
+              <h3 className="text-xl font-bold font-serif text-white group-hover:text-chartreuse transition-colors">
+                Food Intelligence Index
+              </h3>
+              <p className="text-xs text-cream/70 font-sans leading-relaxed">
+                Discover laboratory protein density and wholesale pricing for 12 core Indian staples.
+              </p>
+              <div className="flex items-center gap-2 text-xs font-mono font-bold text-chartreuse pt-2 group-hover:underline">
+                <span>Browse All Foods →</span>
+              </div>
+            </Link>
+
+            <Link
+              href="/compare"
+              className="group p-6 sm:p-8 rounded-3xl bg-[#0B1710]/90 border border-white/10 hover:border-chartreuse/50 transition-all space-y-3 shadow-xl"
+            >
+              <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Compare</span>
+              <h3 className="text-xl font-bold font-serif text-white group-hover:text-chartreuse transition-colors">
+                Head-to-Head Duel
+              </h3>
+              <p className="text-xs text-cream/70 font-sans leading-relaxed">
+                Save head-to-head showdowns between whole foods and packaged snacks to your collection.
+              </p>
+              <div className="flex items-center gap-2 text-xs font-mono font-bold text-chartreuse pt-2 group-hover:underline">
+                <span>Launch Showdown →</span>
+              </div>
+            </Link>
+
+            <Link
+              href="/recipes"
+              className="group p-6 sm:p-8 rounded-3xl bg-[#0B1710]/90 border border-white/10 hover:border-chartreuse/50 transition-all space-y-3 shadow-xl"
+            >
+              <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Kitchen Lab</span>
+              <h3 className="text-xl font-bold font-serif text-white group-hover:text-chartreuse transition-colors">
+                Whole Food Recipes
+              </h3>
+              <p className="text-xs text-cream/70 font-sans leading-relaxed">
+                Save your favorite 15-minute high-yield Indian recipes for easy offline cooking.
+              </p>
+              <div className="flex items-center gap-2 text-xs font-mono font-bold text-chartreuse pt-2 group-hover:underline">
+                <span>Open Recipes →</span>
+              </div>
+            </Link>
+          </div>
+        </section>
       </main>
+
     </div>
   )
 }

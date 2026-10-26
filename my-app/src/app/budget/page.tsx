@@ -8,6 +8,9 @@ import {
   Wallet,
   Trophy,
   ShieldCheck,
+  ArrowRight,
+  ShoppingBag,
+  Sparkles,
 } from 'lucide-react'
 
 export default function BudgetPage() {
@@ -44,7 +47,7 @@ export default function BudgetPage() {
       <div className="space-y-4 max-w-3xl">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-chartreuse border border-chartreuse/30 text-xs font-mono font-bold tracking-widest uppercase shadow-sm">
           <Wallet className="w-3.5 h-3.5" />
-          <span>Section 03 // Protein Economics & National Benchmarks</span>
+          <span>Protein Economics & National Kirana Benchmarks</span>
         </div>
         <h1 className="text-4xl sm:text-6xl font-black font-serif text-white tracking-tight">
           Protein on a Budget
@@ -333,6 +336,61 @@ export default function BudgetPage() {
           ))}
         </div>
       </div>
+
+      {/* Complete Lower-Page Experience: Monthly Household Economic Impact */}
+      <section className="pt-10 border-t border-white/10 space-y-8">
+        <div className="space-y-2">
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-chartreuse block">
+            Macro-Economic Impact
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-black font-serif text-white">
+            What 30 Days of Whole Food Fueling Saves You
+          </h2>
+          <p className="text-sm font-mono text-cream/70 max-w-2xl">
+            Replacing one daily commercial snack bar (₹120) with roasted chana or sattu (₹15) shifts capital straight into your bank account while providing superior whole food satiety.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="p-6 sm:p-8 rounded-3xl bg-[#0B1710]/90 border border-white/10 space-y-3 shadow-xl">
+            <span className="text-xs font-mono text-cream/60 uppercase block">Monthly Financial Delta</span>
+            <div className="text-4xl sm:text-5xl font-black font-serif text-chartreuse">₹3,150+</div>
+            <p className="text-xs text-cream/70 font-sans leading-relaxed">
+              Saved every month per person. Over a 12-month training block, that amounts to ₹37,800 saved from zero fitness advertising markup.
+            </p>
+          </div>
+
+          <div className="p-6 sm:p-8 rounded-3xl bg-[#0B1710]/90 border border-white/10 space-y-3 shadow-xl">
+            <span className="text-xs font-mono text-cream/60 uppercase block">Prebiotic Dietary Fiber</span>
+            <div className="text-4xl sm:text-5xl font-black font-serif text-white">+504g</div>
+            <p className="text-xs text-cream/70 font-sans leading-relaxed">
+              Additional gut-nourishing resistant starch and oligosaccharides ingested per month, supporting microbial diversity and metabolic stability.
+            </p>
+          </div>
+
+          <div className="p-6 sm:p-8 rounded-3xl bg-[#0B1710]/90 border border-white/10 space-y-3 shadow-xl">
+            <span className="text-xs font-mono text-cream/60 uppercase block">Artificial Additives Avoided</span>
+            <div className="text-4xl sm:text-5xl font-black font-serif text-tangerine">0g</div>
+            <p className="text-xs text-cream/70 font-sans leading-relaxed">
+              Zero maltitol laxative humectants, zero fractionated palm oil binders, and zero synthetic artificial sweeteners entered your bloodstream.
+            </p>
+          </div>
+        </div>
+
+        <div className="p-6 rounded-2xl bg-white/5 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs">
+          <div className="flex items-center gap-2 text-cream/80">
+            <Sparkles className="w-4 h-4 text-chartreuse flex-shrink-0" />
+            <span>Ready to plan your weekly groceries based on these cost benchmarks?</span>
+          </div>
+          <a
+            href="/basket"
+            className="min-h-[44px] px-6 py-2.5 rounded-full bg-chartreuse text-forest font-bold uppercase tracking-wider hover:bg-white transition-all flex items-center gap-2 shadow-md"
+          >
+            <ShoppingBag className="w-4 h-4" />
+            <span>Open Budget Basket Planner →</span>
+          </a>
+        </div>
+      </section>
     </div>
   )
 }

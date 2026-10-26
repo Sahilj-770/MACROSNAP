@@ -58,7 +58,7 @@ export default function BasketPage() {
           <div className="space-y-3 max-w-3xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-chartreuse border border-chartreuse/30 text-xs font-mono font-bold tracking-wider uppercase shadow-sm">
               <ShoppingBag className="w-3.5 h-3.5" />
-              <span>THE SOVEREIGN GROCERY LEDGER // REAL PURCHASING POWER</span>
+              <span>Nutrition & Budget Planner · Personal Grocery Basket</span>
             </div>
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black font-serif text-white tracking-tight leading-[0.94]">
               Build Your <br />
@@ -345,8 +345,61 @@ export default function BasketPage() {
               </p>
             </div>
           </div>
+
         </aside>
       </main>
+
+      {/* Complete Lower-Page Experience: Next Steps with Your Planning Basket */}
+      <section className="pt-10 mt-12 border-t border-white/10 space-y-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="space-y-2">
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-chartreuse block">
+            Practical Execution
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-black font-serif text-white">
+            Next Steps With Your Protein Basket
+          </h2>
+          <p className="text-sm font-mono text-cream/70 max-w-2xl">
+            This is a nutritional planning basket designed to help you organize whole-food shopping without fitness brand marketing markups.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="p-6 sm:p-8 rounded-3xl bg-[#0B1710]/90 border border-white/10 space-y-3 shadow-xl">
+            <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Tip 01 · Kirana Strategy</span>
+            <h3 className="text-lg font-bold font-serif text-white">Buy Unbranded Wholesale</h3>
+            <p className="text-xs text-cream/75 font-sans leading-relaxed">
+              Ask your local neighborhood grocery or grain merchant for loose roasted chana, yellow moong dal, and bulk soy chunks for the lowest prices per gram.
+            </p>
+          </div>
+
+          <div className="p-6 sm:p-8 rounded-3xl bg-[#0B1710]/90 border border-white/10 space-y-3 shadow-xl">
+            <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Tip 02 · Cooking Speed</span>
+            <h3 className="text-lg font-bold font-serif text-white">Cook 15-Minute Meals</h3>
+            <p className="text-xs text-cream/75 font-sans leading-relaxed">
+              Turn the items in your basket into savory sattu elixirs, quick high-protein soy bhurji, or gentle moong dal bowls.
+            </p>
+            <div className="pt-2">
+              <Link href="/recipes" className="text-xs font-mono font-bold text-chartreuse hover:underline">
+                View Matching Recipes →
+              </Link>
+            </div>
+          </div>
+
+          <div className="p-6 sm:p-8 rounded-3xl bg-[#0B1710]/90 border border-white/10 space-y-3 shadow-xl">
+            <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Tip 03 · Verification</span>
+            <h3 className="text-lg font-bold font-serif text-white">Compare Contenders</h3>
+            <p className="text-xs text-cream/75 font-sans leading-relaxed">
+              Unsure if a packaged product is worth it? Put it side-by-side with raw paneer or eggs in our head-to-head showdown.
+            </p>
+            <div className="pt-2">
+              <Link href="/compare" className="text-xs font-mono font-bold text-chartreuse hover:underline">
+                Launch Showdown Arena →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </div>
   )
 }

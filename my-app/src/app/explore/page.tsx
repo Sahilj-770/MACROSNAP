@@ -1,10 +1,21 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
+import Link from 'next/link'
 import { FOOD_DATABASE } from '@/data/foods'
 import { FoodCard } from '@/components/features/FoodCard'
 import { BotanicalLeaf } from '@/components/illustrations/BotanicalIllustrations'
-import { Search, Sparkles, ShieldCheck, Wallet } from 'lucide-react'
+import {
+  Search,
+  Sparkles,
+  ShieldCheck,
+  Wallet,
+  Scale,
+  Calculator,
+  CookingPot,
+  ArrowRight,
+  CheckCircle2
+} from 'lucide-react'
 
 export default function ExplorePage() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -63,12 +74,12 @@ export default function ExplorePage() {
   }, [searchQuery, selectedCategory, selectedDietary, sortBy])
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10 selection:bg-chartreuse selection:text-forest">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12 selection:bg-chartreuse selection:text-forest">
       {/* Editorial Header */}
       <div className="space-y-4 max-w-3xl">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-chartreuse border border-chartreuse/30 text-xs font-mono font-bold tracking-widest uppercase shadow-sm">
           <BotanicalLeaf className="w-3.5 h-3.5" />
-          <span>Section 01 // The Food Intelligence Index</span>
+          <span>Food Intelligence Pantry · ICMR-NIN Benchmarked</span>
         </div>
         <h1 className="text-4xl sm:text-6xl font-black font-serif tracking-tight text-white">
           Nutrition Explorer
@@ -218,6 +229,98 @@ export default function ExplorePage() {
           </div>
         )}
       </div>
+
+      {/* Complete Lower-Page Experience: Next Steps in Food Intelligence */}
+      <section className="pt-10 border-t border-white/10 space-y-8">
+        <div className="space-y-2">
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-chartreuse block">
+            Put Your Food Knowledge To Work
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-black font-serif text-white">
+            Where to Take Your Pantry Discoveries Next
+          </h2>
+          <p className="text-sm font-mono text-cream/70 max-w-2xl">
+            Now that you know the laboratory values of these staples, explore how to pair, calculate, and cook them without buying into marketing markups.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Card 1: Showdown */}
+          <Link
+            href="/compare"
+            className="group p-6 sm:p-8 rounded-3xl bg-[#0B1710]/80 hover:bg-[#0B1710] border border-white/10 hover:border-chartreuse/50 transition-all flex flex-col justify-between space-y-6 shadow-xl"
+          >
+            <div className="space-y-3">
+              <div className="w-10 h-10 rounded-2xl bg-chartreuse/10 border border-chartreuse/30 flex items-center justify-center text-chartreuse group-hover:scale-105 transition-transform">
+                <Scale className="w-5 h-5" />
+              </div>
+              <h3 className="text-xl font-black font-serif text-white group-hover:text-chartreuse transition-colors">
+                Head-to-Head Showdown
+              </h3>
+              <p className="text-xs text-cream/75 leading-relaxed font-sans">
+                Pit whole foods against packaged snacks side-by-side to expose the true cost difference per 10 grams of protein.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 text-xs font-mono font-bold text-chartreuse group-hover:underline">
+              <span>Launch Contender Duel</span>
+              <ArrowRight className="w-4 h-4" />
+            </div>
+          </Link>
+
+          {/* Card 2: Calculator */}
+          <Link
+            href="/calculator"
+            className="group p-6 sm:p-8 rounded-3xl bg-[#0B1710]/80 hover:bg-[#0B1710] border border-white/10 hover:border-chartreuse/50 transition-all flex flex-col justify-between space-y-6 shadow-xl"
+          >
+            <div className="space-y-3">
+              <div className="w-10 h-10 rounded-2xl bg-chartreuse/10 border border-chartreuse/30 flex items-center justify-center text-chartreuse group-hover:scale-105 transition-transform">
+                <Calculator className="w-5 h-5" />
+              </div>
+              <h3 className="text-xl font-black font-serif text-white group-hover:text-chartreuse transition-colors">
+                Personal Plate Simulator
+              </h3>
+              <p className="text-xs text-cream/75 leading-relaxed font-sans">
+                Calculate your precise daily protein requirement and build a real daily eating plate using pantry staples.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 text-xs font-mono font-bold text-chartreuse group-hover:underline">
+              <span>Calculate Daily Target</span>
+              <ArrowRight className="w-4 h-4" />
+            </div>
+          </Link>
+
+          {/* Card 3: Recipes */}
+          <Link
+            href="/recipes"
+            className="group p-6 sm:p-8 rounded-3xl bg-[#0B1710]/80 hover:bg-[#0B1710] border border-white/10 hover:border-chartreuse/50 transition-all flex flex-col justify-between space-y-6 shadow-xl"
+          >
+            <div className="space-y-3">
+              <div className="w-10 h-10 rounded-2xl bg-chartreuse/10 border border-chartreuse/30 flex items-center justify-center text-chartreuse group-hover:scale-105 transition-transform">
+                <CookingPot className="w-5 h-5" />
+              </div>
+              <h3 className="text-xl font-black font-serif text-white group-hover:text-chartreuse transition-colors">
+                Whole Food Kitchen Lab
+              </h3>
+              <p className="text-xs text-cream/75 leading-relaxed font-sans">
+                Discover 15-minute high-yield Indian recipes engineered with these exact whole ingredients.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 text-xs font-mono font-bold text-chartreuse group-hover:underline">
+              <span>Explore Kitchen Recipes</span>
+              <ArrowRight className="w-4 h-4" />
+            </div>
+          </Link>
+        </div>
+
+        {/* Scientific Transparency Callout */}
+        <div className="p-6 rounded-2xl bg-white/5 border border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 font-mono text-xs text-cream/70">
+          <div className="flex items-center gap-2.5">
+            <CheckCircle2 className="w-4 h-4 text-chartreuse flex-shrink-0" />
+            <span>All values benchmarked against ICMR-NIN Indian Food Composition Tables (IFCT 2017).</span>
+          </div>
+          <span className="text-cream/50 text-[11px]">Updated Q1 2026 Modal Pricing Index</span>
+        </div>
+      </section>
     </div>
   )
 }
