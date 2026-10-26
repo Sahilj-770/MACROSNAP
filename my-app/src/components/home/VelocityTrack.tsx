@@ -6,7 +6,7 @@ import Link from 'next/link'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
-import { Wallet, ArrowRight, TrendingDown, Film } from 'lucide-react'
+import { ArrowRight, TrendingDown, Film } from 'lucide-react'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -79,22 +79,51 @@ export function VelocityTrack() {
 
   useGSAP(
     () => {
-      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      if (prefersReduced || !trackRef.current || !sectionRef.current) return
+      const mm = gsap.matchMedia()
 
-      const skewTo = gsap.quickTo(trackRef.current, 'skewX', { duration: 0.45, ease: 'power3.out' })
-      const settle = gsap.delayedCall(0.14, () => skewTo(0)).pause()
+      // ─────────────────────────────────────────────────────────────
+      // 1. DESKTOP ANIMATION ENVIRONMENT (>= 1024px)
+      // Velocity-reactive skew effect on desktop scroll
+      // ─────────────────────────────────────────────────────────────
+      mm.add('(min-width: 1024px) and (prefers-reduced-motion: no-preference)', () => {
+        if (!trackRef.current || !sectionRef.current) return
 
-      ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: 'top bottom',
-        end: 'bottom top',
-        onUpdate: (self) => {
-          const velocity = self.getVelocity()
-          skewTo(gsap.utils.clamp(-6, 6, velocity / -300))
-          settle.restart(true)
-        },
+        const skewTo = gsap.quickTo(trackRef.current, 'skewX', { duration: 0.45, ease: 'power3.out' })
+        const settle = gsap.delayedCall(0.14, () => skewTo(0)).pause()
+
+        ScrollTrigger.create({
+          trigger: sectionRef.current,
+          start: 'top bottom',
+          end: 'bottom top',
+          onUpdate: (self) => {
+            const velocity = self.getVelocity()
+            skewTo(gsap.utils.clamp(-5, 5, velocity / -350))
+            settle.restart(true)
+          },
+        })
       })
+
+      // ─────────────────────────────────────────────────────────────
+      // 2. MOBILE ANIMATION ENVIRONMENT (< 1024px)
+      // Zero skew to guarantee fluid 60fps touch gestures & native scroll
+      // ─────────────────────────────────────────────────────────────
+      mm.add('(max-width: 1023px)', () => {
+        if (trackRef.current) {
+          gsap.set(trackRef.current, { skewX: 0 })
+        }
+      })
+
+      // ─────────────────────────────────────────────────────────────
+      // 3. REDUCED MOTION ENVIRONMENT
+      // Completely static, zero skew
+      // ─────────────────────────────────────────────────────────────
+      mm.add('(prefers-reduced-motion: reduce)', () => {
+        if (trackRef.current) {
+          gsap.set(trackRef.current, { skewX: 0 })
+        }
+      })
+
+      return () => mm.revert()
     },
     { scope: sectionRef }
   )
@@ -103,16 +132,16 @@ export function VelocityTrack() {
     <section
       ref={sectionRef}
       id="budget-rail"
-      className="relative w-full py-28 sm:py-36 px-4 sm:px-8 lg:px-14 bg-transparent text-cream overflow-hidden"
+      className="relative w-full py-20 sm:py-32 lg:py-36 px-4 sm:px-8 lg:px-14 bg-transparent text-cream overflow-hidden"
     >
-      {/* Ambient Atmospheric Connecting Beam */}
-      <div className="w-48 h-[1px] bg-gradient-to-r from-transparent via-chartreuse/40 to-transparent mx-auto mb-16 opacity-70" />
+      <div className="w-48 h-[1px] bg-gradient-to-r from-transparent via-chartreuse/40 to-transparent mx-auto mb-12 sm:mb-16 opacity-70" />
+
       {/* 35mm Film Sprocket Ribbon (Top) */}
-      <div className="w-full flex justify-between items-center text-white/10 font-mono text-xs select-none tracking-[0.4em] overflow-hidden whitespace-nowrap mb-8 pb-3 border-b border-white/5 pointer-events-none">
+      <div className="w-full flex justify-between items-center text-white/10 font-mono text-xs select-none tracking-[0.4em] overflow-hidden whitespace-nowrap mb-6 sm:mb-8 pb-3 border-b border-white/5 pointer-events-none">
         <span>▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪</span>
       </div>
 
-      <div className="max-w-7xl mx-auto space-y-14 relative z-10">
+      <div className="max-w-7xl mx-auto space-y-12 sm:space-y-14 relative z-10">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-8">
           <div className="space-y-3 max-w-2xl">
@@ -154,12 +183,12 @@ export function VelocityTrack() {
                 <span className="text-chartreuse font-bold font-mono text-xs">{item.proteinDensity}</span>
               </div>
 
-              {/* Giant Price Typography */}
+              {/* Price Typography */}
               <div className="space-y-1">
                 <span className="text-[10px] font-mono text-cream/50 uppercase tracking-widest block">
                   Cost per 10g Protein
                 </span>
-                <strong className="text-5xl sm:text-6xl font-black font-serif text-chartreuse block tracking-tight drop-shadow-[0_0_20px_rgba(216,243,67,0.25)]">
+                <strong className="text-4xl sm:text-6xl font-black font-serif text-chartreuse block tracking-tight drop-shadow-[0_0_20px_rgba(216,243,67,0.25)]">
                   {item.costPer10g}
                 </strong>
                 <span className="text-xs font-mono text-cream/60 block">{item.batchCost}</span>
@@ -180,12 +209,13 @@ export function VelocityTrack() {
               </div>
 
               <div className="pt-2 border-t border-white/10 flex items-center justify-between font-mono text-xs">
-                <h4 className="text-lg font-bold font-serif text-cream group-hover:text-chartreuse transition-colors">
+                <h3 className="text-base sm:text-lg font-bold font-serif text-cream group-hover:text-chartreuse transition-colors">
                   {item.name}
-                </h4>
+                </h3>
                 <Link
                   href={item.href}
-                  className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-cream group-hover:bg-chartreuse group-hover:text-forest transition-colors"
+                  className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center text-cream group-hover:bg-chartreuse group-hover:text-forest transition-colors focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
+                  aria-label={`View budget details for ${item.name}`}
                 >
                   <ArrowRight className="w-4 h-4" />
                 </Link>
@@ -199,7 +229,7 @@ export function VelocityTrack() {
           <span>SIMULATION BENCHMARK: ₹50 DAILY BUDGET = 119G WHOLE FOOD PROTEIN</span>
           <Link
             href="/budget"
-            className="text-chartreuse hover:text-white font-bold inline-flex items-center gap-2 underline"
+            className="text-chartreuse hover:text-white font-bold inline-flex items-center gap-2 underline focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
           >
             <span>Launch Complete Rupee-to-Protein Simulation</span>
             <ArrowRight className="w-4 h-4" />

@@ -13,11 +13,8 @@ import {
   Minus,
   ArrowRight,
   Sparkles,
-  CheckCircle2,
   AlertTriangle,
-  Flame,
-  ShieldCheck,
-  Check
+  Compass,
 } from 'lucide-react'
 
 export default function BasketPage() {
@@ -27,7 +24,8 @@ export default function BasketPage() {
     removeFromBasket,
     clearBasket,
     dailyTargetProteinGrams,
-    addToBasket
+    addToBasket,
+    loadSampleBasket,
   } = useUserStore()
 
   const [budgetLimit, setBudgetLimit] = useState<number>(100)
@@ -47,13 +45,8 @@ export default function BasketPage() {
 
   const remainingBudget = budgetLimit - totalCost
   const budgetPercent = Math.min(100, Math.round((totalCost / budgetLimit) * 100))
-  const proteinTargetPercent = Math.min(100, Math.round((totalProtein / dailyTargetProteinGrams) * 100))
-
-  const addPowerPack = () => {
-    addToBasket('sattu-chana', 100)
-    addToBasket('soy-chunks', 100)
-    addToBasket('roasted-chana', 100)
-  }
+  const targetProteinGoal = dailyTargetProteinGrams > 0 ? dailyTargetProteinGrams : 90
+  const proteinTargetPercent = Math.min(100, Math.round((totalProtein / targetProteinGoal) * 100))
 
   return (
     <div className="min-h-screen bg-[#050B07] text-cream pb-24 selection:bg-chartreuse selection:text-forest">
@@ -79,19 +72,19 @@ export default function BasketPage() {
           {/* Quick Actions */}
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={addPowerPack}
-              className="px-4 py-2 rounded-2xl text-xs font-mono font-black bg-chartreuse text-forest shadow-[0_0_15px_rgba(216,243,67,0.3)] hover:bg-white transition-all flex items-center gap-1.5 cursor-pointer"
+              onClick={loadSampleBasket}
+              className="min-h-[44px] px-4 py-2 rounded-2xl text-xs font-mono font-black bg-chartreuse text-forest shadow-[0_0_15px_rgba(216,243,67,0.3)] hover:bg-white transition-all flex items-center gap-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
             >
               <Sparkles className="w-3.5 h-3.5 text-forest" />
-              <span>+ Indian Triple Power Pack (₹36 for 90g)</span>
+              <span>+ Load Starter Staples (90g Protein)</span>
             </button>
             {basketItems.length > 0 && (
               <button
                 onClick={clearBasket}
-                className="px-4 py-2 rounded-2xl text-xs font-mono font-bold bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 transition-all flex items-center gap-1.5 cursor-pointer"
+                className="min-h-[44px] px-4 py-2 rounded-2xl text-xs font-mono font-bold bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 transition-all flex items-center gap-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
               >
                 <Trash2 className="w-3.5 h-3.5" />
-                <span>Clear All</span>
+                <span>Clear Basket</span>
               </button>
             )}
           </div>
@@ -108,7 +101,10 @@ export default function BasketPage() {
             <span className="font-bold uppercase tracking-wider text-muted-foreground">
               Basket Contents ({basketItems.length} Products)
             </span>
-            <Link href="/explore" className="text-chartreuse hover:underline font-bold flex items-center gap-1">
+            <Link
+              href="/explore"
+              className="text-chartreuse hover:underline font-bold flex items-center gap-1 min-h-[36px] py-1 px-2 rounded focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
+            >
               <span>+ Add More Foods</span>
               <ArrowRight className="w-3 h-3" />
             </Link>
@@ -163,30 +159,33 @@ export default function BasketPage() {
                         </div>
                       </div>
 
-                      {/* Controls */}
+                      {/* Controls (min 44px touch targets) */}
                       <div className="flex items-center gap-4 self-end sm:self-center">
-                        <div className="flex items-center gap-2 bg-white/5 px-2 py-1 rounded-xl border border-white/15 font-mono text-xs">
+                        <div className="flex items-center gap-1 sm:gap-2 bg-white/5 px-2 py-1 rounded-xl border border-white/15 font-mono text-xs">
                           <button
                             onClick={() => updateBasketQuantity(item.foodId, Math.max(50, item.quantityGrams - 50))}
-                            className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors flex items-center justify-center font-bold cursor-pointer"
+                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors flex items-center justify-center font-bold cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
+                            aria-label={`Decrease ${food.name} quantity by 50g`}
                           >
-                            <Minus className="w-3 h-3" />
+                            <Minus className="w-3.5 h-3.5" />
                           </button>
-                          <span className="w-16 text-center font-black text-chartreuse">
+                          <span className="w-16 text-center font-black text-chartreuse text-sm">
                             {item.quantityGrams}g
                           </span>
                           <button
                             onClick={() => updateBasketQuantity(item.foodId, item.quantityGrams + 50)}
-                            className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors flex items-center justify-center font-bold cursor-pointer"
+                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors flex items-center justify-center font-bold cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
+                            aria-label={`Increase ${food.name} quantity by 50g`}
                           >
-                            <Plus className="w-3 h-3" />
+                            <Plus className="w-3.5 h-3.5" />
                           </button>
                         </div>
 
                         <button
                           onClick={() => removeFromBasket(item.foodId)}
-                          className="p-2 text-white/40 hover:text-red-400 transition-colors rounded-lg hover:bg-red-500/10 cursor-pointer"
+                          className="min-w-[44px] min-h-[44px] flex items-center justify-center text-white/40 hover:text-red-400 transition-colors rounded-xl hover:bg-red-500/10 cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
                           title="Remove item"
+                          aria-label={`Remove ${food.name} from basket`}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -197,21 +196,30 @@ export default function BasketPage() {
               </AnimatePresence>
             </div>
           ) : (
-            <div className="text-center py-16 space-y-4">
-              <ShoppingBag className="w-14 h-14 text-white/20 mx-auto" />
-              <div className="space-y-1">
-                <p className="text-xl font-bold font-serif text-white">Your grocery basket is empty</p>
-                <p className="text-xs font-mono text-cream/60 max-w-sm mx-auto">
-                  Click the button below to add our recommended Indian Triple Power Pack or explore individual staples.
+            <div className="text-center py-16 space-y-5">
+              <ShoppingBag className="w-16 h-16 text-white/20 mx-auto" />
+              <div className="space-y-1.5">
+                <p className="text-2xl font-bold font-serif text-white">Your grocery basket is empty</p>
+                <p className="text-xs font-mono text-cream/70 max-w-sm mx-auto leading-relaxed">
+                  Start fresh by browsing our database of whole Indian staples, or click below to load our curated starter staples pack.
                 </p>
               </div>
-              <button
-                onClick={addPowerPack}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-chartreuse text-forest font-mono text-xs font-black uppercase tracking-wider hover:bg-white transition-all shadow-[0_0_20px_rgba(216,243,67,0.3)] active:scale-95 cursor-pointer"
-              >
-                <span>Load Triple Power Pack (90g Protein)</span>
-                <Sparkles className="w-4 h-4 text-forest" />
-              </button>
+              <div className="flex flex-wrap justify-center gap-3 pt-2">
+                <button
+                  onClick={loadSampleBasket}
+                  className="min-h-[44px] inline-flex items-center gap-2 px-6 py-3 rounded-full bg-chartreuse text-forest font-mono text-xs font-black uppercase tracking-wider hover:bg-white transition-all shadow-[0_0_20px_rgba(216,243,67,0.3)] active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
+                >
+                  <Sparkles className="w-4 h-4 text-forest" />
+                  <span>Load Starter Staples (90g Protein)</span>
+                </button>
+                <Link
+                  href="/explore"
+                  className="min-h-[44px] inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-cream font-mono text-xs font-bold uppercase tracking-wider transition-all focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
+                >
+                  <Compass className="w-4 h-4 text-chartreuse" />
+                  <span>Explore Whole Foods</span>
+                </Link>
+              </div>
             </div>
           )}
         </div>
@@ -231,10 +239,11 @@ export default function BasketPage() {
             {/* Target Budget Slider */}
             <div className="space-y-2">
               <div className="flex justify-between items-center text-xs font-mono">
-                <span className="text-cream/70 uppercase">Daily Budget Ceiling:</span>
+                <label htmlFor="budget-slider" className="text-cream/70 uppercase">Daily Budget Ceiling:</label>
                 <span className="font-bold text-chartreuse text-base">₹{budgetLimit}</span>
               </div>
               <input
+                id="budget-slider"
                 type="range"
                 min="30"
                 max="300"
@@ -276,7 +285,7 @@ export default function BasketPage() {
                 <div className="flex justify-between">
                   <span className="text-cream/70">Daily Protein Target:</span>
                   <span className="text-chartreuse font-bold">
-                    {proteinTargetPercent}% ({totalProtein.toFixed(0)}g / {dailyTargetProteinGrams}g)
+                    {proteinTargetPercent}% ({totalProtein.toFixed(0)}g / {targetProteinGoal}g)
                   </span>
                 </div>
                 <div className="w-full bg-black/60 h-2.5 rounded-full overflow-hidden border border-white/10">
@@ -322,7 +331,7 @@ export default function BasketPage() {
                   <span>Budget Limit Exceeded</span>
                 </div>
                 <p className="text-cream/75 text-[11px] leading-relaxed">
-                  Swap out paneer or packaged products with raw bulk soy chunks or chana sattu to bring total spend under ₹{budgetLimit}.
+                  Swap out packaged products with raw bulk soy chunks or chana sattu to bring total spend under ₹{budgetLimit}.
                 </p>
               </div>
             )}

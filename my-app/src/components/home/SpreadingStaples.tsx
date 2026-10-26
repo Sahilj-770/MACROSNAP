@@ -6,7 +6,7 @@ import Link from 'next/link'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
-import { ArrowUpRight, Scale, Sparkles, Award } from 'lucide-react'
+import { ArrowUpRight, Scale, Sparkles } from 'lucide-react'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -22,7 +22,7 @@ const SOVEREIGN_FOODS = [
     costSub: 'Per 10g Protein',
     desc: 'The undisputed budget protein champion. 52% pure plant protein by weight. Zero artificial sweeteners or gums.',
     image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80',
-    compareHref: '/compare?foodA=soy-chunks&foodB=commercial-protein-bar',
+    compareHref: '/compare?foodA=commercial-protein-bar&foodB=soy-chunks',
   },
   {
     id: 'eggs-whole',
@@ -35,7 +35,7 @@ const SOVEREIGN_FOODS = [
     costSub: 'Per 10g Protein',
     desc: 'The gold standard of human protein bioavailability. Complete amino profile, choline, and fat-soluble vitamins.',
     image: 'https://images.unsplash.com/photo-1506976785307-8732e854ad03?auto=format&fit=crop&w=800&q=80',
-    compareHref: '/compare?foodA=boiled-egg-whole&foodB=commercial-protein-bar',
+    compareHref: '/compare?foodA=eggs-whole&foodB=commercial-protein-bar',
   },
   {
     id: 'roasted-chana',
@@ -48,7 +48,7 @@ const SOVEREIGN_FOODS = [
     costSub: 'Per 10g Protein',
     desc: 'Zero-cooking instant pantry staple. High in resistant starch that feeds colon microbiome and maintains satiety.',
     image: 'https://images.unsplash.com/photo-1515543237350-b3eea1ec8082?auto=format&fit=crop&w=800&q=80',
-    compareHref: '/compare?foodA=roasted-chana&foodB=commercial-protein-bar',
+    compareHref: '/compare?foodA=commercial-protein-bar&foodB=roasted-chana',
   },
   {
     id: 'paneer-fresh',
@@ -61,7 +61,7 @@ const SOVEREIGN_FOODS = [
     costSub: 'Per 10g Protein',
     desc: 'High biological value dairy staple. Rich in bioavailable calcium and slow-digesting casein for overnight synthesis.',
     image: 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=800&q=80',
-    compareHref: '/compare?foodA=paneer-raw&foodB=firm-tofu',
+    compareHref: '/compare?foodA=paneer-fresh&foodB=tofu-firm',
   },
   {
     id: 'sattu-chana',
@@ -74,7 +74,7 @@ const SOVEREIGN_FOODS = [
     costSub: 'Per 10g Protein',
     desc: 'India’s original whole food protein shake. Drink with cold water, roasted jeera, and black salt in 60 seconds.',
     image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80',
-    compareHref: '/compare?foodA=roasted-chana&foodB=whey-protein-isolate',
+    compareHref: '/compare?foodA=sattu-chana&foodB=whey-protein-isolate',
   },
   {
     id: 'yellow-moong-dal',
@@ -97,54 +97,94 @@ export function SpreadingStaples() {
 
   useGSAP(
     () => {
-      const isDesktop = window.matchMedia('(min-width: 1024px)').matches
-      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      const mm = gsap.matchMedia()
 
-      if (!isDesktop || prefersReduced || !gridRef.current || !sectionRef.current) return
+      // ─────────────────────────────────────────────────────────────
+      // 1. DESKTOP ANIMATION ENVIRONMENT (>= 1024px)
+      // Coordinated bento spread from center into grid positions
+      // ─────────────────────────────────────────────────────────────
+      mm.add('(min-width: 1024px) and (prefers-reduced-motion: no-preference)', () => {
+        if (!gridRef.current || !sectionRef.current) return
 
-      const grid = gridRef.current
-      const tiles = Array.from(grid.querySelectorAll('.staple-tile')) as HTMLElement[]
-      const tiltAngles = [-6, 5, -4, 6, -3, 4]
+        const grid = gridRef.current
+        const tiles = Array.from(grid.querySelectorAll('.staple-tile')) as HTMLElement[]
+        const tiltAngles = [-6, 5, -4, 6, -3, 4]
 
-      const toCentre = (tile: HTMLElement, axis: 'x' | 'y') => {
-        if (axis === 'x') {
-          return grid.clientWidth / 2 - (tile.offsetLeft + tile.offsetWidth / 2)
+        const toCentre = (tile: HTMLElement, axis: 'x' | 'y') => {
+          if (axis === 'x') {
+            return grid.clientWidth / 2 - (tile.offsetLeft + tile.offsetWidth / 2)
+          }
+          return Math.min(grid.clientHeight, window.innerHeight * 0.8) / 2 - (tile.offsetTop + tile.offsetHeight / 2)
         }
-        return Math.min(grid.clientHeight, window.innerHeight * 0.8) / 2 - (tile.offsetTop + tile.offsetHeight / 2)
-      }
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: grid,
-          start: 'top 85%',
-          end: 'top 20%',
-          scrub: 0.8,
-          invalidateOnRefresh: true,
-        },
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: grid,
+            start: 'top 85%',
+            end: 'top 20%',
+            scrub: 0.8,
+            invalidateOnRefresh: true,
+          },
+        })
+
+        tiles.forEach((tile, index) => {
+          tl.fromTo(
+            tile,
+            {
+              x: () => toCentre(tile, 'x'),
+              y: () => toCentre(tile, 'y'),
+              rotation: tiltAngles[index % tiltAngles.length],
+              scale: 0.82,
+              opacity: 0.35,
+            },
+            {
+              x: 0,
+              y: 0,
+              rotation: 0,
+              scale: 1,
+              opacity: 1,
+              duration: 0.6,
+              ease: 'power2.out',
+            },
+            index * 0.08
+          )
+        })
       })
 
-      tiles.forEach((tile, index) => {
-        tl.fromTo(
-          tile,
-          {
-            x: () => toCentre(tile, 'x'),
-            y: () => toCentre(tile, 'y'),
-            rotation: tiltAngles[index % tiltAngles.length],
-            scale: 0.82,
-            opacity: 0.35,
-          },
-          {
-            x: 0,
-            y: 0,
-            rotation: 0,
-            scale: 1,
-            opacity: 1,
-            duration: 0.6,
+      // ─────────────────────────────────────────────────────────────
+      // 2. MOBILE ANIMATION ENVIRONMENT (< 1024px)
+      // Fluid vertical reveal sequence without offset distortion
+      // ─────────────────────────────────────────────────────────────
+      mm.add('(max-width: 1023px) and (prefers-reduced-motion: no-preference)', () => {
+        const tiles = gridRef.current?.querySelectorAll('.staple-tile')
+        if (tiles && tiles.length > 0) {
+          gsap.from(tiles, {
+            y: 20,
+            opacity: 0,
+            stagger: 0.07,
+            duration: 0.5,
             ease: 'power2.out',
-          },
-          index * 0.08
-        )
+            scrollTrigger: {
+              trigger: gridRef.current,
+              start: 'top 85%',
+              once: true,
+            },
+          })
+        }
       })
+
+      // ─────────────────────────────────────────────────────────────
+      // 3. REDUCED MOTION ENVIRONMENT
+      // Immediately resting, zero transform, full opacity
+      // ─────────────────────────────────────────────────────────────
+      mm.add('(prefers-reduced-motion: reduce)', () => {
+        const tiles = gridRef.current?.querySelectorAll('.staple-tile')
+        if (tiles) {
+          gsap.set(tiles, { x: 0, y: 0, scale: 1, rotation: 0, opacity: 1 })
+        }
+      })
+
+      return () => mm.revert()
     },
     { scope: sectionRef }
   )
@@ -153,11 +193,10 @@ export function SpreadingStaples() {
     <section
       ref={sectionRef}
       id="staples"
-      className="relative w-full py-28 sm:py-36 px-4 sm:px-8 lg:px-14 bg-transparent text-cream overflow-hidden"
+      className="relative w-full py-20 sm:py-32 lg:py-36 px-4 sm:px-8 lg:px-14 bg-transparent text-cream overflow-hidden"
     >
-      {/* Ambient Atmospheric Connecting Beam */}
-      <div className="w-48 h-[1px] bg-gradient-to-r from-transparent via-chartreuse/40 to-transparent mx-auto mb-16 opacity-70" />
-      <div className="max-w-7xl mx-auto space-y-16 relative z-10">
+      <div className="w-48 h-[1px] bg-gradient-to-r from-transparent via-chartreuse/40 to-transparent mx-auto mb-12 sm:mb-16 opacity-70" />
+      <div className="max-w-7xl mx-auto space-y-12 sm:space-y-16 relative z-10">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-8">
           <div className="space-y-3 max-w-2xl">
@@ -177,7 +216,7 @@ export function SpreadingStaples() {
           </p>
         </div>
 
-        {/* 6-Card Spreading Bento Grid */}
+        {/* 6-Card Bento Grid */}
         <div
           ref={gridRef}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 relative"
@@ -234,14 +273,14 @@ export function SpreadingStaples() {
               <div className="pt-4 border-t border-white/10 flex items-center justify-between font-mono text-xs font-bold">
                 <Link
                   href={food.compareHref}
-                  className="inline-flex items-center gap-1.5 text-cream/80 hover:text-chartreuse transition-colors group-hover:translate-x-1 transition-transform"
+                  className="min-h-[44px] inline-flex items-center gap-1.5 text-cream/80 hover:text-chartreuse transition-colors group-hover:translate-x-1 transition-transform focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
                 >
                   <Scale className="w-3.5 h-3.5 text-chartreuse" />
                   <span>Launch Head-to-Head Compare</span>
                 </Link>
                 <Link
                   href={food.compareHref}
-                  className="w-8 h-8 rounded-full bg-white/10 text-cream flex items-center justify-center group-hover:bg-chartreuse group-hover:text-forest transition-colors"
+                  className="w-11 h-11 rounded-full bg-white/10 text-cream flex items-center justify-center group-hover:bg-chartreuse group-hover:text-forest transition-colors focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
                   aria-label={`Compare ${food.name}`}
                 >
                   <ArrowUpRight className="w-4 h-4" />
@@ -256,7 +295,7 @@ export function SpreadingStaples() {
           <span>DATA PROVENANCE: ICMR-NIN INDIAN FOOD COMPOSITION TABLES (IFCT 2017)</span>
           <Link
             href="/explore"
-            className="text-chartreuse hover:text-white font-bold inline-flex items-center gap-2 underline"
+            className="text-chartreuse hover:text-white font-bold inline-flex items-center gap-2 underline focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
           >
             <span>Explore all 30+ categorized staples in directory</span>
             <ArrowUpRight className="w-4 h-4" />

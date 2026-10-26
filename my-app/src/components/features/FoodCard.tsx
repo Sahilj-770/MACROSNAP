@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { FoodItem } from '@/types/food'
 import { useUserStore } from '@/store/useUserStore'
-import { Bookmark, ShoppingBag, Scale, Sparkles, Plus, Check } from 'lucide-react'
+import { Bookmark, ShoppingBag, Scale, Sparkles, Check } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 interface FoodCardProps {
@@ -22,12 +22,13 @@ export function FoodCard({ food }: FoodCardProps) {
   const proteinPercent = Math.min(100, (food.proteinPer100g / 60) * 100)
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
+    <motion.article
+      data-testid="food-card"
+      initial={{ opacity: 0, y: 15 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-40px' }}
-      transition={{ duration: 0.4 }}
-      className="group relative bg-[#0B1710]/90 backdrop-blur-md rounded-3xl border border-white/10 hover:border-chartreuse/50 transition-all duration-500 hover:shadow-[0_0_35px_rgba(216,243,67,0.12)] flex flex-col justify-between overflow-hidden p-6"
+      viewport={{ once: true, margin: '-20px' }}
+      transition={{ duration: 0.35 }}
+      className="group relative bg-[#0B1710]/90 backdrop-blur-md rounded-3xl border border-white/10 hover:border-chartreuse/50 transition-all duration-300 hover:shadow-[0_0_35px_rgba(216,243,67,0.12)] flex flex-col justify-between overflow-hidden p-6"
     >
       <div>
         {/* Food Image with High-Res Frame */}
@@ -76,12 +77,12 @@ export function FoodCard({ food }: FoodCardProps) {
 
           <button
             onClick={() => toggleFavoriteFood(food.id)}
-            className={`p-2 rounded-full border transition-all cursor-pointer active:scale-95 ${
+            className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full border transition-all cursor-pointer active:scale-95 focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none ${
               isFavorite
                 ? 'bg-tangerine text-white border-tangerine shadow-sm'
                 : 'border-white/15 text-white/50 hover:text-white hover:border-chartreuse/50 bg-black/40'
             }`}
-            aria-label={isFavorite ? 'Remove from saved' : 'Save food'}
+            aria-label={isFavorite ? `Remove ${food.name} from saved` : `Save ${food.name} to library`}
           >
             <Bookmark className="w-4 h-4 fill-current" />
           </button>
@@ -143,7 +144,7 @@ export function FoodCard({ food }: FoodCardProps) {
       <div className="mt-5 pt-4 border-t border-white/10 grid grid-cols-2 gap-2">
         <Link
           href={`/compare?foodA=commercial-protein-bar&foodB=${food.id}`}
-          className="py-2.5 px-3 rounded-xl border border-white/15 text-cream hover:bg-white/10 hover:border-chartreuse hover:text-chartreuse text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95 text-center"
+          className="min-h-[44px] py-2.5 px-3 rounded-xl border border-white/15 text-cream hover:bg-white/10 hover:border-chartreuse hover:text-chartreuse text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95 text-center focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
         >
           <Scale className="w-3.5 h-3.5" />
           <span>VS Compare</span>
@@ -151,16 +152,17 @@ export function FoodCard({ food }: FoodCardProps) {
 
         <button
           onClick={() => addToBasket(food.id, food.servingSizeGrams)}
-          className={`py-2.5 px-3 rounded-xl text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer ${
+          className={`min-h-[44px] py-2.5 px-3 rounded-xl text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none ${
             inBasket
               ? 'bg-leaf text-cream border border-leaf'
               : 'bg-chartreuse text-forest hover:bg-white shadow-[0_0_20px_rgba(216,243,67,0.3)] font-black'
           }`}
+          aria-label={inBasket ? `${food.name} is in your basket` : `Add ${food.name} to basket`}
         >
           {inBasket ? <Check className="w-3.5 h-3.5" /> : <ShoppingBag className="w-3.5 h-3.5 text-forest" />}
           <span>{inBasket ? 'In Basket' : 'Add Basket'}</span>
         </button>
       </div>
-    </motion.div>
+    </motion.article>
   )
 }

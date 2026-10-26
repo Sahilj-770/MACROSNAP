@@ -26,22 +26,22 @@ interface UserPreferencesStore {
   clearBasket: () => void
 
   setProteinGoal: (weightKg: number, targetProteinG: number) => void
+
+  // Customer-Ready Starter / Sample Loaders
+  loadSampleBasket: () => void
+  loadSampleFavorites: () => void
+  loadSampleComparisons: () => void
+  resetAllToCleanState: () => void
 }
 
 export const useUserStore = create<UserPreferencesStore>()(
   persist(
     (set, get) => ({
-      favoriteFoodIds: ['soy-chunks', 'roasted-chana', 'paneer-fresh'],
-      favoriteRecipeIds: ['sattu-super-coolant', 'chana-paneer-toss'],
-      savedComparisons: [
-        ['commercial-protein-bar', 'roasted-chana'],
-        ['paneer-fresh', 'tofu-firm'],
-      ],
-      basketItems: [
-        { foodId: 'soy-chunks', quantityGrams: 100 },
-        { foodId: 'roasted-chana', quantityGrams: 100 },
-        { foodId: 'eggs-whole', quantityGrams: 100 },
-      ],
+      // Clean customer-ready initial state: zero artificial mock data
+      favoriteFoodIds: [],
+      favoriteRecipeIds: [],
+      savedComparisons: [],
+      basketItems: [],
       dailyTargetProteinGrams: 90,
       bodyWeightKg: 65,
 
@@ -118,9 +118,45 @@ export const useUserStore = create<UserPreferencesStore>()(
       setProteinGoal: (weightKg, targetProteinG) => {
         set({ bodyWeightKg: weightKg, dailyTargetProteinGrams: targetProteinG })
       },
+
+      // Starter / Sample pack loaders (invoked deliberately by the user)
+      loadSampleBasket: () => {
+        set({
+          basketItems: [
+            { foodId: 'soy-chunks', quantityGrams: 100 },
+            { foodId: 'roasted-chana', quantityGrams: 100 },
+            { foodId: 'eggs-whole', quantityGrams: 100 },
+          ],
+        })
+      },
+
+      loadSampleFavorites: () => {
+        set({
+          favoriteFoodIds: ['soy-chunks', 'roasted-chana', 'paneer-fresh'],
+          favoriteRecipeIds: ['sattu-super-coolant', 'kettle-soy-bhurji'],
+        })
+      },
+
+      loadSampleComparisons: () => {
+        set({
+          savedComparisons: [
+            ['commercial-protein-bar', 'soy-chunks'],
+            ['paneer-fresh', 'tofu-firm'],
+          ],
+        })
+      },
+
+      resetAllToCleanState: () => {
+        set({
+          favoriteFoodIds: [],
+          favoriteRecipeIds: [],
+          savedComparisons: [],
+          basketItems: [],
+        })
+      },
     }),
     {
-      name: 'macrosnap-user-storage',
+      name: 'macrosnap-user-storage-v2',
       storage: createJSONStorage(() => localStorage),
     }
   )

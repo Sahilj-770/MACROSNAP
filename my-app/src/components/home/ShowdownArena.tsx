@@ -61,7 +61,7 @@ const MATCHUPS = [
       benefits: ['8.4g Insoluble Prebiotic Fiber', 'Low Glycemic Index (GI 28)', 'Zero Cooking / Instant Snack'],
       image: 'https://images.unsplash.com/photo-1515543237350-b3eea1ec8082?auto=format&fit=crop&w=1200&q=80',
     },
-    compareLink: '/compare?foodA=roasted-chana&foodB=commercial-protein-bar',
+    compareLink: '/compare?foodA=commercial-protein-bar&foodB=roasted-chana',
   },
   {
     id: 'tofu-vs-paneer',
@@ -89,7 +89,7 @@ const MATCHUPS = [
       benefits: ['480mg Bioavailable Calcium', 'Sustained 6-Hour Casein Release', 'Conjugated Linoleic Acid (CLA)'],
       image: 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=1200&q=80',
     },
-    compareLink: '/compare?foodA=paneer-raw&foodB=firm-tofu',
+    compareLink: '/compare?foodA=paneer-fresh&foodB=tofu-firm',
   },
 ]
 
@@ -100,11 +100,10 @@ export function ShowdownArena() {
   return (
     <section
       id="showdown"
-      className="relative w-full py-28 sm:py-36 px-4 sm:px-8 lg:px-14 bg-transparent text-cream overflow-hidden"
+      className="relative w-full py-20 sm:py-32 lg:py-36 px-4 sm:px-8 lg:px-14 bg-transparent text-cream overflow-hidden"
     >
-      {/* Ambient Atmospheric Connecting Beam */}
-      <div className="w-48 h-[1px] bg-gradient-to-r from-transparent via-chartreuse/40 to-transparent mx-auto mb-16 opacity-70" />
-      <div className="max-w-7xl mx-auto space-y-16 relative z-10">
+      <div className="w-48 h-[1px] bg-gradient-to-r from-transparent via-chartreuse/40 to-transparent mx-auto mb-12 sm:mb-16 opacity-70" />
+      <div className="max-w-7xl mx-auto space-y-12 sm:space-y-16 relative z-10">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-8">
           <div className="space-y-3 max-w-2xl">
@@ -126,7 +125,7 @@ export function ShowdownArena() {
                 <button
                   key={m.id}
                   onClick={() => setActiveTab(m.id)}
-                  className={`relative px-4 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                  className={`min-h-[44px] relative px-4 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none ${
                     isActive ? 'text-forest' : 'text-cream/70 hover:text-white bg-white/5'
                   }`}
                 >
@@ -148,10 +147,10 @@ export function ShowdownArena() {
         <AnimatePresence mode="wait">
           <motion.div
             key={current.id}
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -24 }}
-            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
             className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch"
           >
             {/* Contender A: The Commercial Pretender */}
@@ -316,7 +315,7 @@ export function ShowdownArena() {
         <div className="text-center pt-6">
           <Link
             href={current.compareLink}
-            className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-chartreuse text-forest font-mono text-xs font-bold uppercase tracking-wider hover:bg-white transition-all shadow-xl active:scale-95"
+            className="min-h-[44px] inline-flex items-center gap-3 px-8 py-4 rounded-full bg-chartreuse text-forest font-mono text-xs font-bold uppercase tracking-wider hover:bg-white transition-all shadow-xl active:scale-95 focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
           >
             <span>Launch Complete Scientific Showdown Studio</span>
             <ArrowRight className="w-4 h-4" />

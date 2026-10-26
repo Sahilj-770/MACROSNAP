@@ -9,40 +9,51 @@ import {
   Sparkles,
   Plus,
   Trash2,
-  Check,
+  CheckCircle2,
   ShoppingBag,
-  TrendingUp,
   Dumbbell,
   Heart,
   Flame,
-  User,
+  Target,
 } from 'lucide-react'
 import { useUserStore } from '@/store/useUserStore'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export default function CalculatorPage() {
   const [weightKg, setWeightKg] = useState<number>(68)
+  const [weightInputStr, setWeightInputStr] = useState<string>('68')
   const [activityLevel, setActivityLevel] = useState<'sedentary' | 'moderate' | 'intense'>('moderate')
   const [goal, setGoal] = useState<'maintenance' | 'muscle-gain' | 'fat-loss'>('muscle-gain')
-  const [mealPlanFoods, setMealPlanFoods] = useState<{ foodId: string; servings: number }[]>([
-    { foodId: 'eggs-whole', servings: 2 },
-    { foodId: 'soy-chunks', servings: 1 },
-    { foodId: 'roasted-chana', servings: 1 },
-  ])
+  const [mealPlanFoods, setMealPlanFoods] = useState<{ foodId: string; servings: number }[]>([])
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
 
-  const { addToBasket } = useUserStore()
+  const { addToBasket, setProteinGoal } = useUserStore()
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg)
+    setTimeout(() => {
+      setToastMessage(null)
+    }, 2800)
+  }
+
+  // Handle weight change with graceful boundary clamping
+  const handleWeightChange = (newVal: number) => {
+    const clamped = Math.min(200, Math.max(30, isNaN(newVal) ? 65 : newVal))
+    setWeightKg(clamped)
+    setWeightInputStr(String(clamped))
+  }
 
   const multiplierRange = {
     sedentary: { min: 0.8, max: 1.0, label: '0.8 - 1.0 g / kg' },
     moderate: {
-      min: goal === 'muscle-gain' ? 1.6 : 1.2,
-      max: goal === 'muscle-gain' ? 2.0 : 1.5,
-      label: goal === 'muscle-gain' ? '1.6 - 2.0 g / kg' : '1.2 - 1.5 g / kg',
+      min: goal === 'muscle-gain' ? 1.6 : goal === 'fat-loss' ? 1.4 : 1.2,
+      max: goal === 'muscle-gain' ? 2.0 : goal === 'fat-loss' ? 1.8 : 1.5,
+      label: goal === 'muscle-gain' ? '1.6 - 2.0 g / kg' : goal === 'fat-loss' ? '1.4 - 1.8 g / kg' : '1.2 - 1.5 g / kg',
     },
     intense: {
-      min: goal === 'muscle-gain' ? 1.8 : 1.6,
-      max: goal === 'muscle-gain' ? 2.2 : 2.0,
-      label: goal === 'muscle-gain' ? '1.8 - 2.2 g / kg' : '1.6 - 2.0 g / kg',
+      min: goal === 'muscle-gain' ? 1.8 : goal === 'fat-loss' ? 1.8 : 1.6,
+      max: goal === 'muscle-gain' ? 2.2 : goal === 'fat-loss' ? 2.4 : 2.0,
+      label: goal === 'muscle-gain' ? '1.8 - 2.2 g / kg' : goal === 'fat-loss' ? '1.8 - 2.4 g / kg' : '1.6 - 2.0 g / kg',
     },
   }[activityLevel]
 
@@ -68,7 +79,7 @@ export default function CalculatorPage() {
     }, 0)
   )
 
-  const progressPct = Math.min(100, Math.round((mealPlanTotalG / midpointTargetG) * 100))
+  const progressPct = Math.min(100, Math.round((mealPlanTotalG / Math.max(1, midpointTargetG)) * 100))
 
   const addFoodToMealPlan = (foodId: string) => {
     const existing = mealPlanFoods.find((f) => f.foodId === foodId)
@@ -77,6 +88,15 @@ export default function CalculatorPage() {
     } else {
       setMealPlanFoods([...mealPlanFoods, { foodId, servings: 1 }])
     }
+  }
+
+  const loadSampleDailyPlate = () => {
+    setMealPlanFoods([
+      { foodId: 'eggs-whole', servings: 2 },
+      { foodId: 'soy-chunks', servings: 1 },
+      { foodId: 'roasted-chana', servings: 1 },
+    ])
+    showToast('🍱 Loaded sample Indian whole food daily plate')
   }
 
   const updateServings = (foodId: string, delta: number) => {
@@ -97,25 +117,52 @@ export default function CalculatorPage() {
   }
 
   const addAllToBasket = () => {
+    if (mealPlanFoods.length === 0) return
     mealPlanFoods.forEach((item) => {
       const food = FOOD_DATABASE.find((f) => f.id === item.foodId)
       if (food) {
         addToBasket(food.id, food.servingSizeGrams * item.servings)
       }
     })
-    alert('🛒 All plate ingredients added to your kitchen basket!')
+    showToast(`🛒 Added ${mealPlanFoods.length} plate staples to your Virtual Basket`)
+  }
+
+  const handleSaveGoal = () => {
+    setProteinGoal(weightKg, midpointTargetG)
+    showToast(`🎯 Saved ${midpointTargetG}g daily protein target for ${weightKg}kg bodyweight`)
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10 selection:bg-chartreuse selection:text-forest">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10 selection:bg-chartreuse selection:text-forest relative">
+      {/* Non-blocking Live Notification Toast */}
+      <div
+        role="status"
+        aria-live="polite"
+        className="fixed bottom-6 right-6 z-50 pointer-events-none"
+      >
+        <AnimatePresence>
+          {toastMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: 15, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.95 }}
+              className="pointer-events-auto bg-[#0D2316] text-cream border-2 border-chartreuse px-5 py-3 rounded-2xl shadow-[0_0_25px_rgba(216,243,67,0.3)] font-mono text-xs font-bold flex items-center gap-2.5"
+            >
+              <CheckCircle2 className="w-4 h-4 text-chartreuse" />
+              <span>{toastMessage}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
       {/* Editorial Header */}
       <div className="space-y-4 max-w-3xl">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-chartreuse border border-chartreuse/30 text-xs font-mono font-bold tracking-widest uppercase shadow-sm">
           <Calculator className="w-3.5 h-3.5" />
           <span>Section 06 // Individual Physiology Engine</span>
         </div>
-        <h1 className="text-5xl sm:text-6xl font-black font-serif text-white tracking-tight">
-          Protein & Bioavailability Calculator
+        <h1 className="text-4xl sm:text-6xl font-black font-serif text-white tracking-tight">
+          Protein Target Calculator
         </h1>
         <p className="text-sm sm:text-base text-cream/70 leading-relaxed">
           Evidence-informed daily target calculation based on clinical guidelines (ACSM / ISSN).
@@ -131,27 +178,55 @@ export default function CalculatorPage() {
             <span className="text-xs font-mono text-muted-foreground uppercase">Clinical Model</span>
           </div>
 
-          {/* Body Weight Interactive Dial */}
+          {/* Body Weight Interactive Dial & Numeric Input */}
           <div className="space-y-3">
             <div className="flex justify-between items-center text-xs font-mono">
-              <span className="font-bold text-muted-foreground uppercase">Body Weight</span>
-              <span className="text-xl font-black font-mono text-forest bg-chartreuse px-3.5 py-1 rounded-full shadow-[0_0_15px_rgba(216,243,67,0.4)]">
-                {weightKg} kg <span className="text-xs font-medium text-forest/80">({Math.round(weightKg * 2.2)} lbs)</span>
-              </span>
+              <label htmlFor="body-weight-number" className="font-bold text-muted-foreground uppercase">
+                Body Weight (kg)
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  id="body-weight-number"
+                  type="number"
+                  min="30"
+                  max="200"
+                  step="0.5"
+                  value={weightInputStr}
+                  onChange={(e) => {
+                    setWeightInputStr(e.target.value)
+                    const parsed = parseFloat(e.target.value)
+                    if (!isNaN(parsed) && parsed >= 30 && parsed <= 200) {
+                      setWeightKg(parsed)
+                    }
+                  }}
+                  onBlur={() => {
+                    const parsed = parseFloat(weightInputStr)
+                    handleWeightChange(parsed)
+                  }}
+                  className="w-20 text-center font-black font-mono text-forest bg-chartreuse px-2 py-1 rounded-xl shadow-[0_0_15px_rgba(216,243,67,0.4)] text-base focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+                  aria-label="Enter body weight in kilograms"
+                />
+                <span className="text-xs font-mono text-cream/60">
+                  ({Math.round(weightKg * 2.2)} lbs)
+                </span>
+              </div>
             </div>
+
             <input
+              id="body-weight-slider"
               type="range"
-              min={40}
-              max={130}
+              min={30}
+              max={150}
               step={1}
               value={weightKg}
-              onChange={(e) => setWeightKg(Number(e.target.value))}
+              onChange={(e) => handleWeightChange(Number(e.target.value))}
               className="w-full h-2.5 bg-black/60 rounded-lg appearance-none cursor-pointer accent-chartreuse border border-white/15"
+              aria-label="Adjust body weight slider"
             />
             <div className="flex justify-between text-[10px] font-mono text-muted-foreground">
-              <span>40 kg (88 lbs)</span>
-              <span>85 kg (187 lbs)</span>
-              <span>130 kg (286 lbs)</span>
+              <span>30 kg</span>
+              <span>85 kg (Standard)</span>
+              <span>150 kg</span>
             </div>
           </div>
 
@@ -163,7 +238,7 @@ export default function CalculatorPage() {
             <div className="grid grid-cols-3 gap-2">
               <button
                 onClick={() => setActivityLevel('sedentary')}
-                className={`p-3 rounded-2xl border text-center transition-all cursor-pointer ${
+                className={`min-h-[44px] p-3 rounded-2xl border text-center transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none ${
                   activityLevel === 'sedentary'
                     ? 'border-chartreuse bg-chartreuse/15 text-chartreuse shadow-[0_0_15px_rgba(216,243,67,0.2)]'
                     : 'border-white/10 bg-white/5 text-cream/70 hover:border-white/30'
@@ -175,31 +250,31 @@ export default function CalculatorPage() {
 
               <button
                 onClick={() => setActivityLevel('moderate')}
-                className={`p-3 rounded-2xl border text-center transition-all cursor-pointer ${
+                className={`min-h-[44px] p-3 rounded-2xl border text-center transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none ${
                   activityLevel === 'moderate'
                     ? 'border-chartreuse bg-chartreuse/15 text-chartreuse shadow-[0_0_15px_rgba(216,243,67,0.2)]'
                     : 'border-white/10 bg-white/5 text-cream/70 hover:border-white/30'
                 }`}
               >
-                <span className="text-xs font-mono font-bold block">3-4x Training</span>
-                <span className="text-[10px] opacity-70 block mt-0.5">1.4-1.8 g/kg</span>
+                <span className="text-xs font-mono font-bold block">Gym 3-4x</span>
+                <span className="text-[10px] opacity-70 block mt-0.5">1.2-1.6 g/kg</span>
               </button>
 
               <button
                 onClick={() => setActivityLevel('intense')}
-                className={`p-3 rounded-2xl border text-center transition-all cursor-pointer ${
+                className={`min-h-[44px] p-3 rounded-2xl border text-center transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none ${
                   activityLevel === 'intense'
                     ? 'border-chartreuse bg-chartreuse/15 text-chartreuse shadow-[0_0_15px_rgba(216,243,67,0.2)]'
                     : 'border-white/10 bg-white/5 text-cream/70 hover:border-white/30'
                 }`}
               >
-                <span className="text-xs font-mono font-bold block">Athletic Hard</span>
+                <span className="text-xs font-mono font-bold block">Athlete 5+x</span>
                 <span className="text-[10px] opacity-70 block mt-0.5">1.8-2.2 g/kg</span>
               </button>
             </div>
           </div>
 
-          {/* Primary Objective Selector */}
+          {/* Goal Selectors */}
           <div className="space-y-3">
             <span className="text-xs font-mono font-bold text-muted-foreground uppercase block">
               Primary Objective
@@ -207,114 +282,131 @@ export default function CalculatorPage() {
             <div className="grid grid-cols-3 gap-2">
               <button
                 onClick={() => setGoal('maintenance')}
-                className={`p-3 rounded-2xl border text-center text-xs font-mono font-bold transition-all cursor-pointer ${
+                className={`min-h-[44px] p-3 rounded-2xl border text-center transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none ${
                   goal === 'maintenance'
-                    ? 'border-chartreuse bg-chartreuse text-forest shadow-[0_0_12px_rgba(216,243,67,0.3)] font-black'
+                    ? 'border-chartreuse bg-chartreuse/15 text-chartreuse'
                     : 'border-white/10 bg-white/5 text-cream/70 hover:border-white/30'
                 }`}
               >
-                Vitality
+                <Heart className="w-4 h-4 mx-auto mb-1 text-chartreuse" />
+                <span className="text-xs font-mono font-bold block">Vitality</span>
               </button>
+
               <button
                 onClick={() => setGoal('muscle-gain')}
-                className={`p-3 rounded-2xl border text-center text-xs font-mono font-bold transition-all cursor-pointer ${
+                className={`min-h-[44px] p-3 rounded-2xl border text-center transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none ${
                   goal === 'muscle-gain'
-                    ? 'border-chartreuse bg-chartreuse text-forest shadow-[0_0_12px_rgba(216,243,67,0.3)] font-black'
+                    ? 'border-chartreuse bg-chartreuse/15 text-chartreuse'
                     : 'border-white/10 bg-white/5 text-cream/70 hover:border-white/30'
                 }`}
               >
-                Hypertrophy
+                <Dumbbell className="w-4 h-4 mx-auto mb-1 text-chartreuse" />
+                <span className="text-xs font-mono font-bold block">Hypertrophy</span>
               </button>
+
               <button
                 onClick={() => setGoal('fat-loss')}
-                className={`p-3 rounded-2xl border text-center text-xs font-mono font-bold transition-all cursor-pointer ${
+                className={`min-h-[44px] p-3 rounded-2xl border text-center transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none ${
                   goal === 'fat-loss'
-                    ? 'border-chartreuse bg-chartreuse text-forest shadow-[0_0_12px_rgba(216,243,67,0.3)] font-black'
+                    ? 'border-chartreuse bg-chartreuse/15 text-chartreuse'
                     : 'border-white/10 bg-white/5 text-cream/70 hover:border-white/30'
                 }`}
               >
-                Fat Loss
+                <Flame className="w-4 h-4 mx-auto mb-1 text-tangerine" />
+                <span className="text-xs font-mono font-bold block">Lean Cut</span>
               </button>
             </div>
           </div>
 
-          {/* Computed Target Banner */}
-          <div className="p-6 rounded-3xl bg-[#050B07]/90 text-cream space-y-2 border border-chartreuse/40 shadow-xl">
-            <div className="flex justify-between items-center text-xs font-mono">
-              <span className="text-chartreuse font-bold uppercase">Evidence-Informed Daily Target</span>
-              <span className="text-cream/60">{multiplierRange.label}</span>
-            </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-4xl sm:text-5xl font-black font-serif text-chartreuse">
-                {targetMinG} – {targetMaxG}g
+          {/* Evidence Dossier Output Box */}
+          <div className="p-6 rounded-2xl bg-black/50 border border-chartreuse/30 space-y-4">
+            <div className="flex justify-between items-baseline font-mono">
+              <span className="text-xs uppercase text-muted-foreground">Optimal Daily Target:</span>
+              <span className="text-4xl font-black text-chartreuse tracking-tight">
+                {midpointTargetG}g <span className="text-xs font-normal text-muted-foreground">/ day</span>
               </span>
-              <span className="text-sm font-mono text-cream/70">/ day</span>
             </div>
-            <p className="text-xs font-mono text-cream/60 pt-1">
-              Midpoint benchmark: <strong className="text-chartreuse font-bold">{midpointTargetG}g</strong> daily protein.
-            </p>
+
+            <div className="flex justify-between text-xs font-mono text-muted-foreground pt-1 border-t border-white/10">
+              <span>Target Range:</span>
+              <span className="text-white font-bold">{targetMinG}g — {targetMaxG}g</span>
+            </div>
+
+            <div className="flex justify-between text-xs font-mono text-muted-foreground">
+              <span>Clinical Ratio:</span>
+              <span className="text-chartreuse font-bold">{multiplierRange.label}</span>
+            </div>
+
+            <button
+              onClick={handleSaveGoal}
+              className="w-full min-h-[44px] py-2.5 rounded-xl bg-white/10 hover:bg-chartreuse hover:text-forest text-cream font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
+            >
+              <Target className="w-4 h-4" />
+              <span>Set as My Target Goal</span>
+            </button>
           </div>
         </div>
 
-        {/* Right: Interactive Visual Plate Builder */}
+        {/* Right: Real-World Kitchen Plate Simulator */}
         <div className="lg:col-span-7 space-y-6">
-          {/* Progress Header Card */}
-          <div className="p-8 rounded-3xl bg-[#0B1710]/90 backdrop-blur-md border border-white/10 shadow-xl space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="bg-[#0B1710]/90 backdrop-blur-md rounded-3xl border border-white/10 p-6 sm:p-8 shadow-xl space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-white/10 gap-2">
               <div>
-                <span className="text-xs font-mono text-muted-foreground uppercase font-bold block">
-                  Your Daily Sample Plate
-                </span>
-                <h3 className="text-3xl font-black font-serif text-white mt-1">
-                  {mealPlanTotalG}g <span className="text-lg font-mono text-muted-foreground">/ {midpointTargetG}g Target</span>
-                </h3>
+                <h3 className="text-2xl font-black font-serif text-white">Simulate Your Daily Plate</h3>
+                <p className="text-xs font-mono text-muted-foreground">
+                  Build a day&apos;s eating using unbranded staples to see total protein and rupee spend.
+                </p>
               </div>
 
-              <div className="text-left sm:text-right font-mono">
-                <span className="text-xs text-muted-foreground uppercase block">Estimated Daily Cost</span>
-                <span className="text-3xl font-black text-chartreuse">₹{mealPlanEstimatedCostInr}</span>
-                <span className="text-[10px] text-muted-foreground block">Real kitchen staples</span>
-              </div>
+              {mealPlanFoods.length === 0 ? (
+                <button
+                  onClick={loadSampleDailyPlate}
+                  className="min-h-[44px] px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold bg-chartreuse text-forest shadow-sm hover:bg-white transition-all flex items-center gap-1.5 cursor-pointer self-start sm:self-center focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>+ Load Sample Plate</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => setMealPlanFoods([])}
+                  className="min-h-[44px] px-3 py-1 rounded-xl text-xs font-mono text-white/50 hover:text-red-400 transition-colors self-start sm:self-center"
+                >
+                  Clear Plate
+                </button>
+              )}
             </div>
 
-            {/* Visual Progress Bar */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-xs font-mono font-bold">
-                <span className="text-cream">Plate Completion:</span>
-                <span className={progressPct >= 100 ? 'text-chartreuse' : 'text-cream/70'}>
-                  {progressPct}% {progressPct >= 100 && '🎉 Target Achieved!'}
+            {/* Target Progress Bar */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs font-mono">
+                <span className="text-muted-foreground">Progress towards {midpointTargetG}g Goal:</span>
+                <span className="text-chartreuse font-bold">
+                  {mealPlanTotalG}g ({progressPct}%)
                 </span>
               </div>
-              <div className="w-full h-4 rounded-full bg-black/60 border border-white/10 overflow-hidden p-0.5">
+              <div className="w-full bg-black/60 h-3 rounded-full overflow-hidden border border-white/10">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${progressPct}%` }}
-                  transition={{ duration: 0.6 }}
-                  className={`h-full rounded-full transition-colors ${
-                    progressPct >= 100 ? 'bg-chartreuse shadow-[0_0_12px_#D8F343]' : 'bg-chartreuse/80'
+                  transition={{ duration: 0.5 }}
+                  className={`h-full rounded-full transition-all duration-300 ${
+                    progressPct >= 100 ? 'bg-chartreuse shadow-[0_0_12px_#D8F343]' : 'bg-leaf'
                   }`}
                 />
               </div>
-            </div>
-          </div>
-
-          {/* Active Plate Items List (Food Cards) */}
-          <div className="space-y-3">
-            <div className="flex justify-between items-center text-xs font-mono font-bold text-muted-foreground uppercase">
-              <span>Foods on Your Plate ({mealPlanFoods.length} items)</span>
-              <button
-                onClick={() => setMealPlanFoods([])}
-                className="text-red-400 hover:text-red-300 hover:underline cursor-pointer"
-              >
-                Clear Plate
-              </button>
+              <div className="flex justify-between text-[11px] font-mono text-muted-foreground pt-1">
+                <span>Estimated Daily Plate Cost:</span>
+                <span className="text-white font-bold">₹{mealPlanEstimatedCostInr} / day</span>
+              </div>
             </div>
 
+            {/* Selected Plate Items List */}
             {mealPlanFoods.length > 0 ? (
-              <div className="space-y-2.5">
+              <div className="space-y-3">
                 {mealPlanFoods.map((item) => {
                   const food = FOOD_DATABASE.find((f) => f.id === item.foodId)
                   if (!food) return null
+
                   const proteinYield = (
                     ((food.proteinPer100g * food.servingSizeGrams) / 100) *
                     item.servings
@@ -329,24 +421,23 @@ export default function CalculatorPage() {
                       layout
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      className="p-4 rounded-2xl bg-[#050B07]/80 border border-white/10 flex items-center justify-between gap-4 shadow-sm hover:border-white/20 transition-all"
+                      className="p-4 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-between gap-4"
                     >
-                      <div className="flex items-center gap-3.5">
-                        {food.imageUrl && (
-                          <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-black/40 border border-white/10">
-                            <Image
-                              src={food.imageUrl}
-                              alt={food.name}
-                              fill
-                              sizes="56px"
-                              className="object-cover"
-                            />
-                          </div>
-                        )}
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-black/60 border border-white/10 flex-shrink-0">
+                          <Image
+                            src={food.imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=200&q=80'}
+                            alt={food.name}
+                            fill
+                            sizes="48px"
+                            className="object-cover"
+                          />
+                        </div>
                         <div>
-                          <h4 className="text-base font-bold font-serif text-white">{food.name}</h4>
-                          <p className="text-xs font-mono text-muted-foreground">
+                          <strong className="text-sm font-serif font-bold text-white block">
+                            {food.name}
+                          </strong>
+                          <p className="text-[11px] font-mono text-muted-foreground">
                             {item.servings} × {food.servingDescription} · ₹{itemCost}
                           </p>
                         </div>
@@ -359,19 +450,21 @@ export default function CalculatorPage() {
                         </div>
 
                         {/* Serving Multiplier Controls */}
-                        <div className="flex items-center gap-1.5 bg-white/5 p-1 rounded-xl border border-white/10">
+                        <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/10">
                           <button
                             onClick={() => updateServings(item.foodId, -1)}
-                            className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center justify-center transition-colors cursor-pointer"
+                            className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center justify-center transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
+                            aria-label={`Decrease ${food.name} servings`}
                           >
                             -
                           </button>
-                          <span className="w-5 text-center font-mono text-xs font-bold text-white">
+                          <span className="w-6 text-center font-mono text-xs font-bold text-white">
                             {item.servings}
                           </span>
                           <button
                             onClick={() => updateServings(item.foodId, 1)}
-                            className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center justify-center transition-colors cursor-pointer"
+                            className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center justify-center transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
+                            aria-label={`Increase ${food.name} servings`}
                           >
                             +
                           </button>
@@ -379,8 +472,9 @@ export default function CalculatorPage() {
 
                         <button
                           onClick={() => removeFood(item.foodId)}
-                          className="p-2 text-white/40 hover:text-red-400 transition-colors cursor-pointer"
+                          className="min-w-[40px] min-h-[40px] flex items-center justify-center text-white/40 hover:text-red-400 transition-colors cursor-pointer rounded-lg hover:bg-red-500/10 focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
                           title="Remove item"
+                          aria-label={`Remove ${food.name} from plate`}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -390,11 +484,18 @@ export default function CalculatorPage() {
                 })}
               </div>
             ) : (
-              <div className="p-8 rounded-3xl bg-[#0B1710]/50 border-2 border-dashed border-white/15 text-center space-y-2">
-                <p className="font-bold text-white">Your plate is currently empty.</p>
-                <p className="text-xs font-mono text-muted-foreground">
-                  Tap any staple item below to add whole foods to your daily model.
+              <div className="p-8 rounded-3xl bg-[#0B1710]/50 border-2 border-dashed border-white/15 text-center space-y-3">
+                <p className="font-bold text-white text-lg font-serif">Your plate is currently empty</p>
+                <p className="text-xs font-mono text-muted-foreground max-w-sm mx-auto">
+                  Click the quick-add buttons below or load our balanced Indian sample plate to simulate daily protein.
                 </p>
+                <button
+                  onClick={loadSampleDailyPlate}
+                  className="min-h-[44px] inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-chartreuse text-forest font-mono text-xs font-black uppercase tracking-wider hover:bg-white transition-all shadow-md cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Load Sample High-Protein Plate</span>
+                </button>
               </div>
             )}
           </div>
@@ -411,7 +512,7 @@ export default function CalculatorPage() {
                   <button
                     key={f.id}
                     onClick={() => addFoodToMealPlan(f.id)}
-                    className="px-3.5 py-1.5 rounded-full text-xs font-mono font-bold bg-white/5 hover:bg-chartreuse hover:text-forest border border-white/10 transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer text-cream"
+                    className="min-h-[44px] px-3.5 py-2 rounded-full text-xs font-mono font-bold bg-white/5 hover:bg-chartreuse hover:text-forest border border-white/10 transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer text-cream focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
                   >
                     <Plus className="w-3 h-3" />
                     <span>{f.name}</span>
@@ -425,13 +526,15 @@ export default function CalculatorPage() {
           </div>
 
           {/* Add All to Basket Action */}
-          <button
-            onClick={addAllToBasket}
-            className="w-full py-4 rounded-full bg-chartreuse text-forest font-mono text-xs font-black uppercase tracking-wider hover:bg-white flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(216,243,67,0.3)] transition-all active:scale-95 cursor-pointer"
-          >
-            <ShoppingBag className="w-4 h-4 text-forest" />
-            <span>Add Entire Daily Plate to Shopping Basket →</span>
-          </button>
+          {mealPlanFoods.length > 0 && (
+            <button
+              onClick={addAllToBasket}
+              className="w-full min-h-[48px] py-4 rounded-full bg-chartreuse text-forest font-mono text-xs font-black uppercase tracking-wider hover:bg-white flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(216,243,67,0.3)] transition-all active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
+            >
+              <ShoppingBag className="w-4 h-4 text-forest" />
+              <span>Add Entire Daily Plate to Shopping Basket →</span>
+            </button>
+          )}
         </div>
       </div>
     </div>
