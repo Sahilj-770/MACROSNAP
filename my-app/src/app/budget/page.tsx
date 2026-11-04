@@ -53,8 +53,7 @@ export default function BudgetPage() {
           Protein on a Budget
         </h1>
         <p className="text-sm sm:text-base text-cream/70 leading-relaxed">
-          The fitness advertising complex wants you to believe 100 grams of bioavailable protein requires expensive synthetic isolates.
-          Here is the verifiable empirical math: ranked by cost per 10 grams of real, usable protein.
+          High protein intake does not require expensive imported powders. Ranked by retail cost per 10 grams of complete protein, these benchmarks highlight the most cost-effective Indian whole foods.
         </p>
 
         {/* Pricing Transparency & Methodology Banner */}

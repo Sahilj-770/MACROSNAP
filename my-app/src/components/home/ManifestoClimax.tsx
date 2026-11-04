@@ -25,7 +25,7 @@ export function ManifestoClimax() {
       <div className="my-auto max-w-5xl space-y-8 z-10 py-16">
         <div className="space-y-6">
           <span className="px-4 py-1.5 rounded-full text-xs font-mono font-bold tracking-widest uppercase bg-chartreuse text-forest inline-block shadow-md">
-            The Sovereign Manifesto
+            Our Core Philosophy
           </span>
 
           <h2 className="text-5xl sm:text-7xl lg:text-[104px] font-black font-serif text-cream tracking-tight leading-[0.92]">
@@ -34,7 +34,7 @@ export function ManifestoClimax() {
           </h2>
 
           <p className="text-base sm:text-xl font-mono text-cream/75 max-w-2xl mx-auto pt-4 leading-relaxed">
-            Stop paying 26x markups for synthetic convenience. The highest quality bioavailable protein on Earth is already waiting in your kitchen.
+            Stop paying 26x price premiums for synthetic convenience. The highest quality bioavailable protein on Earth is already waiting in your kitchen.
           </p>
         </div>
 
@@ -53,7 +53,7 @@ export function ManifestoClimax() {
             className="px-8 py-4 rounded-full bg-white/5 border border-white/20 text-cream font-mono text-xs font-bold uppercase tracking-wider hover:bg-white/10 hover:border-white transition-all flex items-center gap-2"
           >
             <Sparkles className="w-4 h-4 text-chartreuse" />
-            <span>Calculate My Daily Target</span>
+            <span>Calculate Daily Target</span>
           </Link>
 
           <Link
@@ -75,15 +75,15 @@ export function ManifestoClimax() {
 
         <div className="flex items-center gap-4">
           <Link href="/library" className="hover:text-cream transition-colors">
-            SAVED LAB
+            SAVED ITEMS
           </Link>
           <span>·</span>
           <Link href="/learn" className="hover:text-cream transition-colors">
-            METHODOLOGY
+            SCIENCE & EVIDENCE
           </Link>
           <span>·</span>
           <Link href="/basket" className="text-chartreuse font-bold hover:underline">
-            VIRTUAL BASKET
+            SHOPPING BASKET
           </Link>
         </div>
       </div>

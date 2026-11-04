@@ -96,7 +96,7 @@ export default function KitchenPage() {
               <span className="text-chartreuse italic font-normal">Your Shelf?</span>
             </h1>
             <p className="text-sm sm:text-base font-mono text-cream/70 max-w-2xl leading-relaxed">
-              Select the staples available in your room or kitchen. Our laboratory matcher cross-references your ingredients against 15-minute high-yield recipes.
+              Select the staples available in your room or kitchen. We match your ingredients against tested 15-minute high-protein Indian recipes.
             </p>
           </div>
 

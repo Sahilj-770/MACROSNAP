@@ -10,13 +10,6 @@ import { ArrowDown, ArrowUpRight, Sparkles } from 'lucide-react'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const AMINO_NODES = [
-  { code: 'LEU', name: 'Leucine', role: 'mTOR Trigger (2.7g)', pos: 'top-[26%] left-[6%]' },
-  { code: 'ISO', name: 'Isoleucine', role: 'Glucose Uptake', pos: 'top-[22%] right-[8%]' },
-  { code: 'VAL', name: 'Valine', role: 'Tissue Synthesis', pos: 'bottom-[32%] left-[8%]' },
-  { code: 'LYS', name: 'Lysine', role: 'Collagen Base', pos: 'bottom-[28%] right-[6%]' },
-]
-
 export function OpeningHero() {
   const containerRef = useRef<HTMLElement>(null)
   const headlineRef = useRef<HTMLDivElement>(null)
@@ -173,32 +166,15 @@ export function OpeningHero() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_20%,_rgba(5,11,7,0.85)_80%)]" />
       </div>
 
-      {/* Top Issue Identifier */}
-      <div className="relative z-20 w-full max-w-7xl flex items-center justify-between font-mono text-[10px] sm:text-[11px] uppercase tracking-widest text-cream/60 pb-4 border-b border-white/10">
-        <div className="flex items-center gap-2.5">
-          <span className="w-2 h-2 rounded-full bg-chartreuse animate-pulse" />
-          <span className="font-bold text-white tracking-widest">MACROSNAP</span>
-          <span className="hidden sm:inline text-white/30">·</span>
-          <span className="hidden sm:inline text-chartreuse font-bold">FOOD INTELLIGENCE ATELIER</span>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <span className="hidden md:inline text-white/50">ICMR-NIN IFCT 2017 VERIFIED</span>
-          <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-chartreuse border border-chartreuse/30 font-bold text-[9px]">
-            100% UNBRANDED
-          </span>
-        </div>
-      </div>
-
       {/* MONUMENTAL EDITORIAL TITLE CARD */}
       <div
         ref={headlineRef}
-        className="relative z-20 my-auto text-center space-y-5 sm:space-y-6 max-w-6xl px-2 py-8 sm:py-12"
+        className="relative z-20 my-auto text-center space-y-6 max-w-6xl px-2 py-10 sm:py-16"
       >
         <div className="overflow-hidden">
-          <div className="hero-line inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-chartreuse/40 text-chartreuse text-[11px] sm:text-xs font-mono font-bold tracking-widest uppercase shadow-xl">
+          <div className="hero-line inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-chartreuse/40 text-chartreuse text-xs font-mono font-bold tracking-widest uppercase shadow-xl">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Independent Food & Nutrition Intelligence</span>
+            <span>ICMR-NIN Benchmarked Nutrition</span>
           </div>
         </div>
 
@@ -226,8 +202,7 @@ export function OpeningHero() {
         {/* Narrative Subtitle */}
         <div className="overflow-hidden max-w-2xl mx-auto pt-2 sm:pt-3">
           <p className="hero-line text-xs sm:text-base md:text-lg font-mono text-cream/80 uppercase tracking-widest leading-relaxed">
-            Reclaiming human nutrition from ₹120 ultra-processed fitness marketing.
-            Real foods. Verified ileal bioavailability. Zero industrial fillers.
+            Real foods, verified bioavailability, and honest rupee-to-protein economics — without the marketing markup.
           </p>
         </div>
 
@@ -236,7 +211,7 @@ export function OpeningHero() {
           <button
             onClick={scrollToNext}
             className="min-h-[44px] px-6 sm:px-8 py-3.5 sm:py-4 rounded-full bg-chartreuse text-forest font-mono text-xs font-black uppercase tracking-wider hover:bg-white hover:scale-105 transition-all shadow-[0_0_30px_rgba(216,243,67,0.4)] flex items-center gap-2.5 sm:gap-3 cursor-pointer active:scale-95 focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
-            aria-label="Scroll to Chapter 2 Telemetry"
+            aria-label="Scroll to Chapter 2 Nutritional Science"
           >
             <span>Explore The Science</span>
             <ArrowDown className="w-4 h-4 text-forest animate-bounce" />
@@ -246,58 +221,44 @@ export function OpeningHero() {
             href="/explore"
             className="min-h-[44px] px-6 sm:px-8 py-3.5 sm:py-4 rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-cream font-mono text-xs font-bold uppercase tracking-wider hover:border-chartreuse hover:text-chartreuse hover:scale-105 transition-all flex items-center gap-2 shadow-xl focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
           >
-            <span>Explore 30+ Pantry Staples</span>
+            <span>Browse 30+ Pantry Staples</span>
             <ArrowUpRight className="w-4 h-4" />
           </Link>
         </div>
       </div>
 
-      {/* Floating Ambient Amino Nodes (Desktop-Only Botanical Accents) */}
-      <div className="hidden xl:block absolute inset-0 pointer-events-none z-15">
-        {AMINO_NODES.map((node) => (
-          <div
-            key={node.code}
-            className={`absolute ${node.pos} px-3.5 py-1.5 rounded-full bg-black/60 border border-white/15 shadow-xl backdrop-blur-md text-[10px] font-mono text-cream flex items-center gap-2`}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-chartreuse shadow-[0_0_8px_#D8F343]" />
-            <strong className="font-bold text-chartreuse">{node.code}</strong>
-            <span className="text-white/60">· {node.role}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* BOTTOM TELEMETRY HUD TILES */}
+      {/* BOTTOM EDITORIAL STAT TILES */}
       <div
         ref={badgesRef}
-        className="relative z-20 w-full max-w-7xl grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 pt-4 sm:pt-6 border-t border-white/10"
+        className="relative z-20 w-full max-w-7xl grid grid-cols-1 sm:grid-cols-3 gap-3 pt-6 border-t border-white/10"
       >
-        <div className="p-3.5 sm:p-4 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 hover:border-chartreuse/40 transition-colors flex items-center justify-between">
+        <div className="p-4 sm:p-5 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 hover:border-chartreuse/40 transition-colors flex items-center justify-between">
           <div>
             <span className="text-[10px] font-mono uppercase text-white/50 block">Bioavailability</span>
-            <strong className="text-lg sm:text-2xl font-black font-serif text-white">DIAAS &gt; 1.18</strong>
+            <strong className="text-xl sm:text-2xl font-black font-serif text-white">DIAAS &gt; 1.18</strong>
           </div>
           <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-chartreuse text-forest">
             Egg Standard
           </span>
         </div>
 
-        <div className="p-3.5 sm:p-4 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 hover:border-chartreuse/40 transition-colors flex items-center justify-between">
+        <div className="p-4 sm:p-5 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 hover:border-chartreuse/40 transition-colors flex items-center justify-between">
           <div>
             <span className="text-[10px] font-mono uppercase text-white/50 block">Protein Density</span>
-            <strong className="text-lg sm:text-2xl font-black font-serif text-white">52g / 100g</strong>
+            <strong className="text-xl sm:text-2xl font-black font-serif text-white">52g / 100g</strong>
           </div>
           <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-[#FF5E36] text-white">
-            Soy Chunks
+            Dry Soy Chunks
           </span>
         </div>
 
-        <div className="p-3.5 sm:p-4 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 hover:border-chartreuse/40 transition-colors flex items-center justify-between">
+        <div className="p-4 sm:p-5 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 hover:border-chartreuse/40 transition-colors flex items-center justify-between">
           <div>
-            <span className="text-[10px] font-mono uppercase text-white/50 block">Scientific Audit</span>
-            <strong className="text-lg sm:text-2xl font-black font-serif text-white">Zero Marketing Markup</strong>
+            <span className="text-[10px] font-mono uppercase text-white/50 block">Prebiotic Fiber</span>
+            <strong className="text-xl sm:text-2xl font-black font-serif text-white">16.8g / 100g</strong>
           </div>
           <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-white/10 text-chartreuse border border-chartreuse/30">
-            100% Raw Data
+            Roasted Chana
           </span>
         </div>
       </div>

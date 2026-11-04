@@ -13,28 +13,28 @@ import { EditorialTicker } from '@/components/layout/EditorialTicker'
 export default function HomePage() {
   return (
     <main className="relative w-full overflow-x-hidden bg-[#050B07] text-cream selection:bg-chartreuse selection:text-forest">
-      {/* Chapter 01: Panoramic Opening Scene */}
+      {/* 01: Hero Scene */}
       <OpeningHero />
 
-      {/* Chapter 02: Molecular Nutrient Matrix Lens */}
+      {/* 02: Nutritional Science & Bioavailability */}
       <TelemetryLens />
 
-      {/* Chapter 03: The Sovereign Staples — Spreading Architecture */}
+      {/* 03: High-Yield Indian Kitchen Staples */}
       <SpreadingStaples />
 
-      {/* Chapter 04: The Nutritional Reckoning — Dual Arena Showdown */}
+      {/* 04: Head-to-Head Food Showdown */}
       <ShowdownArena />
 
-      {/* Chapter 05: Protein on a Budget — Velocity Economic Rail */}
+      {/* 05: Protein on a Budget */}
       <VelocityTrack />
 
-      {/* Chapter 06: The Six Precision Instruments Deck */}
+      {/* 06: Interactive Nutrition Tools */}
       <InstrumentsDeck />
 
-      {/* Chapter 07: The Sovereign Manifesto Climax */}
+      {/* 07: Core Philosophy */}
       <ManifestoClimax />
 
-      {/* Global Bottom Live Biological Feed Ticker */}
+      {/* 08: Editorial Nutrition Ticker */}
       <EditorialTicker />
     </main>
   )

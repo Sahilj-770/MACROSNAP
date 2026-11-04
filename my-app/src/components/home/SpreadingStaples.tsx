@@ -200,19 +200,19 @@ export function SpreadingStaples() {
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-8">
           <div className="space-y-3 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-chartreuse text-forest text-xs font-mono font-bold tracking-widest uppercase shadow-sm">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-chartreuse text-forest text-xs font-mono font-bold tracking-widest uppercase shadow-sm">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>CHAPTER 03 // THE SOVEREIGN DECK</span>
+              <span>03 / HIGH-YIELD STAPLES</span>
             </div>
             <h2 className="text-4xl sm:text-6xl lg:text-7xl font-black font-serif text-cream tracking-tight leading-[0.95]">
-              Six Pantry <br />
-              <span className="text-chartreuse italic font-normal">Sovereigns.</span>
+              Essential Kitchen <br />
+              <span className="text-chartreuse italic font-normal">Staples.</span>
             </h2>
           </div>
 
           <p className="text-sm sm:text-base font-mono text-cream/75 max-w-md leading-relaxed">
-            The fitness advertising complex wants you to believe protein is rare and expensive.
-            These six Indian kitchen staples deliver world-class amino density for a fraction of the cost.
+            High protein density does not require specialized powders or imported bars.
+            These six Indian staples deliver complete amino profiles at everyday market rates.
           </p>
         </div>
 
@@ -229,7 +229,7 @@ export function SpreadingStaples() {
               {/* Top Meta */}
               <div className="flex items-center justify-between font-mono text-xs">
                 <span className="text-[10px] font-bold text-cream/50 uppercase tracking-widest">
-                  STAPLE // {food.num}
+                  STAPLE {food.num}
                 </span>
                 <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-chartreuse font-bold text-[10px] uppercase border border-white/10">
                   {food.tag}

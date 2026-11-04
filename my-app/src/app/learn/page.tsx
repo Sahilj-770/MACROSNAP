@@ -31,16 +31,16 @@ export default function LearnPage() {
       <section className="relative w-full pt-12 pb-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-8">
           <div className="space-y-3 max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-chartreuse border border-chartreuse/30 text-xs font-mono font-bold tracking-wider uppercase shadow-sm">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 text-chartreuse border border-chartreuse/30 text-xs font-mono font-bold tracking-wider uppercase shadow-sm">
               <BookOpen className="w-3.5 h-3.5" />
-              <span>Evidence-Based Nutrition & Myth Busters · Peer-Reviewed Science</span>
+              <span>Evidence-Based Nutrition & Dietary Science</span>
             </div>
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black font-serif text-white tracking-tight leading-[0.94]">
-              Deconstruct <br />
-              <span className="text-chartreuse italic font-normal">The Bro-Science.</span>
+              Evidence-Based <br />
+              <span className="text-chartreuse italic font-normal">Nutrition Science.</span>
             </h1>
             <p className="text-sm sm:text-base font-mono text-cream/70 max-w-2xl leading-relaxed">
-              We parsed the randomized controlled trials and ICMR-NIN dietary databases so fitness influencers and supplement brands can&apos;t drain your stipend.
+              Randomized controlled trials, meta-analyses, and ICMR-NIN dietary research synthesized into clear, practical evidence for Indian dietary staples.
             </p>
           </div>
 

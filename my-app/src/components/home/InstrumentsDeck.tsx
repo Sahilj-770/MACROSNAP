@@ -17,7 +17,7 @@ import {
 const INSTRUMENTS = [
   {
     num: '01',
-    tag: 'EXPLORE // DIRECTORY',
+    tag: 'DIRECTORY',
     title: 'Food Intelligence Index',
     desc: 'Deep nutritional profiles, DIAAS bioavailability scores, and protein density across 30+ staples.',
     href: '/explore',
@@ -27,7 +27,7 @@ const INSTRUMENTS = [
   },
   {
     num: '02',
-    tag: 'SHOWDOWN // ENGINE',
+    tag: 'COMPARE',
     title: 'Head-to-Head Compare',
     desc: 'Compare any packaged supermarket snack with homemade alternatives side-by-side.',
     href: '/compare',
@@ -37,7 +37,7 @@ const INSTRUMENTS = [
   },
   {
     num: '03',
-    tag: 'ECONOMICS // BUDGET',
+    tag: 'BUDGET',
     title: 'Protein on a Budget',
     desc: 'Discover maximum protein per rupee spent with national wholesale and kirana benchmarks.',
     href: '/budget',
@@ -47,7 +47,7 @@ const INSTRUMENTS = [
   },
   {
     num: '04',
-    tag: 'RECIPES // KITCHEN LAB',
+    tag: 'RECIPES',
     title: 'Whole Food Recipes',
     desc: 'High-protein, 15-minute homemade alternatives that beat expensive packaged snacks.',
     href: '/recipes',
@@ -57,7 +57,7 @@ const INSTRUMENTS = [
   },
   {
     num: '05',
-    tag: 'DECODER // INGREDIENTS',
+    tag: 'LABEL DECODER',
     title: 'Ingredient Label Decoder',
     desc: 'Unmask marketing tricks, maltitol spikes, disguised palm oils, and front-of-pack claims.',
     href: '/labels',
@@ -67,8 +67,8 @@ const INSTRUMENTS = [
   },
   {
     num: '06',
-    tag: 'TARGETS // CALCULATOR',
-    title: 'Macro & DIAAS Calculator',
+    tag: 'CALCULATOR',
+    title: 'Macro & Targets Calculator',
     desc: 'Calculate personalized daily protein and leucine thresholds for your exact bodyweight.',
     href: '/calculator',
     cta: 'Calculate Targets',
@@ -89,18 +89,18 @@ export function InstrumentsDeck() {
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-8">
           <div className="space-y-3 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-chartreuse text-forest text-xs font-mono font-bold tracking-widest uppercase">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-chartreuse text-forest text-xs font-mono font-bold tracking-widest uppercase">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>CHAPTER 06 // THE PRECISION SUITE</span>
+              <span>06 / INTERACTIVE TOOLS</span>
             </div>
             <h2 className="text-4xl sm:text-6xl lg:text-7xl font-black font-serif text-cream tracking-tight leading-[0.95]">
-              Six Precision <br />
-              <span className="text-chartreuse italic font-normal">Instruments.</span>
+              Interactive Nutrition <br />
+              <span className="text-chartreuse italic font-normal">Tools.</span>
             </h2>
           </div>
 
-          <p className="text-sm sm:text-base font-mono text-cream/70 max-w-md leading-relaxed">
-            Independent tools engineered to decode nutritional labels, calculate individual leucine thresholds, and audit protein economics.
+          <p className="text-sm sm:text-base font-mono text-cream/75 max-w-md leading-relaxed">
+            Independent tools to calculate personal targets, compare foods side-by-side, decode ingredient labels, and discover high-protein recipes.
           </p>
         </div>
 

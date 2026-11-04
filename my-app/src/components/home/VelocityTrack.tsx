@@ -6,7 +6,7 @@ import Link from 'next/link'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
-import { ArrowRight, TrendingDown, Film } from 'lucide-react'
+import { ArrowRight, TrendingDown } from 'lucide-react'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -136,18 +136,13 @@ export function VelocityTrack() {
     >
       <div className="w-48 h-[1px] bg-gradient-to-r from-transparent via-chartreuse/40 to-transparent mx-auto mb-12 sm:mb-16 opacity-70" />
 
-      {/* 35mm Film Sprocket Ribbon (Top) */}
-      <div className="w-full flex justify-between items-center text-white/10 font-mono text-xs select-none tracking-[0.4em] overflow-hidden whitespace-nowrap mb-6 sm:mb-8 pb-3 border-b border-white/5 pointer-events-none">
-        <span>▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪</span>
-      </div>
-
       <div className="max-w-7xl mx-auto space-y-12 sm:space-y-14 relative z-10">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-8">
           <div className="space-y-3 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-chartreuse text-forest text-xs font-mono font-bold tracking-widest uppercase">
-              <Film className="w-3.5 h-3.5" />
-              <span>CHAPTER 05 // VELOCITY ECONOMIC FILM RAIL</span>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-chartreuse text-forest text-xs font-mono font-bold tracking-widest uppercase">
+              <TrendingDown className="w-3.5 h-3.5" />
+              <span>05 / PROTEIN ECONOMICS</span>
             </div>
             <h2 className="text-4xl sm:text-6xl lg:text-7xl font-black font-serif text-cream tracking-tight leading-[0.95]">
               Protein on <br />
@@ -235,11 +230,6 @@ export function VelocityTrack() {
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
-      </div>
-
-      {/* 35mm Film Sprocket Ribbon (Bottom) */}
-      <div className="w-full flex justify-between items-center text-white/10 font-mono text-xs select-none tracking-[0.4em] overflow-hidden whitespace-nowrap mt-12 pt-3 border-t border-white/5 pointer-events-none">
-        <span>▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪</span>
       </div>
     </section>
   )

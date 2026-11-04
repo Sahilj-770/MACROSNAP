@@ -74,12 +74,12 @@ function CompareContent() {
 
   const handleSaveComparison = () => {
     saveComparison(foodA.id, foodB.id)
-    showToast(`✨ Saved duel: ${foodA.name} vs ${foodB.name}`)
+    showToast(`Saved comparison: ${foodA.name} vs ${foodB.name}`)
   }
 
   const handleAddToBasket = (foodId: string, grams: number, name: string) => {
     addToBasket(foodId, grams)
-    showToast(`🛒 Added ${grams}g ${name} to your Virtual Basket`)
+    showToast(`Added ${grams}g ${name} to your basket`)
   }
 
   return (
@@ -110,14 +110,14 @@ function CompareContent() {
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-chartreuse text-forest text-xs font-mono font-bold tracking-widest uppercase shadow-md">
             <Scale className="w-3.5 h-3.5" />
-            <span>Head-to-Head Nutrition Showdown · Verified Benchmarks</span>
+            <span>Head-to-Head Comparison · Verified Benchmarks</span>
           </div>
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black font-serif text-white tracking-tight leading-[0.94]">
-            Food Contender <br />
+            Food Comparison <br />
             <span className="text-chartreuse italic font-normal">Showdown.</span>
           </h1>
           <p className="text-sm sm:text-base font-mono text-cream/70 max-w-2xl mx-auto leading-relaxed">
-            Normalize biological yields, strip away marketing claims, and calculate the exact rupee cost per 10 grams of usable muscle protein.
+            Compare whole staples against packaged snacks side-by-side. Calculate exact costs per 10 grams of protein and discover nutritional differences.
           </p>
 
           {/* Preset Quick-Pick Chips */}

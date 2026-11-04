@@ -44,8 +44,6 @@ const BIOMARKERS = [
 export function TelemetryLens() {
   const containerRef = useRef<HTMLElement>(null)
   const lensRef = useRef<HTMLDivElement>(null)
-  const ringRef = useRef<SVGSVGElement>(null)
-  const innerRingRef = useRef<SVGSVGElement>(null)
   const leftNotesRef = useRef<HTMLDivElement>(null)
   const rightNotesRef = useRef<HTMLDivElement>(null)
 
@@ -55,7 +53,7 @@ export function TelemetryLens() {
 
       // ─────────────────────────────────────────────────────────────
       // 1. DESKTOP ANIMATION ENVIRONMENT (>= 1024px)
-      // Expanding circular lens reveal + orbital rotation
+      // Expanding circular lens reveal
       // ─────────────────────────────────────────────────────────────
       mm.add('(min-width: 1024px) and (prefers-reduced-motion: no-preference)', () => {
         if (!lensRef.current || !containerRef.current) return
@@ -82,25 +80,6 @@ export function TelemetryLens() {
         const img = lensRef.current.querySelector('img')
         if (img) {
           tl.fromTo(img, { scale: 1.25 }, { scale: 1.05, ease: 'power2.out', duration: 1 }, 0)
-        }
-
-        // Orbit ring rotations
-        if (ringRef.current) {
-          tl.fromTo(
-            ringRef.current,
-            { rotation: -90, transformOrigin: '50% 50%' },
-            { rotation: 45, ease: 'none', duration: 1 },
-            0
-          )
-        }
-
-        if (innerRingRef.current) {
-          tl.fromTo(
-            innerRingRef.current,
-            { rotation: 120, transformOrigin: '50% 50%' },
-            { rotation: -30, ease: 'none', duration: 1 },
-            0
-          )
         }
 
         // Stagger cards
@@ -173,9 +152,9 @@ export function TelemetryLens() {
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-8">
           <div className="space-y-3 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-chartreuse text-xs font-mono font-bold tracking-widest uppercase">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 text-chartreuse text-xs font-mono font-bold tracking-widest uppercase">
               <Dna className="w-3.5 h-3.5" />
-              <span>CHAPTER 02 // MOLECULAR TELEMETRY</span>
+              <span>02 / NUTRITIONAL SCIENCE</span>
             </div>
             <h2 className="text-4xl sm:text-6xl lg:text-7xl font-black font-serif text-cream tracking-tight leading-[0.95]">
               Food Made <br />
@@ -184,11 +163,11 @@ export function TelemetryLens() {
           </div>
 
           <p className="text-sm sm:text-base font-mono text-cream/75 max-w-md leading-relaxed">
-            Nutritional science is not a checklist of marketing buzzwords. True bioavailability happens at the mucosal border of your small intestine.
+            Nutritional value is determined by true biological absorption in the small intestine, not by front-of-pack claims.
           </p>
         </div>
 
-        {/* Central Stage: Telemetry Lens with Surrounding Biomarkers */}
+        {/* Central Stage: Nutrition Lens with Surrounding Biomarkers */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
           {/* Left Biomarkers */}
           <div ref={leftNotesRef} className="lg:col-span-3 space-y-4 sm:space-y-6 order-2 lg:order-1">
@@ -198,65 +177,25 @@ export function TelemetryLens() {
                 className="biomarker-card p-5 sm:p-6 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 hover:border-chartreuse/40 transition-colors space-y-2 group"
               >
                 <div className="flex justify-between items-center text-[10px] font-mono text-cream/60">
-                  <span className="text-chartreuse font-bold">NODE // {b.num}</span>
+                  <span className="text-chartreuse font-bold">{b.num} — {b.title.toUpperCase()}</span>
                   <span className="uppercase">{b.unit}</span>
                 </div>
                 <strong className="text-2xl sm:text-3xl font-black font-serif text-cream block group-hover:text-chartreuse transition-colors">
                   {b.value}
                 </strong>
-                <h3 className="text-xs sm:text-sm font-bold font-mono text-cream uppercase">{b.title}</h3>
                 <p className="text-xs text-cream/70 leading-relaxed font-sans">{b.desc}</p>
               </div>
             ))}
           </div>
 
-          {/* Center Stage: Circular Telemetry Lens with Concentric Rings */}
+          {/* Center Stage: Circular Nutrition Lens */}
           <div className="lg:col-span-6 flex flex-col items-center justify-center relative order-1 lg:order-2 my-4 sm:my-6 lg:my-0">
             <div className="relative w-64 sm:w-88 md:w-[400px] aspect-square flex items-center justify-center">
-              {/* Outer Rotating SVG Orbit Ring */}
-              <svg
-                ref={ringRef}
-                viewBox="0 0 440 440"
-                className="absolute inset-0 w-full h-full pointer-events-none text-chartreuse/30"
-              >
-                <circle
-                  cx="220"
-                  cy="220"
-                  r="210"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeDasharray="6 8"
-                />
-                <circle
-                  cx="220"
-                  cy="10"
-                  r="5"
-                  fill="#D8F343"
-                  className="shadow-[0_0_10px_#D8F343]"
-                />
-                <circle cx="220" cy="430" r="4" fill="#FF5E36" />
-              </svg>
+              {/* Outer Subtle Focus Ring */}
+              <div className="absolute inset-0 rounded-full border border-chartreuse/20 scale-105 pointer-events-none" />
+              <div className="absolute inset-4 rounded-full border border-white/10 pointer-events-none" />
 
-              {/* Inner Orbit Ring */}
-              <svg
-                ref={innerRingRef}
-                viewBox="0 0 440 440"
-                className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] pointer-events-none text-white/20"
-              >
-                <circle
-                  cx="220"
-                  cy="220"
-                  r="190"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1"
-                  strokeDasharray="4 6"
-                />
-                <circle cx="220" cy="30" r="3" fill="#ffffff" />
-              </svg>
-
-              {/* Central Circular Lens Frame (defaults to circle 50%) */}
+              {/* Central Circular Lens Frame */}
               <div
                 ref={lensRef}
                 className="relative w-56 sm:w-72 md:w-88 aspect-square rounded-full overflow-hidden shadow-2xl border-2 border-chartreuse/50"
@@ -264,7 +203,7 @@ export function TelemetryLens() {
               >
                 <Image
                   src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1200&q=85"
-                  alt="Microscopic whole food nutrient matrix"
+                  alt="Whole food nutrient composition"
                   fill
                   sizes="(max-width: 768px) 250px, 400px"
                   className="object-cover"
@@ -286,13 +225,12 @@ export function TelemetryLens() {
                 className="biomarker-card p-5 sm:p-6 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 hover:border-chartreuse/40 transition-colors space-y-2 group"
               >
                 <div className="flex justify-between items-center text-[10px] font-mono text-cream/60">
-                  <span className="text-chartreuse font-bold">NODE // {b.num}</span>
+                  <span className="text-chartreuse font-bold">{b.num} — {b.title.toUpperCase()}</span>
                   <span className="uppercase">{b.unit}</span>
                 </div>
                 <strong className="text-2xl sm:text-3xl font-black font-serif text-cream block group-hover:text-chartreuse transition-colors">
                   {b.value}
                 </strong>
-                <h3 className="text-xs sm:text-sm font-bold font-mono text-cream uppercase">{b.title}</h3>
                 <p className="text-xs text-cream/70 leading-relaxed font-sans">{b.desc}</p>
               </div>
             ))}
@@ -303,14 +241,14 @@ export function TelemetryLens() {
         <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs font-mono text-cream/60 gap-4">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-chartreuse" />
-            <span>ILEAL AMINO ACID ASSAYS VERIFIED VIA NIN-ICMR 2017 STANDARDS</span>
+            <span>ILEAL AMINO ACID ASSAYS BENCHMARKED VIA ICMR-NIN 2017 STANDARDS</span>
           </div>
 
           <Link
             href="/learn"
             className="text-chartreuse hover:text-white font-bold inline-flex items-center gap-1.5 transition-colors group focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
           >
-            <span>Read The Biological Manifesto</span>
+            <span>Explore Scientific Evidence</span>
             <ArrowRight className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>

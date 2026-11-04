@@ -9,8 +9,8 @@ import { Check, X, ArrowRight, Scale, ShieldAlert, Award } from 'lucide-react'
 const MATCHUPS = [
   {
     id: 'bar-vs-soy',
-    tab: '01 // BAR VS SOY CHUNKS',
-    subtitle: 'THE 26X COST & SYNTHETIC FILLER PARADOX',
+    tab: 'Bar vs Soy Chunks',
+    subtitle: 'The 26x Cost Difference & Ingredient Comparison',
     commercial: {
       tag: 'PACKAGED BAR (67G)',
       name: 'Commercial Protein Bar',
@@ -37,8 +37,8 @@ const MATCHUPS = [
   },
   {
     id: 'shake-vs-chana',
-    tab: '02 // RTD SHAKE VS CHANA',
-    subtitle: 'ULTRA-PROCESSED CONVENIENCE VS ZERO-COOK REAL FOOD',
+    tab: 'RTD Shake vs Chana',
+    subtitle: 'Ultra-Processed Beverage vs Whole Food Staple',
     commercial: {
       tag: 'BOTTLED SHAKE (200ML)',
       name: 'Commercial Ready-to-Drink Shake',
@@ -65,8 +65,8 @@ const MATCHUPS = [
   },
   {
     id: 'tofu-vs-paneer',
-    tab: '03 // TOFU VS DESI PANEER',
-    subtitle: 'PLANT CALORIE EFFICIENCY VS SUSTAINED CASEIN SYNTHESIS',
+    tab: 'Tofu vs Fresh Paneer',
+    subtitle: 'Plant Efficiency vs Dairy Casein Profile',
     commercial: {
       tag: 'ORGANIC BLOCK (100G)',
       name: 'Firm Organic Tofu',
@@ -107,13 +107,13 @@ export function ShowdownArena() {
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-8">
           <div className="space-y-3 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-chartreuse text-forest text-xs font-mono font-bold tracking-widest uppercase">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-chartreuse text-forest text-xs font-mono font-bold tracking-widest uppercase">
               <Scale className="w-3.5 h-3.5" />
-              <span>CHAPTER 04 // THE DUAL RECKONING ARENA</span>
+              <span>04 / FOOD SHOWDOWNS</span>
             </div>
             <h2 className="text-4xl sm:text-6xl lg:text-7xl font-black font-serif text-cream tracking-tight leading-[0.95]">
-              The Nutritional <br />
-              <span className="text-chartreuse italic font-normal">Reckoning.</span>
+              Packaged vs. <br />
+              <span className="text-chartreuse italic font-normal">Whole Foods.</span>
             </h2>
           </div>
 
@@ -161,7 +161,7 @@ export function ShowdownArena() {
                     <ShieldAlert className="w-3.5 h-3.5" />
                     <span>{current.commercial.tag}</span>
                   </span>
-                  <span className="text-[10px] font-mono text-cream/40 uppercase">Commercial Pretender</span>
+                  <span className="text-[10px] font-mono text-cream/40 uppercase">Commercial Product</span>
                 </div>
 
                 <div>
