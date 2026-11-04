@@ -59,8 +59,8 @@ src/
 │   └── error.tsx           # Global client error boundary
 ├── components/
 │   ├── features/           # FoodCard, comparison stages, recipe views
-│   ├── home/               # Landing sections (OpeningHero, TelemetryLens, SpreadingStaples, etc.)
-│   ├── layout/             # Redesigned Navbar, EditorialTicker
+│   ├── home/               # Streamlined 7-section landing (HeroSection, HeroProductPreview, HowItWorks, CoreFeaturesBento, ProductShowcase, FinalCTA)
+│   ├── layout/             # Minimal Navbar (Section 1) and Footer (Section 7)
 │   └── ui/                 # Accessible primitives, badges, inputs
 ├── data/
 │   ├── foods.ts            # Audited database of 12 validated core Indian staples

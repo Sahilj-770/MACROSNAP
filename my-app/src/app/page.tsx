@@ -1,41 +1,29 @@
 'use client'
 
 import React from 'react'
-import { OpeningHero } from '@/components/home/OpeningHero'
-import { TelemetryLens } from '@/components/home/TelemetryLens'
-import { SpreadingStaples } from '@/components/home/SpreadingStaples'
-import { ShowdownArena } from '@/components/home/ShowdownArena'
-import { VelocityTrack } from '@/components/home/VelocityTrack'
-import { InstrumentsDeck } from '@/components/home/InstrumentsDeck'
-import { ManifestoClimax } from '@/components/home/ManifestoClimax'
-import { EditorialTicker } from '@/components/layout/EditorialTicker'
+import { HeroSection } from '@/components/home/HeroSection'
+import { HowItWorks } from '@/components/home/HowItWorks'
+import { CoreFeaturesBento } from '@/components/home/CoreFeaturesBento'
+import { ProductShowcase } from '@/components/home/ProductShowcase'
+import { FinalCTA } from '@/components/home/FinalCTA'
 
 export default function HomePage() {
   return (
     <main className="relative w-full overflow-x-hidden bg-[#050B07] text-cream selection:bg-chartreuse selection:text-forest">
-      {/* 01: Hero Scene */}
-      <OpeningHero />
+      {/* Section 2 — Hero with Product Preview Centerpiece */}
+      <HeroSection />
 
-      {/* 02: Nutritional Science & Bioavailability */}
-      <TelemetryLens />
+      {/* Section 3 — How It Works (Three-Step Core Workflow) */}
+      <HowItWorks />
 
-      {/* 03: High-Yield Indian Kitchen Staples */}
-      <SpreadingStaples />
+      {/* Section 4 — Core Features (Asymmetrical Editorial Bento Grid) */}
+      <CoreFeaturesBento />
 
-      {/* 04: Head-to-Head Food Showdown */}
-      <ShowdownArena />
+      {/* Section 5 — Product Showcase (Interactive Real-World Matchups) */}
+      <ProductShowcase />
 
-      {/* 05: Protein on a Budget */}
-      <VelocityTrack />
-
-      {/* 06: Interactive Nutrition Tools */}
-      <InstrumentsDeck />
-
-      {/* 07: Core Philosophy */}
-      <ManifestoClimax />
-
-      {/* 08: Editorial Nutrition Ticker */}
-      <EditorialTicker />
+      {/* Section 6 — Final CTA (Strong Closing Statement) */}
+      <FinalCTA />
     </main>
   )
 }
