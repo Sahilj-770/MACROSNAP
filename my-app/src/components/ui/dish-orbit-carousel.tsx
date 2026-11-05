@@ -102,6 +102,8 @@ export type DishOrbitCarouselProps = {
 
   fontSrc?: string | null
 
+  selectedIndex?: number
+
   onPlay?: (dish: Dish, index: number) => void
 
   onOrder?: (dish: Dish, index: number) => void
@@ -262,7 +264,7 @@ const CSS =
 
   ".dsh-trk{position:relative;width:100%}" +
 
-  ".dsh-root{position:sticky;top:0;overflow:hidden;width:100%;background:var(--color-background);color:var(--color-foreground);" +
+  ".dsh-root{position:relative;overflow:hidden;border-radius:24px;border:1px solid color-mix(in oklab,var(--color-foreground) 8%,transparent);width:100%;background:var(--color-background);color:var(--color-foreground);" +
 
   "font-family:" + FONT + ",ui-sans-serif,system-ui,sans-serif;container-type:inline-size;-webkit-tap-highlight-color:transparent}" +
 
@@ -304,7 +306,7 @@ const CSS =
 
   ".dsh-dot{transition:height .45s cubic-bezier(.3,.7,.2,1)}" +
 
-  ".dsh-plates{position:absolute;left:130px;top:82px;width:245px;height:245px;touch-action:pan-y}" +
+  ".dsh-plates{position:absolute;left:130px;top:82px;width:245px;height:245px;touch-action:pan-y;cursor:pointer}" + ".dsh-plates:hover .dsh-orbit>img{transform:scale(1.03);transition:transform .3s ease}" +
 
   ".dsh-orbit{position:absolute;inset:0;transform-origin:69% -217%;visibility:hidden;will-change:transform}" +
 
@@ -473,6 +475,8 @@ export function DishOrbitCarousel({
   loop = true,
 
   fontSrc = FONT_DATA,
+
+  selectedIndex,
 
   onPlay,
 
@@ -687,129 +691,20 @@ export function DishOrbitCarousel({
 
 
 
-  // The page scroll drives the dish: the stage pins, one stretch of scroll per dish, snapping between them.
-
-  const steps = scrollSteps(n, loop)
-
-  useEffect(() => {
-
-    const track = trackRef.current
-
-    if (!track || steps < 1) return
-
-    const trigger = ScrollTrigger.create({
-
-      trigger: track,
-
-      start: "top top",
-
-      end: "bottom bottom",
-
-      snap: { snapTo: 1 / steps, duration: { min: 0.3, max: 0.8 }, delay: 0.08, ease: "power2.inOut" },
-
-      onUpdate: (self) => {
-
-        // Looping: the last stretch shows the first dish, so jump back to the top unseen.
-
-        if (loop && self.progress >= 1 && self.direction > 0) {
-
-          segRef.current = 0
-
-          self.scroll(self.start + 1)
-
-          select(0, 1)
-
-          return
-
-        }
-
-        const seg = Math.round(self.progress * steps)
-
-        if (seg === segRef.current) return
-
-        const dir = seg > segRef.current ? 1 : -1
-
-        segRef.current = seg
-
-        select(wrapIndex(seg, n), dir)
-
-      },
-
-    })
-
-    // At the very top no scroll is left to fire onUpdate, so scrolling up there wraps round to the last dish.
-
-    // Deferred a frame so the browser's own wheel scroll has landed first.
-
-    let raf = 0
-
-    const onWheel = (e: WheelEvent) => {
-
-      const y = trigger.scroll()
-
-      if (!loop || e.deltaY >= 0 || y < trigger.start - 1 || y > trigger.start + 1) return
-
-      cancelAnimationFrame(raf)
-
-      raf = requestAnimationFrame(() => {
-
-        segRef.current = n - 1
-
-        trigger.scroll(trigger.start + ((trigger.end - trigger.start) * (n - 1)) / steps)
-
-        select(n - 1, -1)
-
-      })
-
-    }
-
-    window.addEventListener("wheel", onWheel, { passive: true })
-
-    stRef.current = trigger
-
-    return () => {
-
-      cancelAnimationFrame(raf)
-
-      window.removeEventListener("wheel", onWheel)
-
-      trigger.kill()
-
-      stRef.current = null
-
-    }
-
-  }, [steps, loop, n])
-
-
-
-  // Buttons, keys and swipes jump to a dish and move the scroll to its stretch, so the two stay in step.
-
+  // Dish changes are strictly click-driven (food thumbnails, arrows, pager dots, or food plate click)
   const go = (to: number, dir?: 1 | -1) => {
-
     if (n < 2) return
-
     const next = wrapIndex(to, n)
-
     if (next === index) return
-
-    const st = stRef.current
-
-    const y = st ? st.scroll() : 0
-
-    if (st && y >= st.start - 1 && y <= st.end + 1) {
-
-      const seg = segmentFor(next, segRef.current, n, loop)
-
-      segRef.current = seg
-
-      st.scroll(st.start + ((st.end - st.start) * seg) / steps)
-
-    }
-
     select(next, dir ?? stepDirection(index, next, n))
-
   }
+
+  // Synchronize external selectedIndex changes
+  useEffect(() => {
+    if (selectedIndex !== undefined && selectedIndex >= 0 && selectedIndex < n && selectedIndex !== indexRef.current) {
+      go(selectedIndex)
+    }
+  }, [selectedIndex, n])
 
   const step = (d: 1 | -1) => go(index + d, d)
 
@@ -849,7 +744,7 @@ export function DishOrbitCarousel({
 
   return (
 
-    <div ref={trackRef} className={"dsh-trk" + (className ? " " + className : "")} style={{ height: "calc(" + height + " * " + (1 + steps * SCROLL_PER_DISH) + ")" }}>
+    <div ref={trackRef} className={"dsh-trk" + (className ? " " + className : "")} style={{ height }}>
 
     <div
 
@@ -923,7 +818,7 @@ export function DishOrbitCarousel({
 
 
 
-        <div className="dsh-plates" onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerCancel={() => (swipe.current = null)}>
+        <div className="dsh-plates" title="Click to view next recipe" onClick={() => step(1)} onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerCancel={() => (swipe.current = null)}>
 
           {dishes.map((d, i) => (
 

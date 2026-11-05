@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import DishOrbitCarousel, { type Dish } from '@/components/ui/dish-orbit-carousel'
 import { RECIPE_DATABASE } from '@/data/recipes-and-lessons'
 import { useUserStore } from '@/store/useUserStore'
-import { ChefHat, Sparkles, BookOpen, Utensils, ArrowUpRight, ShoppingBag, Check } from 'lucide-react'
+import { ChefHat, Sparkles, BookOpen, Utensils, ArrowUpRight, ShoppingBag, Check, MousePointerClick } from 'lucide-react'
 import Link from 'next/link'
 
 const DISH_PALETTE = ['#5B6E2C', '#7D8D39', '#FF5A22', '#08482D']
@@ -33,6 +33,7 @@ const DISHES_DATA: Dish[] = RECIPE_DATABASE.map((r, i) => {
 export default function RecipesPage() {
   const { addToBasket } = useUserStore()
   const [basketToast, setBasketToast] = useState<string | null>(null)
+  const [selectedDishIndex, setSelectedDishIndex] = useState(0)
 
   const handleOrder = (dish: Dish, index: number) => {
     const recipe = RECIPE_DATABASE[index]
@@ -77,26 +78,26 @@ export default function RecipesPage() {
             </p>
           </div>
 
-          {/* Caveat Handwritten Callout */}
+          {/* Interactive instruction callout */}
           <div className="hidden md:flex flex-col items-end self-end text-right">
-            <span
-              className="text-lg font-bold text-[#08482D] -rotate-2"
-              style={{ fontFamily: 'var(--font-caveat, Caveat, cursive)' }}
-            >
-              100% verified kitchen economics ↗
-            </span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#5B6E2C]/10 text-[#5B6E2C] text-xs font-medium mb-1">
+              <MousePointerClick className="w-3.5 h-3.5 text-[#FF5A22]" />
+              <span>Click any food item or thumbnail to advance</span>
+            </div>
             <span className="text-xs text-[#7D8D39] font-mono">
-              Zero ultra-processed protein powders
+              Natural page scrolling enabled • No scroll trapping
             </span>
           </div>
         </div>
       </div>
 
       {/* Primary Feature: Dish Orbit Carousel */}
-      <section className="mb-12">
+      <section id="recipe-stage" className="mb-12">
         <DishOrbitCarousel
           dishes={DISHES_DATA}
           height="720px"
+          selectedIndex={selectedDishIndex}
+          onChange={(newIndex) => setSelectedDishIndex(newIndex)}
           onOrder={handleOrder}
         />
       </section>
@@ -109,7 +110,7 @@ export default function RecipesPage() {
               All Kitchen Formulations ({RECIPE_DATABASE.length})
             </h2>
             <p className="text-xs sm:text-sm text-[#5E5E61] mt-1">
-              Select any dish above to examine detailed macronutrient breakdowns and scale ingredients.
+              Click any recipe card below to inspect its 3D plated presentation and scaled ingredients.
             </p>
           </div>
 
@@ -124,49 +125,77 @@ export default function RecipesPage() {
 
         {/* Quick Recipe Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {RECIPE_DATABASE.map((recipe, index) => (
-            <div
-              key={recipe.id}
-              className="p-5 rounded-2xl bg-white border border-[#5B6E2C]/15 hover:border-[#5B6E2C] transition-all shadow-2xs group flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between text-xs text-[#7D8D39] font-mono mb-2">
-                  <span>RECIPE 0{index + 1}</span>
-                  <span>{recipe.prepTimeMinutes + recipe.cookTimeMinutes} mins</span>
-                </div>
-                <h3 className="font-display text-lg font-bold text-[#101410] group-hover:text-[#5B6E2C] transition-colors line-clamp-1">
-                  {recipe.title}
-                </h3>
-                {recipe.hindiTitle && (
-                  <p className="text-xs text-[#7D8D39] font-medium mt-0.5 line-clamp-1">
-                    {recipe.hindiTitle}
-                  </p>
-                )}
-                <p className="text-xs text-[#5E5E61] mt-2 line-clamp-2 leading-relaxed">
-                  {recipe.tagline}
-                </p>
-              </div>
-
-              <div className="mt-6 pt-3 border-t border-[#5B6E2C]/10 flex items-center justify-between">
+          {RECIPE_DATABASE.map((recipe, index) => {
+            const isSelected = selectedDishIndex === index
+            return (
+              <div
+                key={recipe.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => {
+                  setSelectedDishIndex(index)
+                  const el = document.getElementById('recipe-stage')
+                  if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    setSelectedDishIndex(index)
+                    const el = document.getElementById('recipe-stage')
+                    if (el) {
+                      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+                    }
+                  }
+                }}
+                className={`p-5 rounded-2xl bg-white border cursor-pointer transition-all duration-300 shadow-2xs group flex flex-col justify-between text-left focus:outline-hidden focus:ring-2 focus:ring-[#5B6E2C] ${
+                  isSelected
+                    ? 'border-[#5B6E2C] ring-2 ring-[#5B6E2C]/30 shadow-md bg-[#5B6E2C]/5'
+                    : 'border-[#5B6E2C]/15 hover:border-[#5B6E2C]/60 hover:shadow-sm'
+                }`}
+              >
                 <div>
-                  <span className="text-[10px] font-mono text-[#7D8D39] uppercase block">
-                    Protein
-                  </span>
-                  <span className="text-sm font-bold text-[#5B6E2C]">
-                    {recipe.totalProteinPerServingG}g
-                  </span>
+                  <div className="flex items-center justify-between text-xs text-[#7D8D39] font-mono mb-2">
+                    <span className={isSelected ? 'text-[#FF5A22] font-bold' : ''}>
+                      {isSelected ? '● ACTIVE DISH' : `RECIPE 0${index + 1}`}
+                    </span>
+                    <span>{recipe.prepTimeMinutes + recipe.cookTimeMinutes} mins</span>
+                  </div>
+                  <h3 className="font-display text-lg font-bold text-[#101410] group-hover:text-[#5B6E2C] transition-colors line-clamp-1">
+                    {recipe.title}
+                  </h3>
+                  {recipe.hindiTitle && (
+                    <p className="text-xs text-[#7D8D39] font-medium mt-0.5 line-clamp-1">
+                      {recipe.hindiTitle}
+                    </p>
+                  )}
+                  <p className="text-xs text-[#5E5E61] mt-2 line-clamp-2 leading-relaxed">
+                    {recipe.tagline}
+                  </p>
                 </div>
-                <div className="text-right">
-                  <span className="text-[10px] font-mono text-[#7D8D39] uppercase block">
-                    Price
-                  </span>
-                  <span className="text-sm font-bold text-[#FF5A22]">
-                    ₹{recipe.estimatedCostPerServingInr}
-                  </span>
+
+                <div className="mt-6 pt-3 border-t border-[#5B6E2C]/10 flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-mono text-[#7D8D39] uppercase block">
+                      Protein
+                    </span>
+                    <span className="text-sm font-bold text-[#5B6E2C]">
+                      {recipe.totalProteinPerServingG}g
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] font-mono text-[#7D8D39] uppercase block">
+                      Price
+                    </span>
+                    <span className="text-sm font-bold text-[#FF5A22]">
+                      ₹{recipe.estimatedCostPerServingInr}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </section>
     </div>
