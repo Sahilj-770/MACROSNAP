@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { ArrowRight, Trophy, Zap, TrendingDown, Coins } from 'lucide-react'
+import { ArrowRight, Trophy, Coins, CheckCircle2 } from 'lucide-react'
 
 const TOP_CONTENDERS = [
   {
@@ -34,7 +34,7 @@ const TOP_CONTENDERS = [
     protein: '13.3g',
     costPer10g: '₹9.68',
     calories: '143 kcal',
-    tag: 'DIAAS 1.18 Complete',
+    tag: 'Complete DIAAS',
     color: 'bg-[#5B6E2C] text-[#F3F6F4]',
   },
   {
@@ -49,108 +49,79 @@ const TOP_CONTENDERS = [
 
 export function BudgetRibbonTeaser() {
   return (
-    <section className="relative py-28 z-10">
+    <section className="relative py-24 z-10 bg-[#F3F6F4]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[rgba(125,141,57,0.12)] border border-[rgba(91,110,44,0.2)] text-xs font-mono tracking-widest uppercase text-[#5B6E2C] mb-4">
               <Coins className="w-3.5 h-3.5 text-[#7D8D39]" />
-              <span>Chapter II &mdash; Macro Economics</span>
+              <span>Grocery Economics &bull; Rupee-to-Protein</span>
             </div>
             <h2 className="font-display text-4xl sm:text-6xl font-bold text-[#20271D] tracking-tight leading-[1.05] mb-4">
-              Protein on a Budget. <br />
-              <span className="italic font-normal text-[#5B6E2C]">Stop paying the gym-bro tax.</span>
+              Hit 100g protein for ₹45. <br />
+              <span className="italic font-normal text-[#5B6E2C]">Not ₹250.</span>
             </h2>
             <p className="text-base sm:text-lg text-[#737B70] leading-relaxed">
-              Why pay ₹150 for a synthetic bar with 20g of protein when 50g of soya chunks delivers 26g of pure biological protein for ₹6.00?
+              Western supplements and boutique snacks tell you that getting enough protein requires expensive lifestyle subscriptions. Real Indian kitchen staples provide complete amino acids at a fraction of the cost.
             </p>
           </div>
 
           <Link
             href="/budget"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#5B6E2C] text-[#F3F6F4] text-xs font-semibold tracking-wider uppercase hover:bg-[#7D8D39] transition-all shadow-xs shrink-0 self-start md:self-end"
+            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-[#5B6E2C] hover:bg-[#7D8D39] text-[#F3F6F4] text-xs font-semibold tracking-wider uppercase transition-all duration-300 shadow-xs self-start md:self-auto shrink-0 group"
           >
-            <span>Launch 3D Video Ribbon</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>Open Protein on Budget</span>
+            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
 
-        {/* Top Contenders Horizontal Bento Cards */}
+        {/* 5 Contenders Horizontal Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-          {TOP_CONTENDERS.map((item, idx) => {
-            const isBar = item.costPer10g === '₹60.00'
-            return (
-              <div
-                key={item.name}
-                className={`p-6 rounded-3xl border transition-all duration-300 backdrop-blur-md ${
-                  isBar
-                    ? 'bg-[#FF5A22]/10 border-[#FF5A22]/40 shadow-xs'
-                    : 'bg-white/75 border-[rgba(91,110,44,0.18)] hover:border-[#5B6E2C] shadow-xs hover:shadow-md'
-                }`}
-              >
+          {TOP_CONTENDERS.map((item, index) => (
+            <div
+              key={item.name}
+              className={`p-6 rounded-3xl border transition-all duration-200 flex flex-col justify-between ${
+                index === 0
+                  ? 'bg-white border-[#5B6E2C] shadow-sm'
+                  : index === 4
+                  ? 'bg-white border-[rgba(255,90,34,0.3)] shadow-2xs'
+                  : 'bg-white border-[rgba(91,110,44,0.18)] shadow-2xs'
+              }`}
+            >
+              <div>
                 <div className="flex items-center justify-between mb-4">
                   <span
-                    className={`text-[10px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-full ${item.color}`}
+                    className={`text-[10px] uppercase font-mono tracking-wider px-2.5 py-1 rounded-full ${item.color}`}
                   >
                     {item.tag}
                   </span>
-                  <span className="text-xs font-mono text-[#737B70]">
-                    #{idx + 1}
-                  </span>
+                  {index === 0 && <Trophy className="w-4 h-4 text-[#7D8D39]" />}
                 </div>
 
-                <h3 className="font-display text-xl font-bold text-[#20271D] mb-4 leading-snug">
+                <h3 className="font-display text-lg font-bold text-[#20271D] leading-tight mb-2">
                   {item.name}
                 </h3>
 
-                <div className="space-y-2.5 pt-4 border-t border-[rgba(91,110,44,0.12)]">
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-[11px] text-[#737B70] font-mono">Cost / 10g:</span>
-                    <span
-                      className={`font-mono font-bold text-lg ${
-                        isBar ? 'text-[#FF5A22]' : 'text-[#5B6E2C]'
-                      }`}
-                    >
-                      {item.costPer10g}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-[#737B70] font-mono">Protein / 100g:</span>
-                    <span className="font-semibold text-[#20271D]">{item.protein}</span>
-                  </div>
-
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-[#737B70] font-mono">Energy:</span>
-                    <span className="text-[#737B70]">{item.calories}</span>
-                  </div>
+                <div className="space-y-1 text-xs text-[#737B70] font-mono mt-3">
+                  <div>Protein: <span className="font-bold text-[#20271D]">{item.protein}</span> / 100g</div>
+                  <div>Energy: {item.calories}</div>
                 </div>
               </div>
-            )
-          })}
-        </div>
 
-        {/* Economics Insight Callout Banner */}
-        <div className="mt-8 p-6 sm:p-8 rounded-3xl bg-[rgba(125,141,57,0.08)] border border-[rgba(91,110,44,0.18)] flex flex-col md:flex-row items-center justify-between gap-6 backdrop-blur-md">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-[#5B6E2C] text-white flex items-center justify-center shrink-0">
-              <TrendingDown className="w-6 h-6" />
+              <div className="mt-6 pt-4 border-t border-[rgba(91,110,44,0.12)]">
+                <span className="text-[10px] uppercase font-mono text-[#737B70] block">
+                  Cost per 10g Protein
+                </span>
+                <span
+                  className={`font-display text-2xl font-bold ${
+                    index === 4 ? 'text-[#FF5A22]' : 'text-[#5B6E2C]'
+                  }`}
+                >
+                  {item.costPer10g}
+                </span>
+              </div>
             </div>
-            <div>
-              <h4 className="font-display text-lg font-bold text-[#20271D]">
-                The Average Indian Household Saves ₹3,420 Every Month
-              </h4>
-              <p className="text-xs text-[#737B70] mt-0.5">
-                By substituting commercial isolate bars with boiled eggs, roasted sattu, and soya chunks.
-              </p>
-            </div>
-          </div>
-          <Link
-            href="/budget"
-            className="px-5 py-2.5 rounded-full border border-[rgba(91,110,44,0.3)] text-xs font-mono font-medium uppercase text-[#5B6E2C] hover:bg-[#5B6E2C] hover:text-[#F3F6F4] transition-all shrink-0"
-          >
-            Calculate Household Savings
-          </Link>
+          ))}
         </div>
       </div>
     </section>

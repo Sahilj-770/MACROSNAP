@@ -33,16 +33,16 @@ export function Footer() {
             </span>
             <div className="flex flex-col gap-2 text-xs text-[#F3F6F4]/80">
               <Link href="/explore" className="hover:text-[#FF5A22] transition-colors">
-                Food Discovery Archive
+                Explore Foods
               </Link>
               <Link href="/budget" className="hover:text-[#FF5A22] transition-colors">
-                Protein on a Budget
+                Protein on Budget
               </Link>
               <Link href="/compare" className="hover:text-[#FF5A22] transition-colors">
-                Nutritional Duel
+                Compare Foods
               </Link>
               <Link href="/labels" className="hover:text-[#FF5A22] transition-colors">
-                Foil Pack Label Decoder
+                Label Decoder
               </Link>
             </div>
           </div>
@@ -54,16 +54,16 @@ export function Footer() {
             </span>
             <div className="flex flex-col gap-2 text-xs text-[#F3F6F4]/80">
               <Link href="/calculator" className="hover:text-[#FF5A22] transition-colors">
-                Scientific Target Calculator
+                Daily Calculator
               </Link>
               <Link href="/recipes" className="hover:text-[#FF5A22] transition-colors">
-                Whole Food Recipe Lab
+                Recipes
               </Link>
               <Link href="/kitchen" className="hover:text-[#FF5A22] transition-colors">
-                Pantry Ingredient Matcher
+                Pantry Matcher
               </Link>
               <Link href="/basket" className="hover:text-[#FF5A22] transition-colors">
-                Grocery Ledger
+                Grocery Basket
               </Link>
             </div>
           </div>
@@ -71,11 +71,11 @@ export function Footer() {
           {/* Science & Education */}
           <div className="flex flex-col gap-3">
             <span className="text-[11px] uppercase tracking-widest text-[#7D8D39] font-semibold">
-              Science & Dossiers
+              Science &amp; Evidence
             </span>
             <div className="flex flex-col gap-2 text-xs text-[#F3F6F4]/80">
               <Link href="/learn" className="hover:text-[#FF5A22] transition-colors">
-                Myth Busters Dossier
+                Learn / Myth Busters
               </Link>
               <span className="text-[11px] text-[#737B70]">
                 Standard Formula: (Cost per 100g / Protein per 100g) × 10 = ₹ / 10g Protein

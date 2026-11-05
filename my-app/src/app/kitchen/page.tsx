@@ -42,21 +42,21 @@ export function KitchenPage() {
       <div className="pb-8 border-b border-[rgba(91,110,44,0.18)] mb-12">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[rgba(125,141,57,0.12)] border border-[rgba(91,110,44,0.2)] text-xs font-mono uppercase tracking-widest text-[#5B6E2C] mb-3">
           <Utensils className="w-3.5 h-3.5 text-[#7D8D39]" />
-          <span>Artisanal Kitchen Pantry Cellar</span>
+          <span>Pantry Ingredient Matcher</span>
         </div>
         <h1 className="font-display text-4xl sm:text-6xl font-bold text-[#20271D] tracking-tight">
-          The Pantry Matcher
+          Pantry Ingredient Matcher
         </h1>
         <p className="text-sm sm:text-base text-[#737B70] mt-3 max-w-2xl leading-relaxed">
-          Tap whatever staples are sitting in your hostel shelf or kitchen pantry right now. Our engine instantly surfaces chef-tested 15-minute formulas engineered for maximum protein with zero supermarket trips.
+          Select whatever staples are in your kitchen right now. Our engine instantly surfaces chef-tested recipes engineered for high protein yield with zero extra grocery runs.
         </p>
       </div>
 
       {/* Traditional Indian Spice Box / Pantry Grid */}
-      <div className="p-8 sm:p-10 rounded-3xl bg-white border border-[rgba(91,110,44,0.18)] shadow-lg mb-12 space-y-6">
+      <div className="p-8 sm:p-10 rounded-3xl bg-white border border-[rgba(91,110,44,0.18)] shadow-sm mb-12 space-y-6">
         <div className="flex items-center justify-between pb-4 border-b border-[rgba(91,110,44,0.12)]">
           <span className="text-xs font-mono uppercase tracking-widest text-[#5B6E2C] font-semibold">
-            PANTRY STAPLE COMPARTMENTS &bull; SELECT TO ACTIVATE
+            SELECT INGREDIENTS IN YOUR KITCHEN
           </span>
           <span className="text-xs font-mono text-[#7D8D39]">
             {selectedStaples.length} Active Staples

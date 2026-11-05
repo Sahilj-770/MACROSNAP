@@ -78,3 +78,21 @@
 - [x] **Automated Verification**:
   - Static production build: `npm run build` exited with code 0 (all 15 static routes rendered in 1.2s).
   - Full Playwright QA run passed across 11 desktop routes, 5 interactive flows, and 10 responsive viewports with 0 console errors.
+
+## Phase 8 — Design Recovery & Art-Direction Correction
+- [x] **Checkpoint Creation**: Created `recovery-checkpoint-step774` tag and `recovery/pre-art-direction-correction` branch before executing adjustments.
+- [x] **Palette & Brand Correction**: Enforced light-first design system with primary palette: Soft White `#F3F6F4`, Sage `#7D8D39`, Deep Olive `#5B6E2C`, and Tangerine `#FF5A22`. Purged competing neon and dark surfaces.
+- [x] **Navbar Standardization**: Created a single consistent MacroSnap navbar with exact user-requested labels: **Home**, **Explore Foods**, **Compare**, **Protein on Budget**, **Recipes**, **Calculator**, **Learn / Myth Busters**, **Basket**. Removed all announcement bars, micro-headers, and cinematic metadata strips.
+- [x] **Natural Light Botanical Hero**: Redesigned hero with natural sunlight wash, spacious composition, Instrument Serif typography, human copy, authentic Indian staple pricing benchmarks, and direct CTAs. Removed synthetic audio drone.
+- [x] **Human Content & Jargon Purge**: Replaced pseudo-scientific and gaming jargon with human, understandable copy across all pages:
+  - Homepage: Removed "Chapter I–V" and "Epilogue" identifiers; streamlined journey into cohesive editorial flow.
+  - `/calculator`: Renamed to "Nutrition & Macro Calculator", updated meal schedules to "Breakfast", "Lunch", "Evening Snack", "Dinner".
+  - `/compare`: Renamed to "Nutritional Comparison: Compare Foods Side by Side", focusing on clarity and actual comparisons.
+  - `/labels`: Refined to "Food Label Decoder", an interactive educational consumer guide.
+  - `/kitchen`: Refined to "Pantry Ingredient Matcher".
+  - `/learn`: Replaced fictional "Aurevon" branding with MacroSnap, maintaining Aurevon-inspired entrance easing, Flower2 icon, and full-viewport video hero while adapting dossiers to a light-first `#F3F6F4` botanical layout.
+- [x] **Preserved Product Integrity**: Maintained all 11 routes, ICMR-NIN IFCT 2017 database, Zustand store persistence, formulas, recipes, and interactive modals.
+- [x] **Production Verification**:
+  - `next build`: Exit Code 0, all 15 pages generated statically.
+  - Playwright E2E QA: Exit Code 0, 0 console errors across desktop, tablet, and mobile.
+

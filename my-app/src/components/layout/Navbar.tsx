@@ -8,7 +8,6 @@ import {
   ShoppingBag,
   Menu,
   X,
-  ArrowUpRight,
   Sparkles,
   BookOpen,
   TrendingDown,
@@ -17,28 +16,34 @@ import {
   Swords,
   ChefHat,
   ScanLine,
+  BookmarkCheck,
   ChevronDown,
 } from 'lucide-react'
 
-const PRIMARY_LINKS = [
-  { href: '/explore', label: 'Book Archive', icon: BookOpen },
-  { href: '/budget', label: 'Economics', icon: TrendingDown },
-  { href: '/calculator', label: 'Calculator', icon: Calculator },
-  { href: '/learn', label: 'Myth Busters', icon: Compass },
+// Primary links matching user's exact specification
+const NAV_LINKS = [
+  { href: '/', label: 'Home' },
+  { href: '/explore', label: 'Explore Foods' },
+  { href: '/compare', label: 'Compare' },
+  { href: '/budget', label: 'Protein on Budget' },
+  { href: '/recipes', label: 'Recipes' },
+  { href: '/calculator', label: 'Calculator' },
+  { href: '/learn', label: 'Learn / Myth Busters' },
 ]
 
-const SECONDARY_LINKS = [
-  { href: '/compare', label: 'Nutritional Duel', desc: 'Side-by-side food showdown', icon: Swords },
-  { href: '/recipes', label: 'Whole Food Lab', desc: '15-min recipes with dynamic scaler', icon: ChefHat },
-  { href: '/kitchen', label: 'Pantry Matcher', desc: 'Cook with what you already have', icon: Sparkles },
-  { href: '/labels', label: 'Label Decoder', desc: 'UV forensic packaging scanner', icon: ScanLine },
+// Secondary utility tools
+const MORE_TOOLS = [
+  { href: '/labels', label: 'Label Decoder', desc: 'Investigate packaged food traps', icon: ScanLine },
+  { href: '/kitchen', label: 'Pantry Matcher', desc: 'Cook with what you have in the kitchen', icon: Sparkles },
+  { href: '/library', label: 'Saved Library', desc: 'Your offline pinned benchmarks & recipes', icon: BookmarkCheck },
 ]
 
 export function Navbar() {
   const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [labDropdownOpen, setLabDropdownOpen] = useState(false)
+  const [moreDropdownOpen, setMoreDropdownOpen] = useState(false)
+
   const basketItems = useUserStore((state) => state.basketItems)
   const totalBasketCount = basketItems.reduce(
     (acc, item) => acc + (item.quantityGrams > 0 ? 1 : 0),
@@ -47,7 +52,7 @@ export function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20)
+      setScrolled(window.scrollY > 15)
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
@@ -56,7 +61,7 @@ export function Navbar() {
   // Close menus on route change
   useEffect(() => {
     setMobileMenuOpen(false)
-    setLabDropdownOpen(false)
+    setMoreDropdownOpen(false)
   }, [pathname])
 
   // Prevent background scroll when mobile menu is open
@@ -71,142 +76,107 @@ export function Navbar() {
     }
   }, [mobileMenuOpen])
 
-  const isSecondaryActive = SECONDARY_LINKS.some((item) => pathname === item.href)
-  const isDarkHero = (pathname === '/learn' || pathname === '/') && !scrolled
+  const isMoreActive = MORE_TOOLS.some((item) => pathname === item.href)
 
   return (
     <>
+      {/* 
+        Single Consistent MacroSnap Navbar
+        Light-first, botanical aesthetic: Soft White background, Deep Olive & Sage typography
+      */}
       <header
         className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${
           scrolled
             ? 'py-2.5 bg-[#F3F6F4]/95 backdrop-blur-md border-b border-[rgba(91,110,44,0.18)] shadow-xs'
-            : isDarkHero
-            ? 'py-4 sm:py-5 bg-transparent border-b border-white/10'
-            : 'py-4 sm:py-5 bg-[#F3F6F4]/80 backdrop-blur-xs border-b border-[rgba(91,110,44,0.08)]'
+            : 'py-3.5 bg-[#F3F6F4]/90 backdrop-blur-xs border-b border-[rgba(91,110,44,0.12)]'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             {/* Left: Brand Monogram & Logotype */}
             <Link
               href="/"
-              className="flex items-center gap-3 group focus:outline-hidden select-none"
+              className="flex items-center gap-2.5 group focus:outline-hidden select-none shrink-0"
               aria-label="MacroSnap Home"
             >
-              <div
-                className={`relative w-9 h-9 rounded-full flex items-center justify-center font-semibold text-sm transition-transform duration-300 group-hover:scale-105 shadow-xs border ${
-                  isDarkHero
-                    ? 'bg-[#5B6E2C] text-[#F3F6F4] border-white/30'
-                    : 'bg-[#5B6E2C] text-[#F3F6F4] border-[#7D8D39]/40'
-                }`}
-              >
+              <div className="relative w-8 h-8 rounded-full bg-[#5B6E2C] text-[#F3F6F4] flex items-center justify-center font-semibold text-sm transition-transform duration-300 group-hover:scale-105 shadow-xs border border-[#7D8D39]/40">
                 <span className="font-display italic text-base">M</span>
                 {/* Botanical Pulse Spore */}
-                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#FF5A22] border-2 border-[#F3F6F4] animate-pulse" />
+                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#FF5A22] border-2 border-[#F3F6F4]" />
               </div>
               <div className="flex flex-col">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`font-display text-2xl font-bold tracking-tight leading-none ${
-                      isDarkHero ? 'text-white' : 'text-[#20271D]'
-                    }`}
-                  >
-                    MacroSnap
-                  </span>
-                  <span
-                    className={`hidden xl:inline-block px-1.5 py-0.5 rounded-xs text-[9px] font-mono font-medium tracking-wide border ${
-                      isDarkHero
-                        ? 'bg-white/15 text-[#A3B18A] border-white/20'
-                        : 'bg-[#7D8D39]/15 text-[#5B6E2C] border-[#7D8D39]/30'
-                    }`}
-                  >
-                    IFCT 2017
-                  </span>
-                </div>
-                <span
-                  className={`text-[10px] uppercase tracking-widest font-medium font-sans ${
-                    isDarkHero ? 'text-[#A3B18A]' : 'text-[#7D8D39]'
-                  }`}
-                >
+                <span className="font-display text-xl sm:text-2xl font-bold tracking-tight text-[#20271D] leading-none">
+                  MacroSnap
+                </span>
+                <span className="text-[9px] uppercase tracking-widest font-medium font-sans text-[#7D8D39] mt-0.5">
                   Know what you eat
                 </span>
               </div>
             </Link>
 
-            {/* Center: Curated Aerodynamic Navigation Dock */}
-            <nav
-              className={`hidden lg:flex items-center p-1 rounded-full backdrop-blur-sm border shadow-xs ${
-                isDarkHero
-                  ? 'bg-black/40 border-white/20 text-white'
-                  : 'bg-[#F3F6F4]/90 border-[rgba(91,110,44,0.18)] text-[#20271D]'
-              }`}
-            >
-              {PRIMARY_LINKS.map((link) => {
+            {/* Center: Desktop Navigation Bar */}
+            <nav className="hidden xl:flex items-center gap-1 p-1 rounded-full bg-white/70 backdrop-blur-xs border border-[rgba(91,110,44,0.15)] shadow-2xs">
+              {NAV_LINKS.map((link) => {
                 const isActive = pathname === link.href
                 return (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`relative px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 flex items-center gap-1.5 ${
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
                       isActive
-                        ? 'text-[#F3F6F4] bg-[#5B6E2C] shadow-xs font-semibold'
-                        : isDarkHero
-                        ? 'text-white/80 hover:text-white hover:bg-white/10'
+                        ? 'text-[#F3F6F4] bg-[#5B6E2C] font-semibold shadow-xs'
                         : 'text-[#20271D] hover:text-[#5B6E2C] hover:bg-[rgba(91,110,44,0.08)]'
                     }`}
                   >
-                    <span>{link.label}</span>
+                    {link.label}
                   </Link>
                 )
               })}
 
-              {/* Culinary & Forensic Lab Dropdown */}
+              {/* More Tools Dropdown */}
               <div className="relative">
                 <button
                   type="button"
-                  onClick={() => setLabDropdownOpen(!labDropdownOpen)}
-                  onMouseEnter={() => setLabDropdownOpen(true)}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 flex items-center gap-1.5 ${
-                    isSecondaryActive || labDropdownOpen
+                  onClick={() => setMoreDropdownOpen(!moreDropdownOpen)}
+                  onMouseEnter={() => setMoreDropdownOpen(true)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 flex items-center gap-1 ${
+                    isMoreActive || moreDropdownOpen
                       ? 'text-[#F3F6F4] bg-[#5B6E2C] font-semibold'
-                      : isDarkHero
-                      ? 'text-white/80 hover:text-white hover:bg-white/10'
                       : 'text-[#20271D] hover:text-[#5B6E2C] hover:bg-[rgba(91,110,44,0.08)]'
                   }`}
-                  aria-expanded={labDropdownOpen}
+                  aria-expanded={moreDropdownOpen}
                 >
-                  <span>Lab &amp; Tools</span>
+                  <span>More</span>
                   <ChevronDown
                     className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                      labDropdownOpen ? 'rotate-180' : 'opacity-60'
+                      moreDropdownOpen ? 'rotate-180' : 'opacity-60'
                     }`}
                   />
                 </button>
 
-                {/* Dropdown Menu */}
-                {labDropdownOpen && (
+                {moreDropdownOpen && (
                   <div
-                    onMouseLeave={() => setLabDropdownOpen(false)}
-                    className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-72 rounded-2xl bg-[#F3F6F4] text-[#20271D] border border-[rgba(91,110,44,0.2)] shadow-2xl p-2 flex flex-col gap-1 z-[110] animate-in fade-in slide-in-from-top-2 duration-150"
+                    onMouseLeave={() => setMoreDropdownOpen(false)}
+                    className="absolute top-full mt-2 right-0 w-64 rounded-2xl bg-[#F3F6F4] text-[#20271D] border border-[rgba(91,110,44,0.2)] shadow-xl p-2 flex flex-col gap-1 z-[110] animate-in fade-in duration-150"
                   >
                     <div className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-[#7D8D39] border-b border-[rgba(91,110,44,0.12)] mb-1">
-                      Interactive Instruments
+                      Additional Tools
                     </div>
-                    {SECONDARY_LINKS.map((subItem) => {
+                    {MORE_TOOLS.map((subItem) => {
                       const Icon = subItem.icon
                       const isSubActive = pathname === subItem.href
                       return (
                         <Link
                           key={subItem.href}
                           href={subItem.href}
-                          className={`p-2.5 rounded-xl flex items-start gap-3 transition-colors ${
+                          className={`p-2.5 rounded-xl flex items-start gap-2.5 transition-colors ${
                             isSubActive
                               ? 'bg-[rgba(91,110,44,0.12)] text-[#5B6E2C]'
                               : 'hover:bg-white text-[#20271D]'
                           }`}
                         >
                           <div
-                            className={`p-1.5 rounded-lg ${
+                            className={`p-1.5 rounded-lg shrink-0 ${
                               isSubActive
                                 ? 'bg-[#5B6E2C] text-white'
                                 : 'bg-[rgba(91,110,44,0.08)] text-[#5B6E2C]'
@@ -218,7 +188,7 @@ export function Navbar() {
                             <span className="text-xs font-semibold leading-tight">
                               {subItem.label}
                             </span>
-                            <span className="text-[10px] text-[#737B70] leading-snug mt-0.5">
+                            <span className="text-[10px] text-[#737B70] leading-tight mt-0.5">
                               {subItem.desc}
                             </span>
                           </div>
@@ -230,98 +200,123 @@ export function Navbar() {
               </div>
             </nav>
 
-            {/* Right: Scientific Status & Grocery Ledger */}
-            <div className="flex items-center gap-3">
-              {/* Live Scientific Database Badge (Desktop) */}
-              <div
-                className={`hidden sm:flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-mono border ${
-                  isDarkHero
-                    ? 'bg-white/10 border-white/20 text-[#A3B18A]'
-                    : 'bg-[rgba(125,141,57,0.1)] border-[rgba(91,110,44,0.2)] text-[#5B6E2C]'
-                }`}
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-[#7D8D39] animate-pulse" />
-                <span className="font-medium">ICMR Verified</span>
-              </div>
-
-              {/* Grocery Basket Button */}
+            {/* Right: Basket Button & Mobile Hamburger */}
+            <div className="flex items-center gap-2.5">
               <Link
                 href="/basket"
-                className={`relative flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 shadow-xs ${
+                className={`relative px-3.5 py-1.5 rounded-full text-xs font-semibold flex items-center gap-2 transition-all duration-200 border shadow-2xs ${
                   pathname === '/basket'
                     ? 'bg-[#FF5A22] text-white border-[#FF5A22]'
-                    : isDarkHero
-                    ? 'bg-white/10 text-white border-white/30 hover:bg-white/20'
-                    : 'bg-[#F3F6F4] text-[#20271D] border-[rgba(91,110,44,0.25)] hover:border-[#5B6E2C] hover:bg-white'
+                    : 'bg-white hover:bg-[#F3F6F4] text-[#20271D] border-[rgba(91,110,44,0.2)] hover:border-[#5B6E2C]'
                 }`}
-                aria-label="View Grocery Basket"
+                aria-label={`Basket with ${totalBasketCount} items`}
               >
-                <ShoppingBag className="w-3.5 h-3.5" />
-                <span className="hidden md:inline font-mono">Basket</span>
+                <ShoppingBag className="w-4 h-4 text-[#5B6E2C]" />
+                <span className="hidden sm:inline">Basket</span>
                 {totalBasketCount > 0 && (
-                  <span className="w-4 h-4 rounded-full bg-[#FF5A22] text-white text-[10px] font-bold font-mono flex items-center justify-center -ml-0.5">
+                  <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-[#FF5A22] text-white">
                     {totalBasketCount}
                   </span>
                 )}
               </Link>
 
-              {/* Mobile Hamburger Trigger */}
+              {/* Mobile Menu Button */}
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className={`lg:hidden p-2 rounded-full focus:outline-hidden transition-colors ${
-                  isDarkHero ? 'text-white hover:bg-white/10' : 'text-[#20271D] hover:bg-[rgba(91,110,44,0.1)]'
-                }`}
-                aria-label={mobileMenuOpen ? 'Close Menu' : 'Open Menu'}
+                className="xl:hidden p-2 rounded-full text-[#20271D] hover:bg-white border border-[rgba(91,110,44,0.2)] transition-colors"
+                aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={mobileMenuOpen}
               >
-                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Fullscreen Mobile Navigation Overlay */}
+      {/* 
+        Mobile Navigation Overlay Drawer
+        Clean, elegant, light-first botanical design with clear links
+      */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-[95] bg-[#F3F6F4] flex flex-col justify-between pt-28 pb-8 px-6 lg:hidden overflow-y-auto animate-in fade-in duration-200">
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-[#7D8D39] mb-3">
-              MacroSnap Navigation Index
-            </span>
-
-            {[...PRIMARY_LINKS, ...SECONDARY_LINKS].map((link, idx) => {
-              const isActive = pathname === link.href
-              const Icon = link.icon
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`text-xl font-display py-3 px-3.5 rounded-xl flex items-center justify-between border-b border-[rgba(91,110,44,0.1)] transition-all ${
-                    isActive
-                      ? 'text-[#5B6E2C] font-bold bg-[rgba(91,110,44,0.08)] pl-4'
-                      : 'text-[#20271D] hover:text-[#5B6E2C]'
-                  }`}
-                  style={{ animationDelay: `${idx * 30}ms` }}
+        <div className="fixed inset-0 z-[90] xl:hidden bg-black/30 backdrop-blur-xs flex flex-col justify-end animate-in fade-in duration-200">
+          <div className="w-full bg-[#F3F6F4] rounded-t-3xl border-t border-[rgba(91,110,44,0.25)] p-6 max-h-[85vh] overflow-y-auto shadow-2xl flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between pb-4 border-b border-[rgba(91,110,44,0.15)] mb-4">
+                <span className="text-xs font-mono uppercase tracking-widest text-[#7D8D39]">
+                  Navigation Directory
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-1 rounded-full text-[#20271D] hover:bg-white"
+                  aria-label="Close menu"
                 >
-                  <div className="flex items-center gap-3">
-                    <Icon className="w-4 h-4 text-[#7D8D39]" />
-                    <span>{link.label}</span>
-                  </div>
-                  <ArrowUpRight className="w-4 h-4 opacity-50" />
-                </Link>
-              )
-            })}
-          </div>
-
-          <div className="pt-6 mt-6 border-t border-[rgba(91,110,44,0.18)]">
-            <div className="p-4 rounded-2xl bg-[rgba(125,141,57,0.08)] border border-[rgba(91,110,44,0.18)] flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-[#20271D]">Evidence-Based Nutrition</p>
-                <p className="text-[11px] text-[#737B70]">
-                  ICMR-NIN IFCT 2017 &amp; Mandi wholesale economic data
-                </p>
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-              <Sparkles className="w-5 h-5 text-[#7D8D39]" />
+
+              {/* Main Links */}
+              <div className="space-y-1">
+                {NAV_LINKS.map((link) => {
+                  const isActive = pathname === link.href
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`block px-4 py-2.5 rounded-xl text-base font-medium transition-colors ${
+                        isActive
+                          ? 'bg-[#5B6E2C] text-[#F3F6F4] font-semibold'
+                          : 'text-[#20271D] hover:bg-white'
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  )
+                })}
+              </div>
+
+              {/* Secondary Tools */}
+              <div className="pt-4 mt-4 border-t border-[rgba(91,110,44,0.15)]">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-[#737B70] block px-4 mb-2">
+                  Interactive Tools
+                </span>
+                <div className="grid grid-cols-1 gap-1">
+                  {MORE_TOOLS.map((tool) => {
+                    const Icon = tool.icon
+                    const isSubActive = pathname === tool.href
+                    return (
+                      <Link
+                        key={tool.href}
+                        href={tool.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`flex items-center gap-3 px-4 py-2 rounded-xl text-sm transition-colors ${
+                          isSubActive
+                            ? 'bg-[#5B6E2C] text-white font-semibold'
+                            : 'text-[#20271D] hover:bg-white'
+                        }`}
+                      >
+                        <Icon className="w-4 h-4 text-[#5B6E2C]" />
+                        <span>{tool.label}</span>
+                      </Link>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Basket Link in Mobile Drawer */}
+            <div className="pt-6 mt-6 border-t border-[rgba(91,110,44,0.15)]">
+              <Link
+                href="/basket"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full py-3 rounded-full bg-[#5B6E2C] text-[#F3F6F4] text-sm font-semibold flex items-center justify-center gap-2 shadow-md"
+              >
+                <ShoppingBag className="w-4 h-4" />
+                <span>Open Grocery Basket ({totalBasketCount} items)</span>
+              </Link>
             </div>
           </div>
         </div>

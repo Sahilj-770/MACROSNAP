@@ -1,67 +1,20 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Volume2, VolumeX, Sparkles, ArrowRight, ChevronDown } from 'lucide-react'
+import { ArrowRight, Sparkles, ChevronDown, CheckCircle2 } from 'lucide-react'
 
 export function FernhollowBotanicalHero() {
   const [uiLoaded, setUiLoaded] = useState(false)
-  const [isMuted, setIsMuted] = useState(true)
-  const [isHoveringGo, setIsHoveringGo] = useState(false)
-  const audioContextRef = useRef<AudioContext | null>(null)
-  const gainNodeRef = useRef<GainNode | null>(null)
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setUiLoaded(true)
-    }, 200)
+    }, 150)
     return () => clearTimeout(timer)
   }, [])
 
-  // Audio Ambient Synthesizer (Generates calming ambient botanical drone)
-  const toggleSound = () => {
-    if (!audioContextRef.current) {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
-      const ctx = new AudioCtx()
-      audioContextRef.current = ctx
-
-      const osc1 = ctx.createOscillator()
-      const osc2 = ctx.createOscillator()
-      const gain = ctx.createGain()
-      gainNodeRef.current = gain
-
-      osc1.type = 'sine'
-      osc1.frequency.setValueAtTime(174, ctx.currentTime) // Solfeggio 174 Hz foundation
-      osc2.type = 'triangle'
-      osc2.frequency.setValueAtTime(261.63, ctx.currentTime) // Middle C harmonic
-
-      gain.gain.setValueAtTime(0.06, ctx.currentTime)
-
-      osc1.connect(gain)
-      osc2.connect(gain)
-      gain.connect(ctx.destination)
-
-      osc1.start()
-      osc2.start()
-      setIsMuted(false)
-    } else {
-      const ctx = audioContextRef.current
-      const gain = gainNodeRef.current
-      if (ctx.state === 'suspended') {
-        ctx.resume()
-        gain?.gain.setTargetAtTime(0.06, ctx.currentTime, 0.1)
-        setIsMuted(false)
-      } else if (isMuted) {
-        gain?.gain.setTargetAtTime(0.06, ctx.currentTime, 0.1)
-        setIsMuted(false)
-      } else {
-        gain?.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.1)
-        setIsMuted(true)
-      }
-    }
-  }
-
-  const scrollToJourney = () => {
+  const scrollToContent = () => {
     const nextSection = document.getElementById('food-intelligence')
     if (nextSection) {
       nextSection.scrollIntoView({ behavior: 'smooth' })
@@ -69,106 +22,147 @@ export function FernhollowBotanicalHero() {
   }
 
   return (
-    <section className="relative w-full min-h-[95vh] flex flex-col justify-between items-center select-none text-[#F3F6F4] pt-24 pb-12 px-6 sm:px-12 overflow-hidden">
-      {/* Background Soft Shadow Vignette (Ensures deep contrast on spores) */}
+    <section className="relative w-full min-h-[92vh] flex flex-col justify-between items-center select-none text-[#20271D] pt-32 pb-12 px-6 sm:px-12 overflow-hidden bg-[#F3F6F4]">
+      {/* 
+        Natural Light Botanical Wash 
+        Soft morning sunlight diffused through olive and sage botanical foliage
+      */}
       <div
         className="absolute inset-0 pointer-events-none z-0"
         style={{
           background:
-            'radial-gradient(ellipse 80% 65% at 50% 45%, rgba(32, 39, 29, 0.72) 0%, rgba(13, 17, 11, 0.94) 85%)',
+            'radial-gradient(ellipse 75% 55% at 50% 30%, rgba(255, 255, 255, 0.85) 0%, rgba(243, 246, 244, 0.4) 65%, rgba(220, 228, 216, 0.25) 100%)',
         }}
         aria-hidden="true"
       />
 
-      {/* Seamless bottom transition into Soft White page background (#F3F6F4) */}
+      {/* Decorative Natural Light Botanical Leaf Silhouette (Restrained SVG accents) */}
       <div
-        className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none z-1"
-        style={{
-          background: 'linear-gradient(180deg, rgba(13, 17, 11, 0) 0%, #F3F6F4 100%)',
-        }}
+        className="absolute top-16 -left-20 w-80 h-80 rounded-full bg-[rgba(125,141,57,0.1)] blur-3xl pointer-events-none"
+        aria-hidden="true"
+      />
+      <div
+        className="absolute top-36 -right-20 w-96 h-96 rounded-full bg-[rgba(91,110,44,0.08)] blur-3xl pointer-events-none"
         aria-hidden="true"
       />
 
-      {/* Floating Center Hero Typography (Exact Fernhollow condensed style) */}
+      {/* Center Hero Editorial Content */}
       <div
         className={`relative z-10 my-auto text-center flex flex-col items-center max-w-4xl mx-auto px-4 transition-all duration-1000 ${
           uiLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
         }`}
       >
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 text-[#A3B18A] text-xs font-mono tracking-widest uppercase mb-6 backdrop-blur-sm border border-white/15 shadow-xs">
+        {/* Curated Botanical Badge */}
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 text-[#5B6E2C] text-xs font-mono tracking-widest uppercase mb-6 backdrop-blur-xs border border-[rgba(91,110,44,0.2)] shadow-2xs">
           <Sparkles className="w-3.5 h-3.5 text-[#FF5A22]" />
-          <span>Biological Food Values &amp; Rupee Economics</span>
+          <span>Indian Nutrition Intelligence &bull; ICMR-NIN IFCT 2017</span>
         </div>
 
-        <h1 className="font-display text-6xl sm:text-8xl lg:text-9xl font-normal tracking-tight text-[#F3F6F4] leading-[0.92] mb-6">
+        {/* Master Headline: Instrument Serif */}
+        <h1 className="font-display text-5xl sm:text-7xl lg:text-8xl font-normal tracking-tight text-[#20271D] leading-[0.96] mb-6">
           Know what you eat.
         </h1>
 
-        <p className="text-base sm:text-xl text-[#F3F6F4]/85 font-sans leading-relaxed max-w-xl mb-10">
-          Rooted in nature. Verified by ICMR-NIN science. <br />
-          Benchmarking authentic Indian staples against synthetic gym marketing.
+        {/* Clear, Human Editorial Subcopy */}
+        <p className="text-base sm:text-xl text-[#737B70] font-sans leading-relaxed max-w-2xl mb-10">
+          Discover the true nutritional value and rupee-to-protein economics of authentic Indian staples.
+          We benchmark real whole foods against expensive commercial marketing with transparent science.
         </p>
 
-        {/* Magnetic Circular Arrow Button with Hover Transition */}
+        {/* Carefully Positioned CTA Buttons */}
         <div className="flex flex-col sm:flex-row items-center gap-4">
           <Link
             href="/explore"
-            onPointerEnter={() => setIsHoveringGo(true)}
-            onPointerLeave={() => setIsHoveringGo(false)}
-            className="flex items-center gap-4 px-7 py-3.5 rounded-full bg-[#5B6E2C] text-[#F3F6F4] text-sm font-semibold tracking-wide hover:bg-[#7D8D39] hover:shadow-xl transition-all duration-300 group border border-[#7D8D39]/50"
+            className="flex items-center gap-3 px-8 py-3.5 rounded-full bg-[#5B6E2C] hover:bg-[#7D8D39] text-[#F3F6F4] text-sm font-semibold tracking-wide shadow-md transition-all duration-300 group"
           >
-            <span>Open Book Archive</span>
-            <div className="w-7 h-7 rounded-full bg-white/15 flex items-center justify-center transition-transform group-hover:translate-x-1">
-              <ArrowRight className="w-4 h-4 text-[#F3F6F4]" />
+            <span>Explore Foods</span>
+            <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center transition-transform group-hover:translate-x-1">
+              <ArrowRight className="w-3.5 h-3.5 text-white" />
             </div>
           </Link>
 
-          <button
-            type="button"
-            onClick={scrollToJourney}
-            className="px-6 py-3.5 rounded-full bg-white/10 text-[#F3F6F4] text-sm font-medium hover:bg-white/20 transition-all border border-white/20"
+          <Link
+            href="/calculator"
+            className="px-7 py-3.5 rounded-full bg-white text-[#20271D] hover:bg-[#F3F6F4] text-sm font-medium transition-all duration-200 border border-[rgba(91,110,44,0.25)] shadow-2xs hover:border-[#5B6E2C]"
           >
-            Explore Living Journey
-          </button>
+            Calculate Your Needs
+          </Link>
+
+          <Link
+            href="/budget"
+            className="px-6 py-3.5 rounded-full bg-transparent text-[#5B6E2C] hover:text-[#20271D] text-sm font-medium transition-colors"
+          >
+            Protein on Budget &rarr;
+          </Link>
+        </div>
+
+        {/* Real Food Highlights in Natural Light */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-12 w-full max-w-3xl pt-8 border-t border-[rgba(91,110,44,0.15)]">
+          <div className="p-3.5 rounded-2xl bg-white/80 border border-[rgba(91,110,44,0.15)] text-left shadow-2xs">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#737B70] block">
+              Soya Chunks
+            </span>
+            <strong className="font-display text-xl sm:text-2xl font-bold text-[#5B6E2C]">
+              ₹2.31
+              <span className="text-xs font-sans font-normal text-[#737B70]"> / 10g</span>
+            </strong>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-white/80 border border-[rgba(91,110,44,0.15)] text-left shadow-2xs">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#737B70] block">
+              Yellow Moong Dal
+            </span>
+            <strong className="font-display text-xl sm:text-2xl font-bold text-[#5B6E2C]">
+              ₹6.25
+              <span className="text-xs font-sans font-normal text-[#737B70]"> / 10g</span>
+            </strong>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-white/80 border border-[rgba(91,110,44,0.15)] text-left shadow-2xs">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#737B70] block">
+              Roasted Chana
+            </span>
+            <strong className="font-display text-xl sm:text-2xl font-bold text-[#5B6E2C]">
+              ₹6.67
+              <span className="text-xs font-sans font-normal text-[#737B70]"> / 10g</span>
+            </strong>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-white/80 border border-[rgba(91,110,44,0.15)] text-left shadow-2xs">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#737B70] block">
+              Whole Eggs
+            </span>
+            <strong className="font-display text-xl sm:text-2xl font-bold text-[#5B6E2C]">
+              ₹9.68
+              <span className="text-xs font-sans font-normal text-[#737B70]"> / 10g</span>
+            </strong>
+          </div>
         </div>
       </div>
 
-      {/* Bottom Controls Bar (Scroll to Wander & Ambient Sound) */}
+      {/* Bottom Editorial Trust Bar */}
       <div
-        className={`relative z-10 flex items-center justify-between w-full max-w-6xl mx-auto text-xs font-mono tracking-widest uppercase text-white/70 pt-8 transition-opacity duration-1000 ${
+        className={`relative z-10 flex flex-col sm:flex-row items-center justify-between w-full max-w-6xl mx-auto text-xs font-mono tracking-wider uppercase text-[#737B70] pt-6 transition-opacity duration-1000 gap-3 border-t border-[rgba(91,110,44,0.12)] ${
           uiLoaded ? 'opacity-100' : 'opacity-0'
         }`}
       >
         <div className="flex items-center gap-3">
-          <span className="text-[#FF5A22] font-bold">ICMR-NIN IFCT 2017</span>
-          <span className="hidden sm:inline text-white/30">&bull;</span>
-          <span className="hidden sm:inline">100% TRANSPARENT SCIENCE</span>
+          <span className="text-[#5B6E2C] font-semibold flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-[#7D8D39]" />
+            National Institute of Nutrition (ICMR)
+          </span>
+          <span className="hidden sm:inline text-[#7D8D39]">&bull;</span>
+          <span className="hidden sm:inline">100% Independent Public Data</span>
         </div>
 
-        <div className="flex items-center gap-4">
-          <button
-            type="button"
-            onClick={scrollToJourney}
-            className="group flex items-center gap-2 text-white/80 hover:text-white transition-colors"
-          >
-            <span className="hidden sm:inline">Scroll to wander</span>
-            <ChevronDown className="w-4 h-4 text-[#7D8D39] animate-bounce" />
-          </button>
-          <div className="w-[1px] h-4 bg-white/20 hidden sm:inline" />
-          <button
-            type="button"
-            onClick={toggleSound}
-            className="p-2 rounded-full border border-white/25 hover:border-white text-white transition-all flex items-center gap-2 bg-black/20 backdrop-blur-xs"
-            aria-label={isMuted ? 'Unmute ambient sound' : 'Mute ambient sound'}
-          >
-            {isMuted ? (
-              <VolumeX className="w-4 h-4" />
-            ) : (
-              <Volume2 className="w-4 h-4 text-[#7D8D39]" />
-            )}
-            <span className="text-[10px] hidden sm:inline">{isMuted ? 'Audio Off' : 'Sound On'}</span>
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={scrollToContent}
+          className="group flex items-center gap-2 text-[#5B6E2C] hover:text-[#20271D] transition-colors cursor-pointer"
+        >
+          <span>Scroll to explore</span>
+          <ChevronDown className="w-4 h-4 text-[#7D8D39] animate-bounce" />
+        </button>
       </div>
     </section>
   )

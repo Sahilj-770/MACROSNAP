@@ -59,15 +59,15 @@ def main():
     time.sleep(0.5)
     page.click("button:has-text('Athlete')")
     time.sleep(0.3)
-    page.click("button:has-text('Save Target to MacroSnap Basket')")
+    page.click("button:has-text('Save Target to Grocery Basket')")
     time.sleep(0.3)
     page.screenshot(path="qa_screenshots/interactive_calculator_active.png")
     print("Verified: Calculator Interactive Dials & Goal Save")
 
-    # C. Labels: Click Hotspot 3 (Maltitol)
+    # C. Labels: Click Hotspot 3 (Maltitol / Zero Added Sugar)
     page.goto("http://localhost:3000/labels", wait_until="networkidle")
     time.sleep(0.5)
-    page.click("button:has-text('ZONE 03')")
+    page.click("text='ZERO ADDED SUGAR'")
     time.sleep(0.3)
     page.screenshot(path="qa_screenshots/interactive_labels_maltitol.png")
     print("Verified: Foil Pack Label Decoder Hotspot Switch")
@@ -108,7 +108,7 @@ def main():
       # Test mobile hamburger menu
       if vp_name == 'mobile':
         pg.goto("http://localhost:3000/", wait_until="networkidle")
-        pg.click("button[aria-label='Open Menu']")
+        pg.click("button[aria-label='Open menu'], button[aria-label='Open Menu']")
         time.sleep(0.4)
         pg.screenshot(path="qa_screenshots/mobile_menu_open.png")
         print("Verified: Mobile Menu Overlay Staggered Transition")
