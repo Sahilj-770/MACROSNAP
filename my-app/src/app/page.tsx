@@ -4,6 +4,7 @@ import React from 'react'
 import { UnifiedBotanicalCanvas } from '@/components/home/UnifiedBotanicalCanvas'
 import { ReelmarkBotanicalHero } from '@/components/home/ReelmarkBotanicalHero'
 import { FoodIntelligence } from '@/components/home/FoodIntelligence'
+import { FoodDiscoveryTeaser } from '@/components/home/FoodDiscoveryTeaser'
 import { BudgetRibbonTeaser } from '@/components/home/BudgetRibbonTeaser'
 import { CalculatorTeaser } from '@/components/home/CalculatorTeaser'
 import { MythBustersTeaser } from '@/components/home/MythBustersTeaser'
@@ -34,6 +35,9 @@ export default function HomePage() {
 
       {/* Chapter I: Biological Truth & Standardized Yield */}
       <FoodIntelligence />
+
+      {/* Chapter I.5: Living Food Archive Discovery Preview */}
+      <FoodDiscoveryTeaser />
 
       {/* Chapter II: Rupee-to-Protein Economics & Value Podium */}
       <BudgetRibbonTeaser />
