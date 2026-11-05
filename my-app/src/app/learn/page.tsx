@@ -7,13 +7,9 @@ import {
   CheckCircle2,
   XCircle,
   Sparkles,
-  BookOpen,
-  ArrowRight,
-  ShieldCheck,
-  Check,
   FileText,
-  HelpCircle,
 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { FOOD_MYTHS } from '@/data/recipes-and-lessons'
 import { CurtainSplitHero } from '@/components/ui/curtain-split-hero'
 
@@ -34,11 +30,12 @@ export default function LearnPage() {
   })
 
   return (
-    <div className="relative w-full bg-[#F3F6F4] text-[#101410] pt-24 pb-24">
+    <div className="relative w-full bg-[#F3F6F4] text-[#101410] pt-20 pb-24">
       {/* 
         ========================================================================
         CURTAIN SPLIT HERO COMPONENT
         Two groups of authentic food photography panels pull apart horizontally
+        with hardware-accelerated 60/120fps GPU kinematics.
         ========================================================================
       */}
       <CurtainSplitHero onExploreClick={scrollToDossiers} />
@@ -156,59 +153,69 @@ export default function LearnPage() {
                   </div>
                 </button>
 
-                {/* Expanded Clinical Dossier Body */}
-                {isExpanded && (
-                  <div className="p-6 sm:p-8 pt-0 border-t border-[#5B6E2C]/10 space-y-6 animate-in fade-in duration-300">
-                    
-                    {/* Myth vs Fact Two-Column Bento */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                      <div className="p-5 rounded-2xl bg-[#FF5A22]/5 border border-[#FF5A22]/20">
-                        <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#FF5A22] uppercase tracking-wider mb-2">
-                          <XCircle className="w-4 h-4" />
-                          <span>The Deceptive Claim</span>
+                {/* Expanded Clinical Dossier Body with silky smooth motion */}
+                <AnimatePresence initial={false}>
+                  {isExpanded && (
+                    <motion.div
+                      key={`content-${myth.id}`}
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+                      className="overflow-hidden"
+                    >
+                      <div className="p-6 sm:p-8 pt-0 border-t border-[#5B6E2C]/10 space-y-6">
+                        {/* Myth vs Fact Two-Column Bento */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                          <div className="p-5 rounded-2xl bg-[#FF5A22]/5 border border-[#FF5A22]/20">
+                            <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#FF5A22] uppercase tracking-wider mb-2">
+                              <XCircle className="w-4 h-4" />
+                              <span>The Deceptive Claim</span>
+                            </div>
+                            <p className="text-xs sm:text-sm text-[#5E5E61] leading-relaxed">
+                              {myth.myth}
+                            </p>
+                          </div>
+
+                          <div className="p-5 rounded-2xl bg-[#5B6E2C]/5 border border-[#5B6E2C]/25">
+                            <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#08482D] uppercase tracking-wider mb-2">
+                              <CheckCircle2 className="w-4 h-4" />
+                              <span>The Biochemical Reality</span>
+                            </div>
+                            <p className="text-xs sm:text-sm text-[#101410] font-medium leading-relaxed">
+                              {myth.theTruth}
+                            </p>
+                          </div>
                         </div>
-                        <p className="text-xs sm:text-sm text-[#5E5E61] leading-relaxed">
-                          {myth.myth}
-                        </p>
-                      </div>
 
-                      <div className="p-5 rounded-2xl bg-[#5B6E2C]/5 border border-[#5B6E2C]/25">
-                        <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#08482D] uppercase tracking-wider mb-2">
-                          <CheckCircle2 className="w-4 h-4" />
-                          <span>The Biochemical Reality</span>
+                        {/* Scientific Context Box */}
+                        <div className="p-5 rounded-2xl bg-[#F3F6F4] border border-[#5B6E2C]/15">
+                          <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#7D8D39] uppercase tracking-wider mb-2">
+                            <FileText className="w-3.5 h-3.5" />
+                            <span>Clinical Trial & Physiological Analysis</span>
+                          </div>
+                          <p className="text-xs sm:text-sm text-[#5E5E61] leading-relaxed">
+                            {myth.scientificContext}
+                          </p>
                         </div>
-                        <p className="text-xs sm:text-sm text-[#101410] font-medium leading-relaxed">
-                          {myth.theTruth}
-                        </p>
+
+                        {/* Practical Takeaway Card */}
+                        <div className="p-4 sm:p-5 rounded-2xl bg-[#08482D]/10 border border-[#08482D]/20 text-[#101410]">
+                          <strong className="text-xs font-mono uppercase tracking-wider text-[#08482D] block mb-1">
+                            Practical Kitchen Rule:
+                          </strong>
+                          <p className="text-xs sm:text-sm leading-relaxed">{myth.practicalTakeaway}</p>
+                        </div>
+
+                        {/* Source Citation */}
+                        <div className="flex items-center justify-between text-[11px] font-mono text-[#737B70] pt-3 border-t border-[#5B6E2C]/10">
+                          <span>Primary Scientific Citation:</span>
+                          <span className="font-semibold text-[#101410] text-right">{myth.source}</span>
+                        </div>
                       </div>
-                    </div>
-
-                    {/* Scientific Context Box */}
-                    <div className="p-5 rounded-2xl bg-[#F3F6F4] border border-[#5B6E2C]/15">
-                      <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#7D8D39] uppercase tracking-wider mb-2">
-                        <FileText className="w-3.5 h-3.5" />
-                        <span>Clinical Trial & Physiological Analysis</span>
-                      </div>
-                      <p className="text-xs sm:text-sm text-[#5E5E61] leading-relaxed">
-                        {myth.scientificContext}
-                      </p>
-                    </div>
-
-                    {/* Practical Takeaway Card */}
-                    <div className="p-4 sm:p-5 rounded-2xl bg-[#08482D]/10 border border-[#08482D]/20 text-[#101410]">
-                      <strong className="text-xs font-mono uppercase tracking-wider text-[#08482D] block mb-1">
-                        Practical Kitchen Rule:
-                      </strong>
-                      <p className="text-xs sm:text-sm leading-relaxed">{myth.practicalTakeaway}</p>
-                    </div>
-
-                    {/* Source Citation */}
-                    <div className="flex items-center justify-between text-[11px] font-mono text-[#737B70] pt-3 border-t border-[#5B6E2C]/10">
-                      <span>Primary Scientific Citation:</span>
-                      <span className="font-semibold text-[#101410] text-right">{myth.source}</span>
-                    </div>
-                  </div>
-                )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             )
           })}
