@@ -286,19 +286,19 @@ export function ReelmarkBotanicalHero() {
           Transparent rupee-to-protein economics, verified by clinical scientific standards.
         </p>
 
-        {/* Handwritten Note: "100% verified / by ICMR-NIN" rotated 16° in clear right shoulder */}
+        {/* Handwritten Note: "100% verified / by ICMR-NIN" rotated 16° in clear right shoulder at (1212, 335) */}
         <div
-          className={`hidden xl:flex flex-col items-center absolute right-[calc(28*var(--u))] top-[calc(195*var(--u))] z-20 pointer-events-none transition-all duration-1000 delay-500 ${
+          className={`hidden xl:flex flex-col items-center absolute right-[calc(24*var(--u))] 2xl:right-[calc(40*var(--u))] top-[calc(335*var(--u))] z-20 pointer-events-none transition-all duration-1000 delay-500 ${
             mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           }`}
           style={{ transform: 'rotate(16deg)' }}
         >
-          <span className="font-caveat font-bold text-[#08482D] text-[calc(26*var(--u))] leading-tight text-center whitespace-nowrap">
+          <span className="font-caveat font-bold text-[#08482D] text-[calc(24*var(--u))] leading-tight text-center whitespace-nowrap">
             100% verified <br /> by ICMR-NIN
           </span>
           {/* Long Curving Arrow Down to Cards */}
           <svg
-            className="w-[calc(90*var(--u))] h-[calc(80*var(--u))] text-[#08482D] mt-1"
+            className="w-[calc(80*var(--u))] h-[calc(75*var(--u))] text-[#08482D] mt-1"
             viewBox="0 0 100 90"
             fill="none"
             stroke="currentColor"
