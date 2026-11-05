@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { UnifiedBotanicalCanvas } from '@/components/home/UnifiedBotanicalCanvas'
-import { FernhollowBotanicalHero } from '@/components/home/FernhollowBotanicalHero'
+import { ReelmarkBotanicalHero } from '@/components/home/ReelmarkBotanicalHero'
 import { FoodIntelligence } from '@/components/home/FoodIntelligence'
 import { BudgetRibbonTeaser } from '@/components/home/BudgetRibbonTeaser'
 import { CalculatorTeaser } from '@/components/home/CalculatorTeaser'
@@ -29,8 +29,8 @@ export default function HomePage() {
         aria-hidden="true"
       />
 
-      {/* Hero Chapter: Botanical Valley Origin */}
-      <FernhollowBotanicalHero />
+      {/* Hero Chapter: Reelmark-Inspired Cylindrical Curved Carousel Hero */}
+      <ReelmarkBotanicalHero />
 
       {/* Chapter I: Biological Truth & Standardized Yield */}
       <FoodIntelligence />
