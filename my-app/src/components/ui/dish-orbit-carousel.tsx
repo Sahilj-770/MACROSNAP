@@ -348,13 +348,13 @@ const CSS =
 
   ".dsh-body{grid-area:1/1;visibility:hidden}" +
 
-  ".dsh-rate{position:relative;height:62px;margin:0 0 14px 6px}" +
+  ".dsh-rate{position:relative;display:inline-flex;margin:0 0 14px 6px}" +
 
-  ".dsh-badge{position:absolute;left:0;top:0;width:46px;height:62px;border-radius:10px}" +
+  ".dsh-badge{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;min-width:68px;height:64px;padding:4px 12px 6px;border-radius:12px;box-sizing:border-box}" +
 
-  ".dsh-badge svg{position:absolute;left:17px;bottom:9px;width:12px;height:12px;fill:var(--color-foreground);opacity:.8}" +
+  ".dsh-badge svg{width:13px;height:13px;margin-top:3px;fill:var(--color-foreground);opacity:.85}" +
 
-  ".dsh-num{position:absolute;left:10px;top:4px;font-size:36px;font-weight:700;letter-spacing:-.04em;line-height:1}" +
+  ".dsh-num{font-size:32px;font-weight:700;letter-spacing:-.03em;line-height:1;text-align:center;color:var(--color-foreground)}" +
 
   ".dsh-chef{font-size:19px;font-weight:600;letter-spacing:-.01em;margin:0}" +
 
@@ -999,11 +999,11 @@ export function DishOrbitCarousel({
 
                   <div className="dsh-badge" style={{ background: d.accent }}>
 
+                    <span className="dsh-num" aria-label={"Rated " + d.rating.toFixed(1) + " out of 5"}>{d.rating.toFixed(1)}</span>
+
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2.5 2.9 6 6.6.8-4.9 4.6 1.3 6.6L12 17.2l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z" /></svg>
 
                   </div>
-
-                  <span className="dsh-num" aria-label={"Rated " + d.rating.toFixed(1) + " out of 5"}>{d.rating.toFixed(1)}</span>
 
                 </div>
 
