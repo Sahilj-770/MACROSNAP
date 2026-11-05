@@ -4,22 +4,28 @@ import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Play, Sparkles, ArrowRight } from 'lucide-react'
 
-const VIDEO_URL = '/videos/food_reels_grid.mp4'
-const POSTER_URL = '/videos/food_reels_poster.webp'
-
-// 10 Indian Staples / Whole Food cards mapped to the 10 tiles of the 5x2 video grid
-const CARDS_DATA = [
-  { index: 0, staple: 'Soya Chunks', protein: '52g / 100g', cost: '₹2.31 / 10g', tag: 'High Yield' },
-  { index: 1, staple: 'Moong Dal', protein: '24g / 100g', cost: '₹6.25 / 10g', tag: 'Pantry Staple' },
-  { index: 2, staple: 'Roasted Sattu', protein: '22.5g / 100g', cost: '₹6.67 / 10g', tag: 'Zero Cooking' },
-  { index: 3, staple: 'Whole Eggs', protein: '13.3g / 100g', cost: '₹9.68 / 10g', tag: 'DIAAS 1.18' },
-  { index: 4, staple: 'Cow Paneer', protein: '18g / 100g', cost: '₹18.89 / 10g', tag: 'Dairy Matrix' },
-  { index: 5, staple: 'Firm Tofu', protein: '15g / 100g', cost: '₹14.71 / 10g', tag: 'Clean Plant' },
-  { index: 6, staple: 'Sprouted Chana', protein: '21g / 100g', cost: '₹7.10 / 10g', tag: 'Bioavailable' },
-  { index: 7, staple: 'Greek Dahi', protein: '10g / 100g', cost: '₹12.50 / 10g', tag: 'Probiotic' },
-  { index: 8, staple: 'Chicken Breast', protein: '22g / 100g', cost: '₹9.68 / 10g', tag: 'Lean Cut' },
-  { index: 9, staple: 'Roasted Peanuts', protein: '26g / 100g', cost: '₹7.69 / 10g', tag: 'Dense Energy' },
+// 10 Indian Whole-Food & Nutrition Staples
+const RAW_STAPLES = [
+  { id: 'soya-chunks', staple: 'Soya Chunks', protein: '52g / 100g', cost: '₹2.31 / 10g', tag: 'High Yield', image: '/images/food/food_0.webp' },
+  { id: 'moong-dal', staple: 'Moong Dal', protein: '24g / 100g', cost: '₹6.25 / 10g', tag: 'Pantry Staple', image: '/images/food/food_1.webp' },
+  { id: 'sattu', staple: 'Roasted Sattu', protein: '22.5g / 100g', cost: '₹6.67 / 10g', tag: 'Zero Cooking', image: '/images/food/food_2.webp' },
+  { id: 'eggs', staple: 'Whole Eggs', protein: '13.3g / 100g', cost: '₹9.68 / 10g', tag: 'DIAAS 1.18', image: '/images/food/food_3.webp' },
+  { id: 'paneer', staple: 'Cow Paneer', protein: '18g / 100g', cost: '₹18.89 / 10g', tag: 'Dairy Matrix', image: '/images/food/food_4.webp' },
+  { id: 'tofu', staple: 'Firm Tofu', protein: '15g / 100g', cost: '₹14.71 / 10g', tag: 'Clean Plant', image: '/images/food/food_5.webp' },
+  { id: 'chana', staple: 'Sprouted Chana', protein: '21g / 100g', cost: '₹7.10 / 10g', tag: 'Bioavailable', image: '/images/food/food_6.webp' },
+  { id: 'dahi', staple: 'Greek Dahi', protein: '10g / 100g', cost: '₹12.50 / 10g', tag: 'Probiotic', image: '/images/food/food_7.webp' },
+  { id: 'chicken', staple: 'Chicken Breast', protein: '22g / 100g', cost: '₹9.68 / 10g', tag: 'Lean Cut', image: '/images/food/food_8.webp' },
+  { id: 'peanuts', staple: 'Roasted Peanuts', protein: '26g / 100g', cost: '₹7.69 / 10g', tag: 'Dense Energy', image: '/images/food/food_9.webp' },
 ]
+
+// 20-card continuous loop: 2x seamless repetition ensures zero gaps across all screen widths
+const CARDS_DATA = [...RAW_STAPLES, ...RAW_STAPLES].map((item, idx) => ({
+  ...item,
+  uniqueIndex: idx,
+}))
+
+const CARD_PITCH = 190
+const TOTAL_PITCH = CARDS_DATA.length * CARD_PITCH // 3800u
 
 export function ReelmarkBotanicalHero() {
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -55,6 +61,13 @@ export function ReelmarkBotanicalHero() {
     }
     updateUnit()
     window.addEventListener('resize', updateUnit)
+
+    // Preload all 10 images into browser cache immediately for zero-latency scroll
+    RAW_STAPLES.forEach((item) => {
+      const img = new Image()
+      img.src = item.image
+    })
+
     const t = setTimeout(() => setMounted(true), 100)
     return () => {
       window.removeEventListener('resize', updateUnit)
@@ -84,19 +97,18 @@ export function ReelmarkBotanicalHero() {
         }
       }
 
-      const totalPitch = 1960 // 10 cards * 196u
-      state.offset = ((state.offset % totalPitch) + totalPitch) % totalPitch
+      state.offset = ((state.offset % TOTAL_PITCH) + TOTAL_PITCH) % TOTAL_PITCH
 
-      // Update positions of all 10 cards
-      for (let i = 0; i < 10; i++) {
+      // Update positions of all 20 cards
+      for (let i = 0; i < CARDS_DATA.length; i++) {
         const cardEl = cardRefs.current[i]
         const pathEl = pathRefs.current[i]
         if (!cardEl) continue
 
         // Unpushed offset t from center (720)
-        let rawT = ((i * 196 - state.offset) % totalPitch + totalPitch) % totalPitch
-        if (rawT > totalPitch / 2) {
-          rawT -= totalPitch
+        let rawT = ((i * CARD_PITCH - state.offset) % TOTAL_PITCH + TOTAL_PITCH) % TOTAL_PITCH
+        if (rawT > TOTAL_PITCH / 2) {
+          rawT -= TOTAL_PITCH
         }
         const t = rawT
 
@@ -104,8 +116,8 @@ export function ReelmarkBotanicalHero() {
         const tNorm = t / 706
         const x = 720 + t * (1 + 0.083 * Math.pow(tNorm, 2))
 
-        // Normalized distance from center (0 at 720, 1 at edges)
-        const d = Math.abs(x - 720) / 706
+        // Normalized distance from center (clamped so offscreen cards don't deform excessively)
+        const d = Math.min(Math.abs(x - 720) / 706, 1.45)
 
         // Card width
         const w = 170 + 48 * Math.pow(d, 2)
@@ -113,8 +125,8 @@ export function ReelmarkBotanicalHero() {
         const xRight = x + w / 2
 
         // Left & right edge heights
-        const qLeft = Math.abs(xLeft - 720) / 706
-        const qRight = Math.abs(xRight - 720) / 706
+        const qLeft = Math.min(Math.abs(xLeft - 720) / 706, 1.45)
+        const qRight = Math.min(Math.abs(xRight - 720) / 706, 1.45)
         const hLeft = 280 + 92 * Math.pow(qLeft, 2.6)
         const hRight = 280 + 92 * Math.pow(qRight, 2.6)
 
@@ -162,8 +174,8 @@ export function ReelmarkBotanicalHero() {
         cardEl.style.width = `calc(${w} * var(--u))`
         cardEl.style.height = `calc(${totalH} * var(--u))`
 
-        // Visibility culling for performance
-        if (x < -200 || x > 1640) {
+        // Visibility culling: generous offscreen bounds ensure cards are fully rendered before entering
+        if (x < -380 || x > 1920) {
           cardEl.style.display = 'none'
         } else {
           cardEl.style.display = 'block'
@@ -304,8 +316,8 @@ export function ReelmarkBotanicalHero() {
 
         {/* 
           ========================================================================
-          CYLINDRICAL CURVED CAROUSEL ROW (10 TALL VIDEO CARDS)
-          Draggable with momentum, continuous right->left auto-scroll
+          CYLINDRICAL CURVED CAROUSEL ROW (20 TALL DEDICATED FOOD CARDS)
+          Continuous infinite ribbon: exactly 1 image per tile, zero delay, zero gaps
           ========================================================================
         */}
         <div
@@ -318,12 +330,9 @@ export function ReelmarkBotanicalHero() {
           style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
         >
           {CARDS_DATA.map((card, idx) => {
-            const col = card.index % 5
-            const row = Math.floor(card.index / 5)
-
             return (
               <div
-                key={card.index}
+                key={card.uniqueIndex}
                 ref={(el) => {
                   cardRefs.current[idx] = el
                 }}
@@ -333,40 +342,23 @@ export function ReelmarkBotanicalHero() {
                   WebkitClipPath: `url(#card-clip-${idx})`,
                 }}
               >
-                {/* 5x2 Grid Video Offset Container */}
-                <div className="relative w-full h-full overflow-hidden bg-[#08482D]/20">
-                  {/* High-res Food Image Instant Fallback */}
+                {/* Dedicated Single Image Container Per Tile */}
+                <div className="relative w-full h-full overflow-hidden bg-[#08482D]/15">
                   <img
-                    src={`/images/food/food_${idx}.webp`}
+                    src={card.image}
                     alt={card.staple}
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-
-                  {/* Single Shared Food Motion Grid Video for all 10 cards */}
-                  <video
-                    src={VIDEO_URL}
-                    poster={POSTER_URL}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    className="absolute max-w-none pointer-events-none"
-                    style={{
-                      width: '500%',
-                      height: '200%',
-                      left: `-${col * 100}%`,
-                      top: `-${row * 100}%`,
-                      objectFit: 'cover',
-                    }}
+                    loading="eager"
+                    decoding="sync"
+                    className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none transition-transform duration-500 hover:scale-105"
                   />
 
                   {/* Frosted Play Icon at Card's Bottom-Left */}
-                  <div className="absolute left-3.5 bottom-3.5 z-20 w-8 h-8 rounded-full bg-white/60 backdrop-blur-md flex items-center justify-center text-[#08482D] shadow-xs">
+                  <div className="absolute left-3.5 bottom-3.5 z-20 w-8 h-8 rounded-full bg-white/70 backdrop-blur-md flex items-center justify-center text-[#08482D] shadow-xs">
                     <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
                   </div>
 
                   {/* Food Staple Label Pill at Top of Card */}
-                  <div className="absolute left-3 top-3 z-20 px-2 py-0.5 rounded-full bg-black/40 backdrop-blur-xs text-white text-[10px] font-mono tracking-wide">
+                  <div className="absolute left-3 top-3 z-20 px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-xs text-white text-[10px] font-mono tracking-wide shadow-xs">
                     {card.staple} &bull; {card.cost}
                   </div>
                 </div>
@@ -425,16 +417,11 @@ export function ReelmarkBotanicalHero() {
             mounted ? 'opacity-100 scale-100' : 'opacity-0 scale-90'
           }`}
         >
-          {/* Dashed Outline Ring (190u x 74u) */}
-          <div className="relative w-[190px] h-[74px] lg:w-[calc(190*var(--u))] lg:h-[calc(74*var(--u))] flex items-center justify-center">
-            <div
-              className="absolute inset-0 rounded-full border-2 border-dashed border-[#08482D]/40 pointer-events-none transition-transform duration-500 hover:scale-105"
-              aria-hidden="true"
-            />
-            {/* Main Forest-Green Pill (172u x 58u) */}
+          {/* Dashed Forest-Green Ring */}
+          <div className="relative p-2 rounded-full border border-dashed border-[#08482D]/40">
             <Link
               href="/explore"
-              className="w-[172px] h-[58px] lg:w-[calc(172*var(--u))] lg:h-[calc(58*var(--u))] rounded-full bg-[#08482D] hover:bg-[#5B6E2C] text-white text-sm lg:text-[calc(17*var(--u))] font-semibold flex items-center justify-center gap-2 shadow-md transition-all duration-300 hover:shadow-xl active:scale-95 group cursor-pointer"
+              className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-[#08482D] hover:bg-[#5B6E2C] text-[#F5F8EF] font-sans font-semibold text-sm lg:text-[calc(16*var(--u))] transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] group"
             >
               <span>Explore Foods</span>
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -445,4 +432,3 @@ export function ReelmarkBotanicalHero() {
     </section>
   )
 }
-export default ReelmarkBotanicalHero
