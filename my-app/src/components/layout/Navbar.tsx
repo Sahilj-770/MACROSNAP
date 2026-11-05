@@ -4,256 +4,328 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useUserStore } from '@/store/useUserStore'
-import { BotanicalLeaf } from '@/components/illustrations/BotanicalIllustrations'
 import {
   ShoppingBag,
-  Bookmark,
   Menu,
   X,
-  Compass,
-  Scale,
-  Wallet,
-  CookingPot,
-  Calculator,
+  ArrowUpRight,
+  Sparkles,
   BookOpen,
+  TrendingDown,
+  Calculator,
+  Compass,
+  Swords,
   ChefHat,
-  FileText,
-  ArrowRight
+  ScanLine,
+  ChevronDown,
 } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+
+const PRIMARY_LINKS = [
+  { href: '/explore', label: 'Book Archive', icon: BookOpen },
+  { href: '/budget', label: 'Economics', icon: TrendingDown },
+  { href: '/calculator', label: 'Calculator', icon: Calculator },
+  { href: '/learn', label: 'Myth Busters', icon: Compass },
+]
+
+const SECONDARY_LINKS = [
+  { href: '/compare', label: 'Nutritional Duel', desc: 'Side-by-side food showdown', icon: Swords },
+  { href: '/recipes', label: 'Whole Food Lab', desc: '15-min recipes with dynamic scaler', icon: ChefHat },
+  { href: '/kitchen', label: 'Pantry Matcher', desc: 'Cook with what you already have', icon: Sparkles },
+  { href: '/labels', label: 'Label Decoder', desc: 'UV forensic packaging scanner', icon: ScanLine },
+]
 
 export function Navbar() {
   const pathname = usePathname()
+  const [scrolled, setScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const basketCount = useUserStore((s) => s.basketItems.length)
-  const favoriteCount = useUserStore((s) => s.favoriteFoodIds.length + s.favoriteRecipeIds.length)
+  const [labDropdownOpen, setLabDropdownOpen] = useState(false)
+  const basketItems = useUserStore((state) => state.basketItems)
+  const totalBasketCount = basketItems.reduce(
+    (acc, item) => acc + (item.quantityGrams > 0 ? 1 : 0),
+    0
+  )
 
-  // Essential desktop navigation links
-  const navLinks = [
-    { href: '/explore', label: 'Explore', icon: Compass },
-    { href: '/compare', label: 'Compare', icon: Scale },
-    { href: '/budget', label: 'Budget', icon: Wallet },
-    { href: '/calculator', label: 'Calculator', icon: Calculator },
-    { href: '/recipes', label: 'Recipes', icon: CookingPot },
-  ]
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20)
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
-  // Secondary tools accessible in mobile drawer
-  const utilityTools = [
-    { href: '/learn', label: 'Nutrition Science', desc: 'ICMR-NIN evidence & research', icon: BookOpen },
-    { href: '/kitchen', label: 'Pantry Matcher', desc: 'Find meals with what you have', icon: ChefHat },
-    { href: '/labels', label: 'Label Decoder', desc: 'Unmask marketing claims', icon: FileText },
-  ]
-
-  // Close mobile drawer on route change
+  // Close menus on route change
   useEffect(() => {
     setMobileMenuOpen(false)
+    setLabDropdownOpen(false)
   }, [pathname])
 
-  // Accessibility: Handle Escape key to close mobile menu & lock body scroll
+  // Prevent background scroll when mobile menu is open
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && mobileMenuOpen) {
-        setMobileMenuOpen(false)
-      }
-    }
     if (mobileMenuOpen) {
       document.body.style.overflow = 'hidden'
-      window.addEventListener('keydown', handleKeyDown)
     } else {
-      document.body.style.overflow = ''
+      document.body.style.overflow = 'unset'
     }
     return () => {
-      document.body.style.overflow = ''
-      window.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = 'unset'
     }
   }, [mobileMenuOpen])
 
-  return (
-    <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#050B07]/90 backdrop-blur-xl text-cream transition-all">
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 sm:h-20 flex items-center justify-between gap-4">
-        {/* Brand Logo on the Left */}
-        <Link
-          href="/"
-          className="group flex items-center gap-2.5 sm:gap-3 rounded-2xl focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none transition-transform"
-        >
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/5 border border-white/15 flex items-center justify-center text-chartreuse shadow-sm group-hover:bg-chartreuse/10 group-hover:border-chartreuse/40 group-hover:scale-105 transition-all flex-shrink-0">
-            <BotanicalLeaf className="w-5 h-5 sm:w-6 sm:h-6 text-chartreuse" />
-          </div>
-          <span className="text-xl sm:text-2xl font-black tracking-tight text-white font-serif uppercase">
-            MACRO<span className="text-chartreuse">SNAP</span>
-          </span>
-        </Link>
+  const isSecondaryActive = SECONDARY_LINKS.some((item) => pathname === item.href)
+  const isDarkHero = (pathname === '/learn' || pathname === '/') && !scrolled
 
-        {/* Minimal Essential Navigation Links */}
-        <nav
-          className="hidden md:flex items-center gap-1 bg-white/[0.04] p-1.5 rounded-full border border-white/10"
-          aria-label="Main Navigation"
-        >
-          {navLinks.map((link) => {
-            const isActive = pathname === link.href
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`relative px-4 py-2 rounded-full text-xs font-mono font-bold uppercase tracking-wider transition-colors focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none ${
-                  isActive ? 'text-forest font-black' : 'text-cream/75 hover:text-white'
+  return (
+    <>
+      <header
+        className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${
+          scrolled
+            ? 'py-2.5 bg-[#F3F6F4]/95 backdrop-blur-md border-b border-[rgba(91,110,44,0.18)] shadow-xs'
+            : isDarkHero
+            ? 'py-4 sm:py-5 bg-transparent border-b border-white/10'
+            : 'py-4 sm:py-5 bg-[#F3F6F4]/80 backdrop-blur-xs border-b border-[rgba(91,110,44,0.08)]'
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            {/* Left: Brand Monogram & Logotype */}
+            <Link
+              href="/"
+              className="flex items-center gap-3 group focus:outline-hidden select-none"
+              aria-label="MacroSnap Home"
+            >
+              <div
+                className={`relative w-9 h-9 rounded-full flex items-center justify-center font-semibold text-sm transition-transform duration-300 group-hover:scale-105 shadow-xs border ${
+                  isDarkHero
+                    ? 'bg-[#5B6E2C] text-[#F3F6F4] border-white/30'
+                    : 'bg-[#5B6E2C] text-[#F3F6F4] border-[#7D8D39]/40'
                 }`}
               >
-                {isActive && (
-                  <motion.div
-                    layoutId="navbar-active-pill"
-                    className="absolute inset-0 bg-chartreuse rounded-full shadow-[0_0_15px_rgba(216,243,67,0.35)] -z-10"
-                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                  />
-                )}
-                <span>{link.label}</span>
-              </Link>
-            )
-          })}
-        </nav>
-
-        {/* Right Action: Prominent CTA & Compact Utilities */}
-        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-          {/* Subtle Saved Indicator (only if user saved items) */}
-          {favoriteCount > 0 && (
-            <Link
-              href="/library"
-              className="min-h-[44px] hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-full border border-white/10 bg-white/5 text-xs font-mono hover:border-chartreuse/40 text-cream/80 hover:text-white transition-all focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
-              title="Saved Items"
-              aria-label={`Saved collection, ${favoriteCount} items`}
-            >
-              <Bookmark className="w-4 h-4 text-chartreuse" />
-              <span className="min-w-[18px] h-4.5 px-1 rounded-full bg-chartreuse text-forest text-[10px] font-black flex items-center justify-center">
-                {favoriteCount}
-              </span>
-            </Link>
-          )}
-
-          {/* One Prominent CTA on the Right */}
-          <Link
-            href="/explore"
-            className="min-h-[44px] hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-full bg-chartreuse text-forest text-xs font-mono font-black uppercase tracking-wider hover:bg-white hover:scale-105 transition-all shadow-[0_0_20px_rgba(216,243,67,0.25)] focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
-          >
-            <span>Explore Foods</span>
-            <ArrowRight className="w-3.5 h-3.5 text-forest" />
-          </Link>
-
-          {/* Mobile Menu Toggle Button (min 44px touch target) */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-white/5 border border-white/15 text-cream hover:text-chartreuse hover:border-chartreuse/40 transition-colors focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
-            aria-label="Toggle navigation menu"
-            aria-expanded={mobileMenuOpen}
-          >
-            {mobileMenuOpen ? <X className="w-6 h-6 text-chartreuse" /> : <Menu className="w-6 h-6" />}
-          </button>
-        </div>
-      </div>
-
-      {/* Accessible Mobile Drawer */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            data-testid="mobile-menu"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.22, ease: 'easeOut' }}
-            className="md:hidden border-t border-white/10 bg-[#050B07]/98 backdrop-blur-2xl overflow-hidden shadow-2xl"
-          >
-            <div className="max-w-7xl mx-auto px-5 py-6 space-y-6">
-              {/* Primary Routes */}
-              <div className="grid grid-cols-2 gap-2.5">
-                {navLinks.map((link) => {
-                  const isActive = pathname === link.href
-                  const Icon = link.icon
-                  return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`min-h-[50px] p-3 rounded-xl border transition-all flex items-center gap-3 focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none ${
-                        isActive
-                          ? 'border-chartreuse bg-chartreuse text-forest font-black shadow-md'
-                          : 'border-white/10 bg-white/5 text-cream/90 hover:border-chartreuse/40 hover:text-white'
-                      }`}
-                    >
-                      <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-forest' : 'text-chartreuse'}`} />
-                      <span className="font-mono text-xs font-bold uppercase tracking-wider">{link.label}</span>
-                    </Link>
-                  )
-                })}
+                <span className="font-display italic text-base">M</span>
+                {/* Botanical Pulse Spore */}
+                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#FF5A22] border-2 border-[#F3F6F4] animate-pulse" />
               </div>
-
-              {/* Utility Tools */}
-              <div className="space-y-2 pt-2 border-t border-white/10">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-cream/50 block">
-                  Interactive Intelligence
-                </span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {utilityTools.map((tool) => {
-                    const Icon = tool.icon
-                    const isActive = pathname === tool.href
-                    return (
-                      <Link
-                        key={tool.href}
-                        href={tool.href}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={`min-h-[48px] p-3 rounded-xl border transition-all flex items-center justify-between focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none ${
-                          isActive
-                            ? 'border-chartreuse bg-chartreuse/15 text-chartreuse'
-                            : 'border-white/10 bg-white/5 text-cream/80 hover:border-chartreuse/30 hover:text-white'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <Icon className="w-4 h-4 text-chartreuse flex-shrink-0" />
-                          <div>
-                            <strong className="text-xs font-mono font-bold block">{tool.label}</strong>
-                            <span className="text-[10px] text-cream/50 block">{tool.desc}</span>
-                          </div>
-                        </div>
-                        <ArrowRight className="w-3.5 h-3.5 opacity-60 flex-shrink-0" />
-                      </Link>
-                    )
-                  })}
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`font-display text-2xl font-bold tracking-tight leading-none ${
+                      isDarkHero ? 'text-white' : 'text-[#20271D]'
+                    }`}
+                  >
+                    MacroSnap
+                  </span>
+                  <span
+                    className={`hidden xl:inline-block px-1.5 py-0.5 rounded-xs text-[9px] font-mono font-medium tracking-wide border ${
+                      isDarkHero
+                        ? 'bg-white/15 text-[#A3B18A] border-white/20'
+                        : 'bg-[#7D8D39]/15 text-[#5B6E2C] border-[#7D8D39]/30'
+                    }`}
+                  >
+                    IFCT 2017
+                  </span>
                 </div>
-              </div>
-
-              {/* User Saved & Basket links */}
-              <div className="pt-2 border-t border-white/10 flex items-center justify-between gap-3">
-                <Link
-                  href="/library"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex-1 min-h-[44px] py-2.5 px-4 rounded-xl border border-white/10 bg-white/5 text-xs font-mono text-center text-cream/80 hover:text-white flex items-center justify-center gap-2"
+                <span
+                  className={`text-[10px] uppercase tracking-widest font-medium font-sans ${
+                    isDarkHero ? 'text-[#A3B18A]' : 'text-[#7D8D39]'
+                  }`}
                 >
-                  <Bookmark className="w-4 h-4 text-chartreuse" />
-                  <span>Saved ({favoriteCount})</span>
-                </Link>
-
-                <Link
-                  href="/basket"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex-1 min-h-[44px] py-2.5 px-4 rounded-xl bg-chartreuse text-forest text-xs font-mono font-black uppercase text-center flex items-center justify-center gap-2"
-                >
-                  <ShoppingBag className="w-4 h-4 text-forest" />
-                  <span>Basket ({basketCount})</span>
-                </Link>
+                  Know what you eat
+                </span>
               </div>
+            </Link>
 
-              {/* Drawer Footer */}
-              <div className="pt-2 border-t border-white/10 flex items-center justify-between text-xs font-mono text-cream/50">
-                <span>100% Unbranded · ICMR-NIN Benchmarked</span>
+            {/* Center: Curated Aerodynamic Navigation Dock */}
+            <nav
+              className={`hidden lg:flex items-center p-1 rounded-full backdrop-blur-sm border shadow-xs ${
+                isDarkHero
+                  ? 'bg-black/40 border-white/20 text-white'
+                  : 'bg-[#F3F6F4]/90 border-[rgba(91,110,44,0.18)] text-[#20271D]'
+              }`}
+            >
+              {PRIMARY_LINKS.map((link) => {
+                const isActive = pathname === link.href
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`relative px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 flex items-center gap-1.5 ${
+                      isActive
+                        ? 'text-[#F3F6F4] bg-[#5B6E2C] shadow-xs font-semibold'
+                        : isDarkHero
+                        ? 'text-white/80 hover:text-white hover:bg-white/10'
+                        : 'text-[#20271D] hover:text-[#5B6E2C] hover:bg-[rgba(91,110,44,0.08)]'
+                    }`}
+                  >
+                    <span>{link.label}</span>
+                  </Link>
+                )
+              })}
+
+              {/* Culinary & Forensic Lab Dropdown */}
+              <div className="relative">
                 <button
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="px-3 py-1.5 rounded-lg border border-white/10 hover:text-white"
+                  type="button"
+                  onClick={() => setLabDropdownOpen(!labDropdownOpen)}
+                  onMouseEnter={() => setLabDropdownOpen(true)}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 flex items-center gap-1.5 ${
+                    isSecondaryActive || labDropdownOpen
+                      ? 'text-[#F3F6F4] bg-[#5B6E2C] font-semibold'
+                      : isDarkHero
+                      ? 'text-white/80 hover:text-white hover:bg-white/10'
+                      : 'text-[#20271D] hover:text-[#5B6E2C] hover:bg-[rgba(91,110,44,0.08)]'
+                  }`}
+                  aria-expanded={labDropdownOpen}
                 >
-                  Close
+                  <span>Lab &amp; Tools</span>
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                      labDropdownOpen ? 'rotate-180' : 'opacity-60'
+                    }`}
+                  />
                 </button>
+
+                {/* Dropdown Menu */}
+                {labDropdownOpen && (
+                  <div
+                    onMouseLeave={() => setLabDropdownOpen(false)}
+                    className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-72 rounded-2xl bg-[#F3F6F4] text-[#20271D] border border-[rgba(91,110,44,0.2)] shadow-2xl p-2 flex flex-col gap-1 z-[110] animate-in fade-in slide-in-from-top-2 duration-150"
+                  >
+                    <div className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-[#7D8D39] border-b border-[rgba(91,110,44,0.12)] mb-1">
+                      Interactive Instruments
+                    </div>
+                    {SECONDARY_LINKS.map((subItem) => {
+                      const Icon = subItem.icon
+                      const isSubActive = pathname === subItem.href
+                      return (
+                        <Link
+                          key={subItem.href}
+                          href={subItem.href}
+                          className={`p-2.5 rounded-xl flex items-start gap-3 transition-colors ${
+                            isSubActive
+                              ? 'bg-[rgba(91,110,44,0.12)] text-[#5B6E2C]'
+                              : 'hover:bg-white text-[#20271D]'
+                          }`}
+                        >
+                          <div
+                            className={`p-1.5 rounded-lg ${
+                              isSubActive
+                                ? 'bg-[#5B6E2C] text-white'
+                                : 'bg-[rgba(91,110,44,0.08)] text-[#5B6E2C]'
+                            }`}
+                          >
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-xs font-semibold leading-tight">
+                              {subItem.label}
+                            </span>
+                            <span className="text-[10px] text-[#737B70] leading-snug mt-0.5">
+                              {subItem.desc}
+                            </span>
+                          </div>
+                        </Link>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
+            </nav>
+
+            {/* Right: Scientific Status & Grocery Ledger */}
+            <div className="flex items-center gap-3">
+              {/* Live Scientific Database Badge (Desktop) */}
+              <div
+                className={`hidden sm:flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-mono border ${
+                  isDarkHero
+                    ? 'bg-white/10 border-white/20 text-[#A3B18A]'
+                    : 'bg-[rgba(125,141,57,0.1)] border-[rgba(91,110,44,0.2)] text-[#5B6E2C]'
+                }`}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-[#7D8D39] animate-pulse" />
+                <span className="font-medium">ICMR Verified</span>
+              </div>
+
+              {/* Grocery Basket Button */}
+              <Link
+                href="/basket"
+                className={`relative flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 shadow-xs ${
+                  pathname === '/basket'
+                    ? 'bg-[#FF5A22] text-white border-[#FF5A22]'
+                    : isDarkHero
+                    ? 'bg-white/10 text-white border-white/30 hover:bg-white/20'
+                    : 'bg-[#F3F6F4] text-[#20271D] border-[rgba(91,110,44,0.25)] hover:border-[#5B6E2C] hover:bg-white'
+                }`}
+                aria-label="View Grocery Basket"
+              >
+                <ShoppingBag className="w-3.5 h-3.5" />
+                <span className="hidden md:inline font-mono">Basket</span>
+                {totalBasketCount > 0 && (
+                  <span className="w-4 h-4 rounded-full bg-[#FF5A22] text-white text-[10px] font-bold font-mono flex items-center justify-center -ml-0.5">
+                    {totalBasketCount}
+                  </span>
+                )}
+              </Link>
+
+              {/* Mobile Hamburger Trigger */}
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className={`lg:hidden p-2 rounded-full focus:outline-hidden transition-colors ${
+                  isDarkHero ? 'text-white hover:bg-white/10' : 'text-[#20271D] hover:bg-[rgba(91,110,44,0.1)]'
+                }`}
+                aria-label={mobileMenuOpen ? 'Close Menu' : 'Open Menu'}
+              >
+                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </header>
+          </div>
+        </div>
+      </header>
+
+      {/* Fullscreen Mobile Navigation Overlay */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-[95] bg-[#F3F6F4] flex flex-col justify-between pt-28 pb-8 px-6 lg:hidden overflow-y-auto animate-in fade-in duration-200">
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] font-mono uppercase tracking-widest text-[#7D8D39] mb-3">
+              MacroSnap Navigation Index
+            </span>
+
+            {[...PRIMARY_LINKS, ...SECONDARY_LINKS].map((link, idx) => {
+              const isActive = pathname === link.href
+              const Icon = link.icon
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`text-xl font-display py-3 px-3.5 rounded-xl flex items-center justify-between border-b border-[rgba(91,110,44,0.1)] transition-all ${
+                    isActive
+                      ? 'text-[#5B6E2C] font-bold bg-[rgba(91,110,44,0.08)] pl-4'
+                      : 'text-[#20271D] hover:text-[#5B6E2C]'
+                  }`}
+                  style={{ animationDelay: `${idx * 30}ms` }}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon className="w-4 h-4 text-[#7D8D39]" />
+                    <span>{link.label}</span>
+                  </div>
+                  <ArrowUpRight className="w-4 h-4 opacity-50" />
+                </Link>
+              )
+            })}
+          </div>
+
+          <div className="pt-6 mt-6 border-t border-[rgba(91,110,44,0.18)]">
+            <div className="p-4 rounded-2xl bg-[rgba(125,141,57,0.08)] border border-[rgba(91,110,44,0.18)] flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-[#20271D]">Evidence-Based Nutrition</p>
+                <p className="text-[11px] text-[#737B70]">
+                  ICMR-NIN IFCT 2017 &amp; Mandi wholesale economic data
+                </p>
+              </div>
+              <Sparkles className="w-5 h-5 text-[#7D8D39]" />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }

@@ -1,604 +1,450 @@
 'use client'
 
-import React, { useState } from 'react'
-import Image from 'next/image'
-import { FOOD_DATABASE } from '@/data/foods'
-import { BotanicalLeaf } from '@/components/illustrations/BotanicalIllustrations'
-import {
-  Calculator,
-  Sparkles,
-  Plus,
-  Trash2,
-  CheckCircle2,
-  ShoppingBag,
-  Dumbbell,
-  Heart,
-  Flame,
-  Target,
-} from 'lucide-react'
+import React, { useState, useEffect } from 'react'
 import { useUserStore } from '@/store/useUserStore'
-import { motion, AnimatePresence } from 'framer-motion'
+import {
+  Activity,
+  Sparkles,
+  ShieldCheck,
+  RotateCcw,
+  Check,
+  Info,
+  Flame,
+  Utensils,
+  Clock,
+  Compass,
+  Zap,
+} from 'lucide-react'
 
 export default function CalculatorPage() {
-  const [weightKg, setWeightKg] = useState<number>(68)
-  const [weightInputStr, setWeightInputStr] = useState<string>('68')
-  const [activityLevel, setActivityLevel] = useState<'sedentary' | 'moderate' | 'intense'>('moderate')
-  const [goal, setGoal] = useState<'maintenance' | 'muscle-gain' | 'fat-loss'>('muscle-gain')
-  const [mealPlanFoods, setMealPlanFoods] = useState<{ foodId: string; servings: number }[]>([])
-  const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const setProteinGoal = useUserStore((state) => state.setProteinGoal)
+  const initialWeight = useUserStore((state) => state.bodyWeightKg) || 68
 
-  const { addToBasket, setProteinGoal } = useUserStore()
+  const [weightKg, setWeightKg] = useState(initialWeight)
+  const [activityMultiplier, setActivityMultiplier] = useState(1.6)
+  const [gender, setGender] = useState<'male' | 'female'>('male')
+  const [goal, setGoal] = useState<'maintain' | 'surplus' | 'deficit'>('maintain')
+  const [saved, setSaved] = useState(false)
+  const [pulseActive, setPulseActive] = useState(0)
 
-  const showToast = (msg: string) => {
-    setToastMessage(msg)
-    setTimeout(() => {
-      setToastMessage(null)
+  // Physiological calculations
+  const targetProteinGrams = Math.round(weightKg * activityMultiplier)
+
+  // Estimated BMR using Mifflin-St Jeor equation (average height 172cm, age 26)
+  const bmrBase =
+    gender === 'male'
+      ? 10 * weightKg + 6.25 * 172 - 5 * 26 + 5
+      : 10 * weightKg + 6.25 * 160 - 5 * 26 - 161
+
+  const tdeeMultiplier =
+    activityMultiplier <= 1.2 ? 1.2 : activityMultiplier <= 1.6 ? 1.45 : 1.75
+  const baseTdee = Math.round(bmrBase * tdeeMultiplier)
+
+  const targetCalories =
+    goal === 'maintain'
+      ? baseTdee
+      : goal === 'surplus'
+      ? Math.round(baseTdee * 1.1)
+      : Math.round(baseTdee * 0.85)
+
+  // Macro distribution
+  const proteinKcal = targetProteinGrams * 4
+  const fatGrams = Math.round((targetCalories * 0.25) / 9)
+  const fatKcal = fatGrams * 9
+  const carbKcal = Math.max(0, targetCalories - (proteinKcal + fatKcal))
+  const carbGrams = Math.round(carbKcal / 4)
+
+  // 4-Meal Chrono-Nutritional Schedule
+  const mealProtein = Math.round(targetProteinGrams / 4)
+  const CHRONO_MEALS = [
+    {
+      time: '08:30 AM',
+      name: 'Morning Metabolic Ignition',
+      plate: 'Sprouted Moong & Besan Chilla + Mint Curd',
+      protein: mealProtein,
+      tip: 'High leucine spike to break overnight catabolism',
+    },
+    {
+      time: '01:30 PM',
+      name: 'Midday Cellular Sustenance',
+      plate: 'Soya Granule Bhurji (50g) + 2 Jowar Rotis + Dal Tadka',
+      protein: mealProtein + 2,
+      tip: 'Slow-release complex carbs with complete amino profile',
+    },
+    {
+      time: '06:00 PM',
+      name: 'Post-Exertion Anabolic Window',
+      plate: 'Roasted Sattu Buttermilk (35g) or 3 Boiled Egg Whites',
+      protein: mealProtein - 4,
+      tip: 'Rapid electrolyte hydration + immediate nitrogen influx',
+    },
+    {
+      time: '09:00 PM',
+      name: 'Nocturnal Repair Synthesis',
+      plate: 'Paneer Bhurji / Firm Tofu Salad with Flaxseed Dusting',
+      protein: mealProtein + 2,
+      tip: 'Slow micellar casein/fat matrix for overnight tissue rebuilding',
+    },
+  ]
+
+  // Sequential pulse animation across the 4 meals
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setPulseActive((prev) => (prev + 1) % 4)
     }, 2800)
-  }
-
-  // Handle weight change with graceful boundary clamping
-  const handleWeightChange = (newVal: number) => {
-    const clamped = Math.min(200, Math.max(30, isNaN(newVal) ? 65 : newVal))
-    setWeightKg(clamped)
-    setWeightInputStr(String(clamped))
-  }
-
-  const multiplierRange = {
-    sedentary: { min: 0.8, max: 1.0, label: '0.8 - 1.0 g / kg' },
-    moderate: {
-      min: goal === 'muscle-gain' ? 1.6 : goal === 'fat-loss' ? 1.4 : 1.2,
-      max: goal === 'muscle-gain' ? 2.0 : goal === 'fat-loss' ? 1.8 : 1.5,
-      label: goal === 'muscle-gain' ? '1.6 - 2.0 g / kg' : goal === 'fat-loss' ? '1.4 - 1.8 g / kg' : '1.2 - 1.5 g / kg',
-    },
-    intense: {
-      min: goal === 'muscle-gain' ? 1.8 : goal === 'fat-loss' ? 1.8 : 1.6,
-      max: goal === 'muscle-gain' ? 2.2 : goal === 'fat-loss' ? 2.4 : 2.0,
-      label: goal === 'muscle-gain' ? '1.8 - 2.2 g / kg' : goal === 'fat-loss' ? '1.8 - 2.4 g / kg' : '1.6 - 2.0 g / kg',
-    },
-  }[activityLevel]
-
-  const targetMinG = Math.round(weightKg * multiplierRange.min)
-  const targetMaxG = Math.round(weightKg * multiplierRange.max)
-  const midpointTargetG = Math.round((targetMinG + targetMaxG) / 2)
-
-  const mealPlanTotalG = Math.round(
-    mealPlanFoods.reduce((acc, curr) => {
-      const food = FOOD_DATABASE.find((f) => f.id === curr.foodId)
-      if (!food) return acc
-      const servingProtein = (food.proteinPer100g * food.servingSizeGrams) / 100
-      return acc + servingProtein * curr.servings
-    }, 0)
-  )
-
-  const mealPlanEstimatedCostInr = Math.round(
-    mealPlanFoods.reduce((acc, curr) => {
-      const food = FOOD_DATABASE.find((f) => f.id === curr.foodId)
-      if (!food) return acc
-      const servingCost = (food.estimatedCostPer100g * food.servingSizeGrams) / 100
-      return acc + servingCost * curr.servings
-    }, 0)
-  )
-
-  const progressPct = Math.min(100, Math.round((mealPlanTotalG / Math.max(1, midpointTargetG)) * 100))
-
-  const addFoodToMealPlan = (foodId: string) => {
-    const existing = mealPlanFoods.find((f) => f.foodId === foodId)
-    if (existing) {
-      setMealPlanFoods(mealPlanFoods.map((f) => (f.foodId === foodId ? { ...f, servings: f.servings + 1 } : f)))
-    } else {
-      setMealPlanFoods([...mealPlanFoods, { foodId, servings: 1 }])
-    }
-  }
-
-  const loadSampleDailyPlate = () => {
-    setMealPlanFoods([
-      { foodId: 'eggs-whole', servings: 2 },
-      { foodId: 'soy-chunks', servings: 1 },
-      { foodId: 'roasted-chana', servings: 1 },
-    ])
-    showToast('🍱 Loaded sample Indian whole food daily plate')
-  }
-
-  const updateServings = (foodId: string, delta: number) => {
-    const updated = mealPlanFoods
-      .map((f) => {
-        if (f.foodId === foodId) {
-          const next = f.servings + delta
-          return next > 0 ? { ...f, servings: next } : null
-        }
-        return f
-      })
-      .filter(Boolean) as { foodId: string; servings: number }[]
-    setMealPlanFoods(updated)
-  }
-
-  const removeFood = (foodId: string) => {
-    setMealPlanFoods(mealPlanFoods.filter((f) => f.foodId !== foodId))
-  }
-
-  const addAllToBasket = () => {
-    if (mealPlanFoods.length === 0) return
-    mealPlanFoods.forEach((item) => {
-      const food = FOOD_DATABASE.find((f) => f.id === item.foodId)
-      if (food) {
-        addToBasket(food.id, food.servingSizeGrams * item.servings)
-      }
-    })
-    showToast(`🛒 Added ${mealPlanFoods.length} plate staples to your Virtual Basket`)
-  }
+    return () => clearInterval(timer)
+  }, [])
 
   const handleSaveGoal = () => {
-    setProteinGoal(weightKg, midpointTargetG)
-    showToast(`🎯 Saved ${midpointTargetG}g daily protein target for ${weightKg}kg bodyweight`)
+    setProteinGoal(weightKg, targetProteinGrams)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2400)
   }
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10 selection:bg-chartreuse selection:text-forest relative">
-      {/* Non-blocking Live Notification Toast */}
-      <div
-        role="status"
-        aria-live="polite"
-        className="fixed bottom-6 right-6 z-50 pointer-events-none"
-      >
-        <AnimatePresence>
-          {toastMessage && (
-            <motion.div
-              initial={{ opacity: 0, y: 15, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              className="pointer-events-auto bg-[#0D2316] text-cream border-2 border-chartreuse px-5 py-3 rounded-2xl shadow-[0_0_25px_rgba(216,243,67,0.3)] font-mono text-xs font-bold flex items-center gap-2.5"
-            >
-              <CheckCircle2 className="w-4 h-4 text-chartreuse" />
-              <span>{toastMessage}</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+  const handleReset = () => {
+    setWeightKg(68)
+    setActivityMultiplier(1.6)
+    setGender('male')
+    setGoal('maintain')
+  }
 
+  // Dial radial calculation
+  const minW = 45
+  const maxW = 120
+  const dialPct = ((weightKg - minW) / (maxW - minW)) * 100
+  const dialAngle = -120 + (dialPct / 100) * 240 // -120 deg to +120 deg
+
+  return (
+    <div className="min-h-screen pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       {/* Editorial Header */}
-      <div className="space-y-4 max-w-3xl">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-chartreuse border border-chartreuse/30 text-xs font-mono font-bold tracking-widest uppercase shadow-sm">
-          <Calculator className="w-3.5 h-3.5" />
-          <span>Personal Daily Protein Engine · ACSM & ISSN Guidelines</span>
+      <div className="pb-8 border-b border-[rgba(91,110,44,0.18)] mb-12">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[rgba(125,141,57,0.12)] border border-[rgba(91,110,44,0.2)] text-xs font-mono uppercase tracking-widest text-[#5B6E2C] mb-3">
+          <Activity className="w-3.5 h-3.5 text-[#7D8D39] animate-pulse" />
+          <span>Clinical Physiology Instrument &bull; ACSM / ISSN Guidelines</span>
         </div>
-        <h1 className="text-4xl sm:text-6xl font-black font-serif text-white tracking-tight">
-          Protein Target Calculator
+        <h1 className="font-display text-4xl sm:text-6xl font-bold text-[#20271D] tracking-tight">
+          Precision Nitrogen Calorimeter
         </h1>
-        <p className="text-sm sm:text-base text-cream/70 leading-relaxed">
-          Evidence-informed daily target calculation based on clinical guidelines (ACSM / ISSN).
-          Build a real sample daily plate using kitchen staples to see how easily targets are conquered without ₹120 marketing powders.
+        <p className="text-sm sm:text-base text-[#737B70] mt-3 max-w-3xl leading-relaxed">
+          Calibrate your physiological daily protein requirement based on empirical clinical guidelines, not fitness influencer arbitrary targets. Benchmark real whole-food economics and simulate your 24-hour amino acid distribution.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left: Input Parameters Studio */}
-        <div className="lg:col-span-5 bg-[#0B1710]/90 backdrop-blur-md rounded-3xl border border-white/10 p-6 sm:p-8 shadow-xl space-y-8">
-          <div className="flex items-center justify-between border-b border-white/10 pb-4">
-            <h2 className="text-2xl font-black font-serif text-white">Your Parameters</h2>
-            <span className="text-xs font-mono text-muted-foreground uppercase">Clinical Model</span>
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+        {/* Left Column: Analog Dial & Physical Laboratory Controls */}
+        <div className="lg:col-span-6 space-y-8">
+          {/* Main Dial Housing Card */}
+          <div className="p-8 sm:p-10 rounded-3xl bg-white border border-[rgba(91,110,44,0.18)] shadow-lg relative overflow-hidden">
+            <div className="flex items-center justify-between pb-6 border-b border-[rgba(91,110,44,0.12)] mb-8">
+              <span className="text-xs font-mono uppercase tracking-widest text-[#5B6E2C] font-semibold flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#7D8D39] animate-pulse" />
+                CALIBRATION STAGE // UNIT 01
+              </span>
+              <button
+                type="button"
+                onClick={handleReset}
+                className="flex items-center gap-1.5 text-xs font-mono text-[#737B70] hover:text-[#FF5A22] transition-colors"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reset Dial</span>
+              </button>
+            </div>
 
-          {/* Body Weight Interactive Dial & Numeric Input */}
-          <div className="space-y-3">
-            <div className="flex justify-between items-center text-xs font-mono">
-              <label htmlFor="body-weight-number" className="font-bold text-muted-foreground uppercase">
-                Body Weight (kg)
-              </label>
-              <div className="flex items-center gap-2">
+            {/* Circular Laboratory Dial Gauge with Needle Spring Sweep */}
+            <div className="flex flex-col items-center my-4">
+              <div className="relative w-64 h-64 sm:w-72 sm:h-72 rounded-full bg-[#F3F6F4] border-4 border-[#5B6E2C]/20 shadow-inner flex items-center justify-center">
+                {/* Degree Ticks around circumference with active highlight */}
+                {[...Array(24)].map((_, i) => {
+                  const rot = -120 + i * (240 / 23)
+                  const isActiveTick = Math.abs(rot - dialAngle) < 14
+                  return (
+                    <div
+                      key={i}
+                      className="absolute top-2 w-[1.5px] rounded-full origin-bottom transition-all duration-300"
+                      style={{
+                        transform: `rotate(${rot}deg) translateY(0px)`,
+                        height: i % 4 === 0 ? '14px' : '7px',
+                        backgroundColor: isActiveTick
+                          ? '#FF5A22'
+                          : i % 4 === 0
+                          ? '#5B6E2C'
+                          : 'rgba(91,110,44,0.3)',
+                        boxShadow: isActiveTick ? '0 0 6px #FF5A22' : 'none',
+                      }}
+                    />
+                  )
+                })}
+
+                {/* Needle Pointer with Smooth Inertial Spring */}
+                <div
+                  className="absolute w-1.5 h-28 bg-[#FF5A22] rounded-full origin-bottom shadow-lg transition-transform"
+                  style={{
+                    transform: `translateY(-50%) rotate(${dialAngle}deg)`,
+                    bottom: '50%',
+                    transition: 'transform 0.45s cubic-bezier(0.16, 1, 0.3, 1)',
+                  }}
+                >
+                  <div className="w-3 h-3 rounded-full bg-[#FF5A22] -ml-[3px] -mt-[2px] shadow-sm animate-ping opacity-75" />
+                </div>
+
+                {/* Central Digital Readout Capsule with Animated Numbers */}
+                <div className="relative z-10 w-36 h-36 rounded-full bg-white border-2 border-[rgba(91,110,44,0.25)] shadow-md flex flex-col items-center justify-center p-3 text-center transition-transform hover:scale-105">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-[#737B70]">
+                    BODY WEIGHT
+                  </span>
+                  <span className="font-display text-4xl sm:text-5xl font-bold text-[#20271D] leading-none my-1 tabular-nums transition-all">
+                    {weightKg}
+                  </span>
+                  <span className="text-xs font-mono text-[#5B6E2C] font-semibold">
+                    KILOGRAMS
+                  </span>
+                </div>
+              </div>
+
+              {/* Slider Controller */}
+              <div className="w-full mt-6 space-y-2">
                 <input
-                  id="body-weight-number"
-                  type="number"
-                  min="30"
-                  max="200"
-                  step="0.5"
-                  value={weightInputStr}
-                  onChange={(e) => {
-                    setWeightInputStr(e.target.value)
-                    const parsed = parseFloat(e.target.value)
-                    if (!isNaN(parsed) && parsed >= 30 && parsed <= 200) {
-                      setWeightKg(parsed)
-                    }
-                  }}
-                  onBlur={() => {
-                    const parsed = parseFloat(weightInputStr)
-                    handleWeightChange(parsed)
-                  }}
-                  className="w-20 text-center font-black font-mono text-forest bg-chartreuse px-2 py-1 rounded-xl shadow-[0_0_15px_rgba(216,243,67,0.4)] text-base focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
-                  aria-label="Enter body weight in kilograms"
+                  type="range"
+                  min={minW}
+                  max={maxW}
+                  value={weightKg}
+                  onChange={(e) => setWeightKg(Number(e.target.value))}
+                  className="w-full accent-[#5B6E2C] cursor-pointer h-2 bg-[#F3F6F4] rounded-lg"
                 />
-                <span className="text-xs font-mono text-cream/60">
-                  ({Math.round(weightKg * 2.2)} lbs)
-                </span>
+                <div className="flex justify-between text-[10px] font-mono text-[#737B70]">
+                  <span>45 KG</span>
+                  <span className="text-[#5B6E2C] font-bold">DRAG OR STEP DIAL</span>
+                  <span>120 KG</span>
+                </div>
               </div>
             </div>
 
-            <input
-              id="body-weight-slider"
-              type="range"
-              min={30}
-              max={150}
-              step={1}
-              value={weightKg}
-              onChange={(e) => handleWeightChange(Number(e.target.value))}
-              className="w-full h-2.5 bg-black/60 rounded-lg appearance-none cursor-pointer accent-chartreuse border border-white/15"
-              aria-label="Adjust body weight slider"
-            />
-            <div className="flex justify-between text-[10px] font-mono text-muted-foreground">
-              <span>30 kg</span>
-              <span>85 kg (Standard)</span>
-              <span>150 kg</span>
-            </div>
-          </div>
-
-          {/* Activity Level Cards */}
-          <div className="space-y-3">
-            <span className="text-xs font-mono font-bold text-muted-foreground uppercase block">
-              Activity & Lifestyle
-            </span>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                onClick={() => setActivityLevel('sedentary')}
-                className={`min-h-[44px] p-3 rounded-2xl border text-center transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none ${
-                  activityLevel === 'sedentary'
-                    ? 'border-chartreuse bg-chartreuse/15 text-chartreuse shadow-[0_0_15px_rgba(216,243,67,0.2)]'
-                    : 'border-white/10 bg-white/5 text-cream/70 hover:border-white/30'
-                }`}
-              >
-                <span className="text-xs font-mono font-bold block">Desk / Low</span>
-                <span className="text-[10px] opacity-70 block mt-0.5">0.8-1.0 g/kg</span>
-              </button>
-
-              <button
-                onClick={() => setActivityLevel('moderate')}
-                className={`min-h-[44px] p-3 rounded-2xl border text-center transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none ${
-                  activityLevel === 'moderate'
-                    ? 'border-chartreuse bg-chartreuse/15 text-chartreuse shadow-[0_0_15px_rgba(216,243,67,0.2)]'
-                    : 'border-white/10 bg-white/5 text-cream/70 hover:border-white/30'
-                }`}
-              >
-                <span className="text-xs font-mono font-bold block">Gym 3-4x</span>
-                <span className="text-[10px] opacity-70 block mt-0.5">1.2-1.6 g/kg</span>
-              </button>
-
-              <button
-                onClick={() => setActivityLevel('intense')}
-                className={`min-h-[44px] p-3 rounded-2xl border text-center transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none ${
-                  activityLevel === 'intense'
-                    ? 'border-chartreuse bg-chartreuse/15 text-chartreuse shadow-[0_0_15px_rgba(216,243,67,0.2)]'
-                    : 'border-white/10 bg-white/5 text-cream/70 hover:border-white/30'
-                }`}
-              >
-                <span className="text-xs font-mono font-bold block">Athlete 5+x</span>
-                <span className="text-[10px] opacity-70 block mt-0.5">1.8-2.2 g/kg</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Goal Selectors */}
-          <div className="space-y-3">
-            <span className="text-xs font-mono font-bold text-muted-foreground uppercase block">
-              Primary Objective
-            </span>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                onClick={() => setGoal('maintenance')}
-                className={`min-h-[44px] p-3 rounded-2xl border text-center transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none ${
-                  goal === 'maintenance'
-                    ? 'border-chartreuse bg-chartreuse/15 text-chartreuse'
-                    : 'border-white/10 bg-white/5 text-cream/70 hover:border-white/30'
-                }`}
-              >
-                <Heart className="w-4 h-4 mx-auto mb-1 text-chartreuse" />
-                <span className="text-xs font-mono font-bold block">Vitality</span>
-              </button>
-
-              <button
-                onClick={() => setGoal('muscle-gain')}
-                className={`min-h-[44px] p-3 rounded-2xl border text-center transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none ${
-                  goal === 'muscle-gain'
-                    ? 'border-chartreuse bg-chartreuse/15 text-chartreuse'
-                    : 'border-white/10 bg-white/5 text-cream/70 hover:border-white/30'
-                }`}
-              >
-                <Dumbbell className="w-4 h-4 mx-auto mb-1 text-chartreuse" />
-                <span className="text-xs font-mono font-bold block">Hypertrophy</span>
-              </button>
-
-              <button
-                onClick={() => setGoal('fat-loss')}
-                className={`min-h-[44px] p-3 rounded-2xl border text-center transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none ${
-                  goal === 'fat-loss'
-                    ? 'border-chartreuse bg-chartreuse/15 text-chartreuse'
-                    : 'border-white/10 bg-white/5 text-cream/70 hover:border-white/30'
-                }`}
-              >
-                <Flame className="w-4 h-4 mx-auto mb-1 text-tangerine" />
-                <span className="text-xs font-mono font-bold block">Lean Cut</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Evidence Dossier Output Box */}
-          <div className="p-6 rounded-2xl bg-black/50 border border-chartreuse/30 space-y-4">
-            <div className="flex justify-between items-baseline font-mono">
-              <span className="text-xs uppercase text-muted-foreground">Optimal Daily Target:</span>
-              <span className="text-4xl font-black text-chartreuse tracking-tight">
-                {midpointTargetG}g <span className="text-xs font-normal text-muted-foreground">/ day</span>
+            {/* Brass-and-Sage Laboratory Rocker Switches */}
+            <div className="space-y-4 pt-6 border-t border-[rgba(91,110,44,0.12)]">
+              <span className="text-xs font-mono uppercase tracking-wider text-[#737B70] block">
+                Activity &amp; Training Demand (ISSN Guidelines)
               </span>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                {[
+                  { label: 'Sedentary', val: 0.8, desc: 'RDA Base' },
+                  { label: 'Moderate', val: 1.2, desc: 'Fitness' },
+                  { label: 'Hypertrophy', val: 1.6, desc: 'Strength' },
+                  { label: 'Athlete', val: 2.0, desc: 'Peak Power' },
+                ].map((tier) => (
+                  <button
+                    key={tier.label}
+                    type="button"
+                    onClick={() => setActivityMultiplier(tier.val)}
+                    className={`p-3 rounded-2xl text-left border transition-all duration-200 ${
+                      activityMultiplier === tier.val
+                        ? 'bg-[#5B6E2C] text-[#F3F6F4] border-[#5B6E2C] shadow-sm scale-[1.02]'
+                        : 'bg-[#F3F6F4] text-[#20271D] border-[rgba(91,110,44,0.15)] hover:border-[#5B6E2C]'
+                    }`}
+                  >
+                    <span className="text-xs font-bold font-display block leading-tight">
+                      {tier.label}
+                    </span>
+                    <span
+                      className={`text-[10px] font-mono mt-1 block ${
+                        activityMultiplier === tier.val ? 'text-[#A3B18A]' : 'text-[#737B70]'
+                      }`}
+                    >
+                      {tier.val}g / kg &bull; {tier.desc}
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div className="flex justify-between text-xs font-mono text-muted-foreground pt-1 border-t border-white/10">
-              <span>Target Range:</span>
-              <span className="text-white font-bold">{targetMinG}g — {targetMaxG}g</span>
+            {/* Metabolic Target Mode */}
+            <div className="space-y-2 pt-6 border-t border-[rgba(91,110,44,0.12)]">
+              <span className="text-xs font-mono uppercase tracking-wider text-[#737B70] block">
+                Metabolic Phase
+              </span>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { id: 'deficit', label: 'Fat Loss (-15%)' },
+                  { id: 'maintain', label: 'Eucaloric (Maintain)' },
+                  { id: 'surplus', label: 'Hypertrophy (+10%)' },
+                ].map((mode) => (
+                  <button
+                    key={mode.id}
+                    type="button"
+                    onClick={() => setGoal(mode.id as any)}
+                    className={`py-2 px-3 rounded-xl text-xs font-medium border text-center transition-all ${
+                      goal === mode.id
+                        ? 'bg-[#20271D] text-[#F3F6F4] border-[#20271D] shadow-xs'
+                        : 'bg-[#F3F6F4] text-[#737B70] border-[rgba(91,110,44,0.15)] hover:border-[#5B6E2C]'
+                    }`}
+                  >
+                    {mode.label}
+                  </button>
+                ))}
+              </div>
             </div>
-
-            <div className="flex justify-between text-xs font-mono text-muted-foreground">
-              <span>Clinical Ratio:</span>
-              <span className="text-chartreuse font-bold">{multiplierRange.label}</span>
-            </div>
-
-            <button
-              onClick={handleSaveGoal}
-              className="w-full min-h-[44px] py-2.5 rounded-xl bg-white/10 hover:bg-chartreuse hover:text-forest text-cream font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
-            >
-              <Target className="w-4 h-4" />
-              <span>Set as My Target Goal</span>
-            </button>
           </div>
         </div>
 
-        {/* Right: Real-World Kitchen Plate Simulator */}
-        <div className="lg:col-span-7 space-y-6">
-          <div className="bg-[#0B1710]/90 backdrop-blur-md rounded-3xl border border-white/10 p-6 sm:p-8 shadow-xl space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-white/10 gap-2">
-              <div>
-                <h3 className="text-2xl font-black font-serif text-white">Simulate Your Daily Plate</h3>
-                <p className="text-xs font-mono text-muted-foreground">
-                  Build a day&apos;s eating using unbranded staples to see total protein and rupee spend.
-                </p>
-              </div>
-
-              {mealPlanFoods.length === 0 ? (
-                <button
-                  onClick={loadSampleDailyPlate}
-                  className="min-h-[44px] px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold bg-chartreuse text-forest shadow-sm hover:bg-white transition-all flex items-center gap-1.5 cursor-pointer self-start sm:self-center focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
-                >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>+ Load Sample Plate</span>
-                </button>
-              ) : (
-                <button
-                  onClick={() => setMealPlanFoods([])}
-                  className="min-h-[44px] px-3 py-1 rounded-xl text-xs font-mono text-white/50 hover:text-red-400 transition-colors self-start sm:self-center"
-                >
-                  Clear Plate
-                </button>
-              )}
+        {/* Right Column: Computed Nitrogen Output & 24h Chrono-Nutritional Schedule */}
+        <div className="lg:col-span-6 space-y-8">
+          {/* Output Readout Bento with Animated Counter Displays */}
+          <div className="p-8 sm:p-10 rounded-3xl bg-[#20271D] text-[#F3F6F4] border border-[rgba(91,110,44,0.3)] shadow-xl relative overflow-hidden">
+            <div className="flex items-center justify-between pb-4 border-b border-white/20 mb-6">
+              <span className="text-xs font-mono uppercase tracking-widest text-[#7D8D39]">
+                PHYSIOLOGICAL TARGET MATRIX
+              </span>
+              <span className="text-xs font-mono text-white/70">
+                DAILY SYNTHESIS
+              </span>
             </div>
 
-            {/* Target Progress Bar */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs font-mono">
-                <span className="text-muted-foreground">Progress towards {midpointTargetG}g Goal:</span>
-                <span className="text-chartreuse font-bold">
-                  {mealPlanTotalG}g ({progressPct}%)
+            <div className="grid grid-cols-2 gap-6 mb-8">
+              <div>
+                <span className="text-xs font-mono uppercase tracking-wider text-[#A3B18A] block">
+                  Target Daily Protein
+                </span>
+                <span className="font-display text-5xl sm:text-6xl font-bold text-[#F3F6F4] mt-1 block tabular-nums transition-all">
+                  {targetProteinGrams}
+                  <span className="text-2xl font-sans font-normal text-[#7D8D39] ml-1">g</span>
+                </span>
+                <span className="text-xs font-mono text-white/70 mt-1 block">
+                  {targetProteinGrams * 4} kcal &bull; {Math.round((proteinKcal / targetCalories) * 100)}% of TDEE
                 </span>
               </div>
-              <div className="w-full bg-black/60 h-3 rounded-full overflow-hidden border border-white/10">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${progressPct}%` }}
-                  transition={{ duration: 0.5 }}
-                  className={`h-full rounded-full transition-all duration-300 ${
-                    progressPct >= 100 ? 'bg-chartreuse shadow-[0_0_12px_#D8F343]' : 'bg-leaf'
-                  }`}
-                />
-              </div>
-              <div className="flex justify-between text-[11px] font-mono text-muted-foreground pt-1">
-                <span>Estimated Daily Plate Cost:</span>
-                <span className="text-white font-bold">₹{mealPlanEstimatedCostInr} / day</span>
+
+              <div>
+                <span className="text-xs font-mono uppercase tracking-wider text-[#A3B18A] block">
+                  Estimated TDEE Energy
+                </span>
+                <span className="font-display text-5xl sm:text-6xl font-bold text-[#FF5A22] mt-1 block tabular-nums transition-all">
+                  {targetCalories}
+                  <span className="text-2xl font-sans font-normal text-white/70 ml-1">kcal</span>
+                </span>
+                <span className="text-xs font-mono text-white/70 mt-1 block">
+                  Carbs {carbGrams}g &bull; Fats {fatGrams}g
+                </span>
               </div>
             </div>
 
-            {/* Selected Plate Items List */}
-            {mealPlanFoods.length > 0 ? (
-              <div className="space-y-3">
-                {mealPlanFoods.map((item) => {
-                  const food = FOOD_DATABASE.find((f) => f.id === item.foodId)
-                  if (!food) return null
-
-                  const proteinYield = (
-                    ((food.proteinPer100g * food.servingSizeGrams) / 100) *
-                    item.servings
-                  ).toFixed(1)
-                  const itemCost = Math.round(
-                    ((food.estimatedCostPer100g * food.servingSizeGrams) / 100) * item.servings
-                  )
-
-                  return (
-                    <motion.div
-                      key={item.foodId}
-                      layout
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="p-4 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-between gap-4"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-black/60 border border-white/10 flex-shrink-0">
-                          <Image
-                            src={food.imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=200&q=80'}
-                            alt={food.name}
-                            fill
-                            sizes="48px"
-                            className="object-cover"
-                          />
-                        </div>
-                        <div>
-                          <strong className="text-sm font-serif font-bold text-white block">
-                            {food.name}
-                          </strong>
-                          <p className="text-[11px] font-mono text-muted-foreground">
-                            {item.servings} × {food.servingDescription} · ₹{itemCost}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-4">
-                        <div className="text-right font-mono">
-                          <span className="text-base font-black text-chartreuse block">+{proteinYield}g</span>
-                          <span className="text-[10px] text-muted-foreground uppercase block">Protein</span>
-                        </div>
-
-                        {/* Serving Multiplier Controls */}
-                        <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/10">
-                          <button
-                            onClick={() => updateServings(item.foodId, -1)}
-                            className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center justify-center transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
-                            aria-label={`Decrease ${food.name} servings`}
-                          >
-                            -
-                          </button>
-                          <span className="w-6 text-center font-mono text-xs font-bold text-white">
-                            {item.servings}
-                          </span>
-                          <button
-                            onClick={() => updateServings(item.foodId, 1)}
-                            className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center justify-center transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
-                            aria-label={`Increase ${food.name} servings`}
-                          >
-                            +
-                          </button>
-                        </div>
-
-                        <button
-                          onClick={() => removeFood(item.foodId)}
-                          className="min-w-[40px] min-h-[40px] flex items-center justify-center text-white/40 hover:text-red-400 transition-colors cursor-pointer rounded-lg hover:bg-red-500/10 focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
-                          title="Remove item"
-                          aria-label={`Remove ${food.name} from plate`}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </motion.div>
-                  )
-                })}
+            {/* Animated Macro Distribution Ribbon */}
+            <div className="mb-6 space-y-1.5">
+              <div className="flex justify-between text-[11px] font-mono text-white/80">
+                <span>Macronutrient Energy Balance</span>
+                <span>P {Math.round((proteinKcal / targetCalories) * 100)}% / C {Math.round((carbKcal / targetCalories) * 100)}% / F {Math.round((fatKcal / targetCalories) * 100)}%</span>
               </div>
-            ) : (
-              <div className="p-8 rounded-3xl bg-[#0B1710]/50 border-2 border-dashed border-white/15 text-center space-y-3">
-                <p className="font-bold text-white text-lg font-serif">Your plate is currently empty</p>
-                <p className="text-xs font-mono text-muted-foreground max-w-sm mx-auto">
-                  Click the quick-add buttons below or load our balanced Indian sample plate to simulate daily protein.
-                </p>
-                <button
-                  onClick={loadSampleDailyPlate}
-                  className="min-h-[44px] inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-chartreuse text-forest font-mono text-xs font-black uppercase tracking-wider hover:bg-white transition-all shadow-md cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
-                >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>Load Sample High-Protein Plate</span>
-                </button>
+              <div className="w-full h-3 rounded-full bg-white/10 overflow-hidden flex">
+                <div
+                  className="h-full bg-[#7D8D39] transition-all duration-500"
+                  style={{ width: `${Math.round((proteinKcal / targetCalories) * 100)}%` }}
+                  title="Protein"
+                />
+                <div
+                  className="h-full bg-[#5B6E2C] transition-all duration-500"
+                  style={{ width: `${Math.round((carbKcal / targetCalories) * 100)}%` }}
+                  title="Carbohydrates"
+                />
+                <div
+                  className="h-full bg-[#FF5A22] transition-all duration-500"
+                  style={{ width: `${Math.round((fatKcal / targetCalories) * 100)}%` }}
+                  title="Fats"
+                />
               </div>
-            )}
+            </div>
+
+            {/* Action: Save Target to Basket */}
+            <div className="pt-6 border-t border-white/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <button
+                type="button"
+                onClick={handleSaveGoal}
+                className={`w-full sm:w-auto px-7 py-3 rounded-full text-xs font-mono tracking-wider uppercase font-semibold flex items-center justify-center gap-2 transition-all shadow-md ${
+                  saved
+                    ? 'bg-[#7D8D39] text-white scale-105'
+                    : 'bg-[#5B6E2C] hover:bg-[#7D8D39] text-[#F3F6F4]'
+                }`}
+              >
+                {saved ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    <span>Target Saved to Grocery Basket</span>
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>Save Target to MacroSnap Basket</span>
+                  </>
+                )}
+              </button>
+
+              <span className="text-[11px] font-mono text-[#A3B18A]">
+                Synchronizes with Virtual Ledger
+              </span>
+            </div>
           </div>
 
-          {/* Quick Add Whole Food Chips */}
-          <div className="p-6 rounded-3xl bg-[#0B1710]/90 backdrop-blur-md border border-white/10 space-y-3 shadow-xl">
-            <span className="text-xs font-mono font-bold text-chartreuse uppercase block">
-              + Quick Add High-Yield Staples:
-            </span>
-            <div className="flex flex-wrap gap-2">
-              {FOOD_DATABASE.map((f) => {
-                const proteinG = ((f.proteinPer100g * f.servingSizeGrams) / 100).toFixed(0)
+          {/* The 24-Hour Chrono-Nutritional Plate (MPS Pulses with Animated Sweep) */}
+          <div className="p-8 sm:p-10 rounded-3xl bg-white border border-[rgba(91,110,44,0.18)] shadow-sm space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-[rgba(91,110,44,0.12)]">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-[#5B6E2C] animate-spin" style={{ animationDuration: '12s' }} />
+                <h3 className="font-display text-xl font-bold text-[#20271D]">
+                  24-Hour Chrono-Nutritional Plate
+                </h3>
+              </div>
+              <span className="text-[10px] font-mono text-[#7D8D39] uppercase tracking-wider">
+                4 Anabolic Pulses
+              </span>
+            </div>
+
+            <p className="text-xs text-[#737B70] leading-relaxed">
+              Consuming protein in one massive sitting results in oxidation. Distributing your intake into ~30g–40g pulses every 3.5 to 5 hours maximizes muscle protein synthesis (MPS).
+            </p>
+
+            <div className="space-y-4">
+              {CHRONO_MEALS.map((meal, idx) => {
+                const isCurrentPulse = pulseActive === idx
                 return (
-                  <button
-                    key={f.id}
-                    onClick={() => addFoodToMealPlan(f.id)}
-                    className="min-h-[44px] px-3.5 py-2 rounded-full text-xs font-mono font-bold bg-white/5 hover:bg-chartreuse hover:text-forest border border-white/10 transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer text-cream focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
+                  <div
+                    key={meal.time}
+                    className={`p-4 rounded-2xl border transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                      isCurrentPulse
+                        ? 'bg-[rgba(125,141,57,0.14)] border-[#5B6E2C] shadow-sm translate-x-1'
+                        : 'bg-[#F3F6F4] border-[rgba(91,110,44,0.15)] hover:border-[#5B6E2C]'
+                    }`}
                   >
-                    <Plus className="w-3 h-3" />
-                    <span>{f.name}</span>
-                    <span className="text-white/60 font-normal">
-                      (+{proteinG}g)
-                    </span>
-                  </button>
+                    <div className="flex items-start gap-3">
+                      <span
+                        className={`px-2 py-1 rounded-md text-[10px] font-mono font-bold shrink-0 mt-0.5 transition-colors ${
+                          isCurrentPulse
+                            ? 'bg-[#FF5A22] text-white animate-pulse'
+                            : 'bg-[#5B6E2C] text-[#F3F6F4]'
+                        }`}
+                      >
+                        PULSE 0{idx + 1}
+                      </span>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-mono font-semibold text-[#5B6E2C]">
+                            {meal.time}
+                          </span>
+                          <span className="text-xs font-bold text-[#20271D]">&mdash; {meal.name}</span>
+                        </div>
+                        <p className="text-xs text-[#20271D] font-medium mt-1">{meal.plate}</p>
+                        <p className="text-[10px] text-[#737B70] mt-0.5">{meal.tip}</p>
+                      </div>
+                    </div>
+                    <div className="text-right sm:shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-[rgba(91,110,44,0.1)]">
+                      <span className="font-display text-xl font-bold text-[#5B6E2C]">
+                        ~{meal.protein}g
+                      </span>
+                      <span className="text-[10px] font-mono text-[#737B70] block">Protein</span>
+                    </div>
+                  </div>
                 )
               })}
             </div>
           </div>
-
-          {/* Add All to Basket Action */}
-          {mealPlanFoods.length > 0 && (
-            <button
-              onClick={addAllToBasket}
-              className="w-full min-h-[48px] py-4 rounded-full bg-chartreuse text-forest font-mono text-xs font-black uppercase tracking-wider hover:bg-white flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(216,243,67,0.3)] transition-all active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
-            >
-              <ShoppingBag className="w-4 h-4 text-forest" />
-              <span>Add Entire Daily Plate to Shopping Basket →</span>
-            </button>
-          )}
         </div>
       </div>
-
-      {/* Complete Lower-Page Experience: Meal Timing & Distribution Architecture */}
-      <section className="pt-10 border-t border-white/10 space-y-8">
-        <div className="space-y-2">
-          <span className="text-xs font-mono font-bold uppercase tracking-widest text-chartreuse block">
-            Physiological Application
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-black font-serif text-white">
-            How to Distribute Your Daily Protein Target
-          </h2>
-          <p className="text-sm font-mono text-cream/70 max-w-2xl">
-            Eating {midpointTargetG}g of protein in one meal can exceed muscle protein synthesis (MPS) saturation. Distributing it across 3 to 4 meals triggers optimal MPS pulses throughout the day.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-6 rounded-3xl bg-[#0B1710]/90 border border-white/10 space-y-3 shadow-xl">
-            <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Meal 01 · Morning</span>
-            <div className="text-2xl font-black font-serif text-white">~{Math.round(midpointTargetG * 0.25)}g Target</div>
-            <p className="text-xs text-cream/70 font-sans leading-relaxed">
-              3 Whole Eggs or a glass of chilled Chana Sattu Elixir to kickstart the day.
-            </p>
-          </div>
-
-          <div className="p-6 rounded-3xl bg-[#0B1710]/90 border border-white/10 space-y-3 shadow-xl">
-            <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Meal 02 · Midday</span>
-            <div className="text-2xl font-black font-serif text-white">~{Math.round(midpointTargetG * 0.3)}g Target</div>
-            <p className="text-xs text-cream/70 font-sans leading-relaxed">
-              Yellow Moong Dal khichdi paired with 75g Fresh Cow Milk Paneer.
-            </p>
-          </div>
-
-          <div className="p-6 rounded-3xl bg-[#0B1710]/90 border border-white/10 space-y-3 shadow-xl">
-            <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Meal 03 · Evening</span>
-            <div className="text-2xl font-black font-serif text-white">~{Math.round(midpointTargetG * 0.2)}g Target</div>
-            <p className="text-xs text-cream/70 font-sans leading-relaxed">
-              Roasted Chana (50g) and Roasted Peanuts snack — zero cooking, rich in arginine and fiber.
-            </p>
-          </div>
-
-          <div className="p-6 rounded-3xl bg-[#0B1710]/90 border border-white/10 space-y-3 shadow-xl">
-            <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Meal 04 · Dinner</span>
-            <div className="text-2xl font-black font-serif text-white">~{Math.round(midpointTargetG * 0.25)}g Target</div>
-            <p className="text-xs text-cream/70 font-sans leading-relaxed">
-              Soy Chunks curry (50g dry) or Greek Dahi bowl with slow-digesting micellar casein.
-            </p>
-          </div>
-        </div>
-
-        <div className="p-6 rounded-2xl bg-white/5 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs">
-          <div className="flex items-center gap-2 text-cream/80">
-            <Sparkles className="w-4 h-4 text-chartreuse flex-shrink-0" />
-            <span>Want chef-tested recipes that match this exact distribution?</span>
-          </div>
-          <a
-            href="/recipes"
-            className="min-h-[44px] px-6 py-2.5 rounded-full bg-chartreuse text-forest font-bold uppercase tracking-wider hover:bg-white transition-all shadow-md flex items-center gap-2"
-          >
-            <span>Explore 15-Min Recipes →</span>
-          </a>
-        </div>
-      </section>
     </div>
   )
 }

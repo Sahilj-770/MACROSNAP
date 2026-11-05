@@ -1,4 +1,4 @@
-# MACROSNAP
+# MACROSNAP — Know what you eat.
 
 > Biological food values, Indian dietary benchmarks, and uncompromised rupee-to-protein economics — democratizing nutrition science with transparent data.
 
@@ -9,192 +9,85 @@
 
 ## Overview
 
-**MACROSNAP** is an independent food and nutrition platform comparing Indian staples against commercial fitness products. Most commercial high-protein snacks (protein bars, cookies, specialized shakes) carry 10× to 26× price premiums per gram of actual protein, often masking high sugars, fractionated oils, and polyols under front-of-pack claims.
+**MACROSNAP** is an independent food and nutrition intelligence platform comparing everyday Indian staples against commercial fitness products. Most commercial high-protein snacks (protein bars, cookies, specialized shakes) carry 10× to 26× price premiums per gram of actual protein, often masking high sugars, fractionated oils, and polyols under front-of-pack claims.
 
 MACROSNAP benchmarks real Indian staples against the **ICMR-NIN Indian Food Composition Tables (IFCT 2017)** and local kirana/mandi pricing to deliver:
 
-1. **Standardized Rupee Cost per 10g Protein:** Directly compare pure protein yield across whole foods and packaged snacks.
-2. **Head-to-Head Nutritional Showdowns:** Side-by-side macro and micro profiles with calculated savings.
-3. **Pantry Ingredient Matcher:** Practical recipe discovery connecting shelf staples to 15-minute, high-yield Indian recipes.
-4. **Physiological Daily Target Calculator:** Evidence-based protein intake recommendations (ACSM / ISSN) with real-food plate simulation and meal distribution timing.
-5. **Educational Label Decoder:** Interactive simulator demonstrating packaging practices such as micro-portions, hidden sugars, and deceptive protein claims.
-6. **Local-First Personal Collection & Basket:** Offline-capable bookmarking and grocery budget planning backed by versioned browser storage (`Zustand` + `localStorage`).
+1. **Standardized Rupee Cost per 10g Protein:** Directly compare pure protein yield across whole foods and packaged snacks:
+   $$\text{Cost per 10g Protein (₹)} = \left(\frac{\text{Retail Cost per 100g (₹)}}{\text{Protein per 100g (g)}}\right) \times 10$$
+2. **Food Discovery Archive:** Leon Vasari-inspired 3D curved shelf showcasing authentic biological food profiles (macros, micros, fiber, prep time, kirana modal costs).
+3. **Protein on a Budget Ribbon:** Vante-inspired 3D scroll-driven journey through affordable protein champions with a 30-day savings simulator.
+4. **Scientific Instrument Nutrition Calculator:** ACSM/ISSN daily requirements, bodyweight dynamics, and 4-meal protein distribution pacing.
+5. **Editorial Myth Busters:** Aurevon-inspired video hero with peer-reviewed scientific dossiers deconstructing bro-science myths.
+6. **Head-to-Head Nutritional Duels:** Side-by-side macro/micro comparisons with single-click winner basket actions.
+7. **Whole Food High-Protein Kitchen & Recipes:** 15-minute chef-tested Indian staple recipes with dynamic 1x to 4x serving scaling.
+8. **Foil-Pack Label Decoder:** Supermarket back-of-pack hotspot scanner exposing hidden sugars, maltitol, and serving size manipulation.
+9. **Local-First Grocery Ledger:** Persistent basket and saved comparisons using versioned browser storage (`Zustand` + `localStorage`).
 
 ---
 
-## Core Pillars & Scientific Methodology
+## Brand Visual Identity & Color System
 
-### 1. The Cost-per-10g Protein Formula
-Nutritional value is normalized across all items using the standard metric:
+The platform strictly adheres to the MacroSnap design token standard:
 
-$$\text{Cost per 10g Protein (₹)} = \left(\frac{\text{Retail Cost per 100g (₹)}}{\text{Protein per 100g (g)}}\right) \times 10$$
-
-This standardizes foods regardless of manufacturer serving sizes (e.g., a 15g biscuit serving vs. a 67g bar vs. 100g dry pulse).
-
-### 2. Biological Quality Benchmarks
-- **Protein Density & Bioavailability:** Sourced directly from **ICMR-NIN IFCT 2017** data points (e.g., DIAAS > 1.18 for whole poultry eggs; 52% protein density for whole soy chunks; 22.5g protein + 16.8g prebiotic fiber for roasted Bengal gram).
-- **Price Transparency:** Wholesale mandi and kirana modal pricing in the local application repository are updated regularly, transparently separated from quick-commerce markups.
-
----
-
-## Application Architecture & Routes
-
-```
-my-app/src/
-├── app/
-│   ├── page.tsx            # Home: Panoramic editorial scroll experience
-│   ├── explore/            # Food Directory: Filter by 8 categories & dietaries
-│   ├── compare/            # Contender Showdown: Head-to-head economic duels
-│   ├── budget/             # Protein on a Budget: National value podium & ₹/day simulator
-│   ├── calculator/         # Target Engine: ACSM/ISSN model + plate simulator + meal timing
-│   ├── labels/             # Label Decoder: Supermarket back-of-pack hotspot lab
-│   ├── kitchen/            # Pantry Matcher: Ingredient picker & matching recipes
-│   ├── recipes/            # Homemade Lab: 15-minute chef-tested whole food recipes
-│   ├── learn/              # Science Dossiers: Myth busters & 60-second lessons
-│   ├── library/            # Saved Intelligence: Offline bookmarked foods, duels & recipes
-│   ├── basket/             # Grocery Ledger: Live budget tracking & protein yield
-│   ├── sitemap.ts          # Automated XML sitemap generation
-│   ├── robots.ts           # Crawler directives
-│   ├── not-found.tsx       # Custom 404 recovery page
-│   └── error.tsx           # Global client error boundary
-├── components/
-│   ├── features/           # FoodCard, comparison stages, recipe views
-│   ├── home/               # Streamlined 7-section landing (HeroSection, HeroProductPreview, HowItWorks, CoreFeaturesBento, ProductShowcase, FinalCTA)
-│   ├── layout/             # Minimal Navbar (Section 1) and Footer (Section 7)
-│   └── ui/                 # Accessible primitives, badges, inputs
-├── data/
-│   ├── foods.ts            # Audited database of 12 validated core Indian staples
-│   └── recipes-and-lessons.ts # High-protein recipes, debunked myths & micro-lessons
-├── providers/
-│   └── lenis-provider.tsx  # Smooth scroll provider with reduced-motion guard
-└── store/
-    └── useUserStore.ts     # Versioned local-first store (macrosnap-user-storage-v2)
-```
-
-### Route Breakdown
-
-| Route | Purpose | Key Features |
+| Token Name | Hex Code | Semantic Role |
 |---|---|---|
-| `/` | **Landing Page** | Editorial scroll-driven introduction, molecular lens, staple spread, and economics preview. |
-| `/explore` | **Food Explorer** | Search, sort by protein density / lowest cost, filter by categories (`soy`, `dairy`, `lentils`, `eggs`, `grains`, etc.). |
-| `/compare` | **Contender Duel** | Dynamic side-by-side comparison with preset matchups, custom dropdowns, and instant winner-to-basket actions. |
-| `/budget` | **Protein Economics** | Top value podium (Soy Chunks, Moong Dal, Roasted Chana), interactive daily ₹ spend slider, and 30-day savings breakdown. |
-| `/calculator` | **Target Calculator** | Interactive body weight dial (30kg–200kg) synchronized with numeric input, activity goal multipliers, and 4-meal distribution guidance. |
-| `/labels` | **Label Decoder** | Interactive foil pack simulator with 5 hotspot scan zones (serving tricks, protein claims, hidden sugar aliases, maltitol, binders). |
-| `/kitchen` | **Pantry Matcher** | Interactive ingredient selector with presets (e.g., Hostel Sattu Elixir, Soy Bhurji) and matching recipe engine. |
-| `/recipes` | **Homemade Lab** | Dynamic serving scaler (`1x` to `4x`), macro breakdowns, direct "Add All Ingredients to Basket", and cost comparisons vs. packaged snacks. |
-| `/learn` | **Myths & Lessons** | Investigative dossiers debunking common bro-science myths with peer-reviewed literature citations. |
-| `/library` | **Saved Collection** | Tabbed storage for bookmarked foods, saved duels, and favorite recipes with single-click sample loaders. |
-| `/basket` | **Virtual Basket** | Live cost accumulation, protein total, quantity steppers, and budget threshold warnings. |
+| **Soft White** | `#F3F6F4` | Canvas background, light cards, clean breathing room |
+| **Sage** | `#7D8D39` | Primary brand accent, category pills, subtle badges |
+| **Deep Olive** | `#5B6E2C` | Headings, active states, high-contrast borders |
+| **Tangerine** | `#FF5A22` | Strategic CTAs, key numerical highlights, deception alerts |
+| **Ink** | `#20271D` | High-contrast editorial typography |
+
+---
+
+## Application Route Breakdown
+
+```text
+my-app/src/app/
+├── page.tsx            # Home: Fernhollow-inspired botanical ecosystem & narrative
+├── explore/page.tsx    # Food Discovery Archive: Leon Vasari curved 3D shelf
+├── budget/page.tsx     # Protein on a Budget: Vante 3D video ribbon & savings simulator
+├── calculator/page.tsx # Scientific Instrument: ACSM/ISSN daily target calculator
+├── learn/page.tsx      # Myth Busters: Aurevon-inspired video hero & truth dossiers
+├── compare/page.tsx    # Nutritional Duel: Side-by-side macro & rupee showdown
+├── recipes/page.tsx    # Whole Food Lab: 15-min recipes with dynamic serving scaling
+├── kitchen/page.tsx    # Pantry Matcher: Ingredient combination discovery
+├── labels/page.tsx     # Label Decoder: Supermarket back-of-pack hotspot lab
+├── library/page.tsx    # Saved Intelligence: Offline bookmarked foods, duels & recipes
+└── basket/page.tsx     # Grocery Ledger: Real-time cost accumulator & list export
+```
 
 ---
 
 ## Tech Stack
 
-- **Framework:** [Next.js 16 (App Router)](https://nextjs.org/) with **Turbopack**
-- **Runtime & Language:** [React 19](https://react.dev/), [TypeScript 5](https://www.typescriptlang.org/)
-- **Styling:** [Tailwind CSS v4](https://tailwindcss.com/)
-- **Animation & Motion:** 
-  - [GSAP 3](https://greensock.com/gsap/) with `ScrollTrigger` and `gsap.matchMedia()`
-  - [Framer Motion](https://motion.dev/)
-  - [Lenis](https://lenis.darkroom.engineering/) smooth scrolling
-- **State Management:** [Zustand 5](https://github.com/pmndrs/zustand) with `persist` middleware (`localStorage`)
-- **Icons:** [Lucide React](https://lucide.dev/)
-- **Testing & Verification:** [Playwright](https://playwright.dev/) for headless end-to-end browser testing
-
----
-
-## Motion Architecture
-
-MACROSNAP separates motion into **three distinct environments** using `gsap.matchMedia()`:
-
-1. **Desktop (`>= 1024px`):**
-   - Lenis smooth inertial scrolling.
-   - Scroll-scrubbed radial card expansions and orbital trajectories.
-   - Velocity-based `skewX` clamped to `[-5°, 5°]` to prevent visual distortion.
-   - Smooth clipPath transitions on the Telemetry Lens.
-2. **Mobile (`< 1024px`):**
-   - Lenis disabled in favor of native 120Hz touch scroll.
-   - GSAP scroll pinning and horizontal skews disabled to eliminate scroll-trapping and jitter.
-   - Lightweight vertical fade-ins (12–20px) and static touch-optimized crops.
-3. **Reduced Motion (`prefers-reduced-motion: reduce`):**
-   - All animations instantly resolve to final resting states (`opacity: 1`, `transform: none`).
-   - Smooth scroll hijacking fully bypassed.
-   - CSS transitions clamped to `0.01ms`.
-
----
-
-## Accessibility & Responsive Standards
-
-- **WCAG 2.2 AA Compliance:**
-  - High-contrast color palette: Obsidian `#050B07` background, Organic Cream `#F4EFEA` text (18.2:1 contrast ratio), Chartreuse `#D8F343` accents (12.4:1 contrast ratio).
-  - Strict minimum touch targets of **44 × 44 CSS pixels** on all mobile buttons and inputs.
-  - Visible focus rings across all interactive controls (`outline: 2px solid #D8F343; outline-offset: 2px`).
-  - Screen-reader accessible alerts using non-blocking toasts (`role="status"`, `aria-live="polite"`).
-  - Semantic HTML5 structure throughout (`<article>`, `<nav>`, `<header>`, `<main>`, `<aside>`).
-- **Zero Horizontal Overflow:** Verified across all standard viewports:
-  - 360 × 800 (Compact Mobile)
-  - 390 × 844 (Standard iPhone/Pixel)
-  - 768 × 1024 (Tablet Portrait)
-  - 1366 × 768 (Standard Laptop)
-  - 1440 × 900+ (Desktop Widescreen)
+- **Framework:** Next.js 16.4 (App Router) with **Turbopack**
+- **Runtime & Language:** React 19.3, TypeScript 5 (Strict Mode)
+- **Styling:** Tailwind CSS v4 with custom CSS variable tokens
+- **Motion & Interaction:**
+  - GSAP 3.15 + ScrollTrigger (Scroll-linked 3D ribbon and pinning)
+  - Framer Motion / Motion (Layout transitions, modal reveals)
+  - Lenis 1.3 (Inertial smooth scrolling with `prefers-reduced-motion` guards)
+  - HTML5 Canvas (Botanical particle depth on homepage)
+- **Testing & QA:** Playwright end-to-end test runner across Desktop, Tablet, and Mobile
 
 ---
 
 ## Getting Started
 
-### Prerequisites
-- **Node.js:** v18.18.0 or newer
-- **npm**, **pnpm**, or **yarn**
-- **Python 3** (optional, for running local automated verification scripts)
-
-### Installation
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/Sahilj-770/MACROSNAP.git
-   cd MACROSNAP/my-app
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Start the local development server:**
-   ```bash
-   npm run dev
-   ```
-   Open [http://localhost:3000](http://localhost:3000) in your browser.
-
----
-
-## Build & Testing
-
-### TypeScript Type Check
 ```bash
-npx tsc --noEmit
-```
+# Navigate to application
+cd my-app
 
-### Production Build
-Build the fully optimized static application with Next.js Turbopack:
-```bash
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Run production build
 npm run build
+
+# Start production server
+npm run start
 ```
-
-### Automated End-to-End Verification
-Automated test scripts verify mathematical calculations and multi-viewport rendering via Playwright:
-
-```bash
-# 1. Verify mathematical calculations and storage persistence
-python verify_math_and_store.py
-
-# 2. Run Playwright E2E test suite across viewports and capture screenshots
-python run_visual_refinement_e2e.py
-```
-
----
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).

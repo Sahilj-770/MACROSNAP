@@ -240,3 +240,6 @@ export const FOOD_MYTHS: FoodMyth[] = [
     source: 'NIN-ICMR India Economic Nutrition Index 2024.',
   },
 ]
+
+export const RECIPES = RECIPE_DATABASE
+

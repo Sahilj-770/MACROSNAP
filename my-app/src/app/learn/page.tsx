@@ -1,323 +1,375 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'framer-motion'
-import { FOOD_MYTHS, NUTRITION_LESSONS } from '@/data/recipes-and-lessons'
-import {
-  BookOpen,
-  HelpCircle,
-  Check,
-  X,
-  ShieldAlert,
-  Sparkles,
-  ChevronDown,
-  ExternalLink,
-  Flame,
-  Award,
-  Zap,
-  ArrowRight
-} from 'lucide-react'
+import { Flower2, ChevronDown, CheckCircle, XCircle, Sparkles, BookOpen } from 'lucide-react'
+import { FOOD_MYTHS } from '@/data/recipes-and-lessons'
+
+const VIDEO_URL =
+  'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260819_212700_3bb9329b-5c50-4257-a09b-ca85cf3654a3.mp4'
+
+const EASE_ENTRANCE = 'cubic-bezier(0.16, 1, 0.3, 1)'
+const EASE_OVERLAY = 'cubic-bezier(0.76, 0, 0.24, 1)'
+
+const OVERLAY_LINKS = [
+  { label: 'Home', href: '/' },
+  { label: 'Story & Evidence', href: '#dossiers' },
+  { label: 'Food Collection', href: '/explore' },
+  { label: 'Macro Calculator', href: '/calculator' },
+]
 
 export default function LearnPage() {
-  const [activeTab, setActiveTab] = useState<'myths' | 'lessons'>('myths')
-  const [openMythId, setOpenMythId] = useState<string>(FOOD_MYTHS[0]!.id)
+  const [navMounted, setNavMounted] = useState(false)
+  const [heroMounted, setHeroMounted] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const [overlayOpen, setOverlayOpen] = useState(false)
+
+  // Dossier section state
+  const [activeCategory, setActiveCategory] = useState('All')
+  const [expandedId, setExpandedId] = useState<string | null>(FOOD_MYTHS[0]?.id ?? null)
+
+  // Navbar & Hero Entrance Timers
+  useEffect(() => {
+    const tNav = setTimeout(() => setNavMounted(true), 100)
+    const tHero = setTimeout(() => setHeroMounted(true), 300)
+    return () => {
+      clearTimeout(tNav)
+      clearTimeout(tHero)
+    }
+  }, [])
+
+  // Scroll listener for Navbar
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 40)
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  // Prevent background scroll when overlay is open
+  useEffect(() => {
+    if (overlayOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [overlayOpen])
+
+  const toggleOverlay = () => setOverlayOpen((prev) => !prev)
+
+  const scrollToDossiers = () => {
+    setOverlayOpen(false)
+    const el = document.getElementById('dossiers')
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+
+  const filteredMyths = FOOD_MYTHS.filter((m) => {
+    if (activeCategory === 'All') return true
+    return m.category.toLowerCase().includes(activeCategory.toLowerCase().slice(0, 4))
+  })
 
   return (
-    <div className="min-h-screen bg-[#050B07] text-cream pb-24 selection:bg-chartreuse selection:text-forest">
-      {/* ─────────────────────────────────────────────────────────────
-          HERO BANNER (SCIENTIFIC INVESTIGATIVE JOURNAL)
-      ───────────────────────────────────────────────────────────── */}
-      <section className="relative w-full pt-12 pb-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-8">
-          <div className="space-y-3 max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 text-chartreuse border border-chartreuse/30 text-xs font-mono font-bold tracking-wider uppercase shadow-sm">
-              <BookOpen className="w-3.5 h-3.5" />
-              <span>Evidence-Based Nutrition & Dietary Science</span>
-            </div>
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black font-serif text-white tracking-tight leading-[0.94]">
-              Evidence-Based <br />
-              <span className="text-chartreuse italic font-normal">Nutrition Science.</span>
-            </h1>
-            <p className="text-sm sm:text-base font-mono text-cream/70 max-w-2xl leading-relaxed">
-              Randomized controlled trials, meta-analyses, and ICMR-NIN dietary research synthesized into clear, practical evidence for Indian dietary staples.
-            </p>
+    <div className="relative w-full bg-black text-white selection:bg-[#7D8D39] selection:text-white">
+      {/* 
+        ========================================================================
+        NAVBAR (Fixed, top-0, z-50, Aurevon Spec)
+        ========================================================================
+      */}
+      <header
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
+          scrolled ? 'bg-black/80 backdrop-blur-md' : 'bg-transparent'
+        }`}
+      >
+        <div className="max-w-[1440px] mx-auto px-6 md:px-10 flex items-center justify-between h-16 md:h-20">
+          {/* Left — Logo Link */}
+          <Link
+            href="/"
+            className={`text-white text-xl md:text-2xl font-semibold tracking-tight z-50 transition-all duration-700 ${
+              navMounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
+            }`}
+            style={{ transitionTimingFunction: EASE_ENTRANCE, transitionDelay: '0ms' }}
+          >
+            Aurevon
+          </Link>
+
+          {/* Center — Desktop Only Pill Button */}
+          <div
+            className={`hidden md:flex transition-all duration-700 ${
+              navMounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
+            }`}
+            style={{ transitionTimingFunction: EASE_ENTRANCE, transitionDelay: '200ms' }}
+          >
+            <button
+              type="button"
+              onClick={toggleOverlay}
+              className="px-5 py-2 rounded-full border border-white/20 text-white/90 text-sm hover:bg-white/10 transition-colors flex items-center gap-2 cursor-pointer z-50"
+            >
+              <span>{overlayOpen ? 'Close' : 'Navigate'}</span>
+            </button>
           </div>
 
-          {/* Tab Switcher */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => setActiveTab('myths')}
-              className={`px-5 py-2.5 rounded-2xl text-xs font-mono font-bold transition-all duration-200 flex items-center gap-2 cursor-pointer ${
-                activeTab === 'myths'
-                  ? 'bg-chartreuse text-forest shadow-[0_0_12px_rgba(216,243,67,0.3)] font-black scale-105'
-                  : 'bg-white/5 text-cream/80 border border-white/10 hover:border-chartreuse/30 hover:text-white'
+          {/* Right — Desktop Only Flower2 Icon */}
+          <div
+            className={`hidden md:flex transition-all duration-700 ${
+              navMounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
+            }`}
+            style={{ transitionTimingFunction: EASE_ENTRANCE, transitionDelay: '400ms' }}
+          >
+            <Flower2 className="w-7 h-7 text-white/90" />
+          </div>
+
+          {/* Right — Mobile Hamburger Button */}
+          <button
+            type="button"
+            onClick={toggleOverlay}
+            className="md:hidden w-8 h-8 flex flex-col items-center justify-center gap-1.5 z-50 cursor-pointer"
+            aria-label="Toggle menu"
+          >
+            <span
+              className={`w-6 h-[2px] bg-white transition-all duration-500 ${
+                overlayOpen ? 'rotate-45 translate-y-[4px]' : ''
               }`}
-            >
-              <ShieldAlert className="w-4 h-4 text-tangerine" />
-              <span>Myth Busters ({FOOD_MYTHS.length})</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('lessons')}
-              className={`px-5 py-2.5 rounded-2xl text-xs font-mono font-bold transition-all duration-200 flex items-center gap-2 cursor-pointer ${
-                activeTab === 'lessons'
-                  ? 'bg-chartreuse text-forest shadow-[0_0_12px_rgba(216,243,67,0.3)] font-black scale-105'
-                  : 'bg-white/5 text-cream/80 border border-white/10 hover:border-chartreuse/30 hover:text-white'
+              style={{ transitionTimingFunction: EASE_OVERLAY }}
+            />
+            <span
+              className={`w-6 h-[2px] bg-white transition-all duration-500 ${
+                overlayOpen ? '-rotate-45 -translate-y-[4px]' : ''
               }`}
+              style={{ transitionTimingFunction: EASE_OVERLAY }}
+            />
+          </button>
+        </div>
+      </header>
+
+      {/* 
+        ========================================================================
+        FULL-SCREEN OVERLAY MENU (Aurevon Spec)
+        ========================================================================
+      */}
+      <div
+        className={`fixed inset-0 z-40 bg-black flex flex-col items-center justify-center transition-all duration-700 ${
+          overlayOpen ? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'
+        }`}
+        style={{ transitionTimingFunction: EASE_OVERLAY }}
+      >
+        <nav className="flex flex-col items-center justify-center gap-8">
+          {OVERLAY_LINKS.map((link, idx) => (
+            <Link
+              key={link.label}
+              href={link.href}
+              onClick={() => {
+                if (link.href === '#dossiers') {
+                  scrollToDossiers()
+                } else {
+                  setOverlayOpen(false)
+                }
+              }}
+              className={`font-instrument text-white text-4xl md:text-6xl hover:opacity-60 transition-all duration-600 ${
+                overlayOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+              }`}
+              style={{
+                transitionTimingFunction: EASE_OVERLAY,
+                transitionDelay: overlayOpen ? `${150 + idx * 80}ms` : '0ms',
+              }}
             >
-              <Zap className="w-4 h-4 text-chartreuse" />
-              <span>60-Sec Lessons ({NUTRITION_LESSONS.length})</span>
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+      </div>
+
+      {/* 
+        ========================================================================
+        HERO (Full Viewport, Aurevon Spec)
+        ========================================================================
+      */}
+      <section className="relative w-full h-screen overflow-hidden flex items-end justify-center">
+        {/* Background Video Wrapper: starts scale-105 opacity-0 -> scale-100 opacity-100 */}
+        <div
+          className={`absolute inset-0 transition-all duration-[1400ms] ${
+            heroMounted ? 'scale-100 opacity-100' : 'scale-105 opacity-0'
+          }`}
+          style={{ transitionTimingFunction: EASE_ENTRANCE }}
+        >
+          <video
+            src={VIDEO_URL}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        {/* Foreground (Bottom-Centered) */}
+        <div className="relative z-10 text-center px-6 pb-16 md:pb-24 max-w-4xl mx-auto">
+          {/* H1 in Instrument Serif */}
+          <h1
+            className={`font-instrument text-white text-[2.5rem] leading-[0.95] sm:text-5xl md:text-6xl lg:text-7xl mb-5 md:mb-6 transition-all duration-900 ${
+              heroMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
+            style={{ transitionTimingFunction: EASE_ENTRANCE, transitionDelay: heroMounted ? '400ms' : '0ms' }}
+          >
+            A carefully curated<br className="hidden sm:block" /> collection beyond compare
+          </h1>
+
+          {/* Subcopy */}
+          <p
+            className={`text-white/70 text-base md:text-lg mb-8 md:mb-10 max-w-md mx-auto transition-all duration-900 ${
+              heroMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
+            style={{ transitionTimingFunction: EASE_ENTRANCE, transitionDelay: heroMounted ? '600ms' : '0ms' }}
+          >
+            Reserve your place in our private evidence gallery.
+          </p>
+
+          {/* CTA */}
+          <div
+            className={`transition-all duration-900 ${
+              heroMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
+            style={{ transitionTimingFunction: EASE_ENTRANCE, transitionDelay: heroMounted ? '800ms' : '0ms' }}
+          >
+            <button
+              type="button"
+              onClick={scrollToDossiers}
+              className="inline-block px-8 py-3.5 bg-white text-black text-sm md:text-base font-medium rounded-full hover:bg-white/90 transition-all cursor-pointer shadow-lg"
+            >
+              Explore Evidence Dossiers
             </button>
           </div>
         </div>
       </section>
 
-      {/* ─────────────────────────────────────────────────────────────
-          MYTHS TAB: INVESTIGATIVE DOSSIERS
-      ───────────────────────────────────────────────────────────── */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {activeTab === 'myths' && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between text-xs font-mono text-muted-foreground font-bold uppercase tracking-wider">
-              <span>Classified Industry Claims Under Investigation</span>
-              <span>Click Any Dossier To Unmask</span>
-            </div>
-
-            <div className="space-y-4">
-              {FOOD_MYTHS.map((myth) => {
-                const isOpen = openMythId === myth.id
-
-                return (
-                  <motion.div
-                    key={myth.id}
-                    layout
-                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                    className={`rounded-3xl border transition-all duration-300 overflow-hidden cursor-pointer ${
-                      isOpen
-                        ? 'bg-[#0B1710]/95 backdrop-blur-md border-chartreuse shadow-[0_0_25px_rgba(216,243,67,0.15)]'
-                        : 'bg-[#0B1710]/80 border-white/10 hover:border-white/25 hover:bg-[#0B1710]'
-                    }`}
-                    onClick={() => setOpenMythId(isOpen ? '' : myth.id)}
-                  >
-                    {/* Header Row */}
-                    <div className="p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div className="flex items-start gap-4">
-                        <span className="w-10 h-10 rounded-2xl bg-tangerine/15 text-tangerine flex items-center justify-center font-bold font-mono text-base shrink-0 border border-tangerine/30">
-                          ?
-                        </span>
-                        <div className="space-y-1">
-                          <span className="text-[10px] font-mono font-bold text-chartreuse uppercase tracking-widest block">
-                            Category: {myth.category} // POPULAR FITNESS FALLACY
-                          </span>
-                          <h3 className="text-xl sm:text-2xl font-bold font-serif text-white leading-snug">
-                            &ldquo;{myth.myth}&rdquo;
-                          </h3>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3 self-end md:self-center">
-                        <span className="px-4 py-1.5 rounded-full text-xs font-mono font-black uppercase tracking-widest bg-red-600 text-white shadow-md animate-pulse">
-                          {myth.verdict}
-                        </span>
-                        <span className={`w-8 h-8 rounded-full border border-white/20 flex items-center justify-center transition-transform duration-300 ${
-                          isOpen ? 'rotate-180 bg-chartreuse text-forest font-bold' : 'bg-transparent text-white'
-                        }`}>
-                          <ChevronDown className="w-4 h-4" />
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Expandable Evidence Body */}
-                    <AnimatePresence>
-                      {isOpen && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                          className="px-6 sm:px-8 pb-8 space-y-6 border-t border-white/10 pt-6 text-cream"
-                        >
-                          {/* The Truth Banner */}
-                          <div className="p-5 rounded-2xl bg-[#050B07] text-cream space-y-2 border border-chartreuse/40 shadow-inner">
-                            <div className="flex items-center gap-2 font-mono text-xs text-chartreuse font-bold uppercase tracking-wider">
-                              <Check className="w-4 h-4" />
-                              <span>The Biological Reality</span>
-                            </div>
-                            <p className="text-sm sm:text-base font-sans font-medium text-cream leading-relaxed">
-                              {myth.theTruth}
-                            </p>
-                          </div>
-
-                          {/* Scientific Context & Citation */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2">
-                              <span className="text-[10px] font-mono font-bold text-chartreuse uppercase block tracking-wider">
-                                Clinical Trial Evidence & Data
-                              </span>
-                              <p className="text-xs sm:text-sm text-cream/90 leading-relaxed">
-                                {myth.scientificContext}
-                              </p>
-                            </div>
-
-                            <div className="p-5 rounded-2xl bg-chartreuse/10 border border-chartreuse/30 space-y-2">
-                              <span className="text-[10px] font-mono font-bold text-chartreuse uppercase block tracking-wider">
-                                Actionable Kitchen Takeaway
-                              </span>
-                              <p className="text-xs sm:text-sm font-semibold text-cream leading-relaxed">
-                                {myth.practicalTakeaway}
-                              </p>
-                            </div>
-                          </div>
-
-                          {/* Source Tag */}
-                          <div className="pt-2 flex items-center justify-between text-[11px] font-mono text-muted-foreground border-t border-white/10">
-                            <span className="truncate">
-                              Published Study: {myth.source}
-                            </span>
-                            <span className="font-bold text-chartreuse shrink-0">
-                              Verified Against ICMR-NIN & PubMed
-                            </span>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                )
-              })}
-            </div>
+      {/* 
+        ========================================================================
+        EVIDENCE DOSSIERS SECTION (Deep Scientific Peer-Reviewed Literature)
+        ========================================================================
+      */}
+      <section id="dossiers" className="py-24 px-6 md:px-12 max-w-6xl mx-auto bg-black text-[#F3F6F4]">
+        <div className="pb-8 border-b border-white/15 mb-12">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 text-[#A3B18A] text-xs font-mono uppercase tracking-widest mb-4">
+            <Sparkles className="w-3.5 h-3.5 text-[#FF5A22]" />
+            <span>ICMR-NIN &bull; Peer-Reviewed Scientific Archive</span>
           </div>
-        )}
+          <h2 className="font-instrument text-4xl sm:text-6xl text-white tracking-tight">
+            Scientific Myth Demolition Dossiers
+          </h2>
+          <p className="text-sm sm:text-base text-white/70 mt-3 max-w-2xl leading-relaxed">
+            Separating marketing folklore from empirical metabolic literature. Every dossier is cross-referenced with randomized controlled trials (RCTs) and clinical dietary standards.
+          </p>
 
-        {/* ─────────────────────────────────────────────────────────────
-            LESSONS TAB: 60-SECOND INTEL BRIEFS
-        ───────────────────────────────────────────────────────────── */}
-        {activeTab === 'lessons' && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between text-xs font-mono text-muted-foreground font-bold uppercase tracking-wider">
-              <span>Rapid 60-Second Nutrition Masterclasses</span>
-              <span>Read Time ~1 Min</span>
-            </div>
+          {/* Category Tabs */}
+          <div className="flex flex-wrap gap-2 mt-8">
+            {['All', 'Supplements', 'Safety', 'Hormones', 'Economics'].map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setActiveCategory(cat)}
+                className={`px-4 py-1.5 rounded-full text-xs font-mono tracking-wider uppercase transition-all ${
+                  activeCategory === cat
+                    ? 'bg-white text-black font-semibold shadow-xs'
+                    : 'bg-white/10 text-white/70 hover:bg-white/20'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {NUTRITION_LESSONS.map((lesson) => (
-                <div
-                  key={lesson.id}
-                  className="p-6 sm:p-8 rounded-3xl bg-[#0B1710]/95 backdrop-blur-md border border-white/10 hover:border-chartreuse/40 transition-all duration-300 shadow-xl flex flex-col justify-between space-y-6 text-cream"
+        {/* Accordion Dossier Cards */}
+        <div className="space-y-6">
+          {filteredMyths.map((myth) => {
+            const isExpanded = expandedId === myth.id
+            return (
+              <div
+                key={myth.id}
+                className="rounded-3xl bg-[#141813] border border-white/15 overflow-hidden transition-all duration-300 hover:border-white/30"
+              >
+                {/* Header Row */}
+                <button
+                  type="button"
+                  onClick={() => setExpandedId(isExpanded ? null : myth.id)}
+                  className="w-full p-6 sm:p-8 flex items-start sm:items-center justify-between text-left gap-4 cursor-pointer"
                 >
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between font-mono text-[11px]">
-                      <span className="px-2.5 py-0.5 rounded-full bg-white/5 text-chartreuse border border-chartreuse/30 font-bold uppercase">
-                        {lesson.category}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <span className="text-[10px] font-mono uppercase tracking-widest text-[#7D8D39] px-2.5 py-1 rounded-full bg-white/10">
+                        {myth.category}
                       </span>
-                      <span className="text-muted-foreground flex items-center gap-1">
-                        ⏱️ {lesson.readTimeSec}s read
+                      <span
+                        className={`text-[10px] font-mono font-bold tracking-wider px-2.5 py-1 rounded-full flex items-center gap-1.5 ${
+                          myth.verdict === 'BUSTED'
+                            ? 'bg-[#FF5A22]/20 text-[#FF5A22]'
+                            : 'bg-[#7D8D39]/20 text-[#7D8D39]'
+                        }`}
+                      >
+                        {myth.verdict === 'BUSTED' ? (
+                          <XCircle className="w-3.5 h-3.5" />
+                        ) : (
+                          <CheckCircle className="w-3.5 h-3.5" />
+                        )}
+                        <span>{myth.verdict}</span>
                       </span>
                     </div>
 
-                    <h3 className="text-2xl font-bold font-serif text-white leading-tight">
-                      {lesson.title}
+                    <h3 className="font-instrument text-2xl sm:text-3xl text-white leading-tight">
+                      &ldquo;{myth.myth}&rdquo;
                     </h3>
+                  </div>
 
-                    <p className="text-xs font-mono font-semibold text-chartreuse">
-                      &ldquo;{lesson.headline}&rdquo;
-                    </p>
+                  <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center shrink-0 text-white/80 transition-transform duration-300">
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform duration-300 ${
+                        isExpanded ? 'rotate-180 text-[#7D8D39]' : ''
+                      }`}
+                    />
+                  </div>
+                </button>
 
-                    <p className="text-xs text-cream/80 leading-relaxed">
-                      {lesson.coreLesson}
-                    </p>
+                {/* Expanded Details */}
+                {isExpanded && (
+                  <div className="p-6 sm:p-8 pt-0 border-t border-white/10 space-y-6 text-sm text-white/80 animate-in fade-in duration-200">
+                    <div>
+                      <h4 className="text-xs font-mono uppercase tracking-widest text-[#7D8D39] mb-2 font-bold">
+                        Biological Reality:
+                      </h4>
+                      <p className="leading-relaxed text-white/90">{myth.theTruth}</p>
+                    </div>
 
-                    {/* Bullet Points */}
-                    <div className="space-y-2 pt-2 border-t border-white/10">
-                      {lesson.bulletPoints.map((pt, i) => (
-                        <div key={i} className="flex items-start gap-2 text-xs text-cream/80">
-                          <span className="text-chartreuse font-bold mt-0.5">▸</span>
-                          <span>{pt}</span>
-                        </div>
-                      ))}
+                    <div className="p-4 rounded-2xl bg-black/40 border border-white/10">
+                      <h4 className="text-xs font-mono uppercase tracking-widest text-[#A3B18A] mb-1 font-bold">
+                        Clinical Context:
+                      </h4>
+                      <p className="text-xs leading-relaxed text-white/70">
+                        {myth.scientificContext}
+                      </p>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-[#5B6E2C]/20 border border-[#5B6E2C]/30 text-xs text-white/90">
+                      <strong className="text-[#A3B18A] block mb-1">
+                        Practical Kitchen Rule:
+                      </strong>
+                      <p>{myth.practicalTakeaway}</p>
+                    </div>
+
+                    <div className="text-[11px] font-mono text-white/50 pt-2 border-t border-white/10">
+                      Ref: {myth.source}
                     </div>
                   </div>
-
-                  {/* Practical Golden Rule */}
-                  <div className="p-4 rounded-2xl bg-[#050B07] text-cream space-y-1 font-mono text-xs border border-chartreuse/30">
-                    <span className="text-[10px] text-chartreuse uppercase font-bold block">
-                      The Golden Rule:
-                    </span>
-                    <p className="text-cream/90 text-[11px] leading-snug">
-                      {lesson.practicalRule}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Complete Lower-Page Experience: Put Science into Practice */}
-        <section className="pt-10 mt-12 border-t border-white/10 space-y-8">
-          <div className="space-y-2">
-            <span className="text-xs font-mono font-bold uppercase tracking-widest text-chartreuse block">
-              Translate Evidence to Action
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black font-serif text-white">
-              Put the Scientific Dossiers Into Practice
-            </h2>
-            <p className="text-sm font-mono text-cream/70 max-w-2xl">
-              Now that you&apos;ve deconstructed the marketing myths, check your personal biological requirement or discover real whole foods that meet it.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <Link
-              href="/calculator"
-              className="group p-6 sm:p-8 rounded-3xl bg-[#0B1710]/90 border border-white/10 hover:border-chartreuse/50 transition-all space-y-3 shadow-xl"
-            >
-              <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Step 01</span>
-              <h3 className="text-xl font-bold font-serif text-white group-hover:text-chartreuse transition-colors">
-                Calculate Daily Targets
-              </h3>
-              <p className="text-xs text-cream/75 font-sans leading-relaxed">
-                Determine your exact daily protein requirement based on your body weight and training activity.
-              </p>
-              <div className="flex items-center gap-2 text-xs font-mono font-bold text-chartreuse pt-2 group-hover:underline">
-                <span>Open Calculator →</span>
+                )}
               </div>
-            </Link>
-
-            <Link
-              href="/explore"
-              className="group p-6 sm:p-8 rounded-3xl bg-[#0B1710]/90 border border-white/10 hover:border-chartreuse/50 transition-all space-y-3 shadow-xl"
-            >
-              <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Step 02</span>
-              <h3 className="text-xl font-bold font-serif text-white group-hover:text-chartreuse transition-colors">
-                Inspect 30+ Staples
-              </h3>
-              <p className="text-xs text-cream/75 font-sans leading-relaxed">
-                Review laboratory DIAAS scores and cost per 10g protein for unbranded pantry foods.
-              </p>
-              <div className="flex items-center gap-2 text-xs font-mono font-bold text-chartreuse pt-2 group-hover:underline">
-                <span>Explore Food Index →</span>
-              </div>
-            </Link>
-
-            <Link
-              href="/compare"
-              className="group p-6 sm:p-8 rounded-3xl bg-[#0B1710]/90 border border-white/10 hover:border-chartreuse/50 transition-all space-y-3 shadow-xl"
-            >
-              <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Step 03</span>
-              <h3 className="text-xl font-bold font-serif text-white group-hover:text-chartreuse transition-colors">
-                Dual Contender Showdown
-              </h3>
-              <p className="text-xs text-cream/75 font-sans leading-relaxed">
-                Pit any processed supermarket snack against whole food alternatives side-by-side.
-              </p>
-              <div className="flex items-center gap-2 text-xs font-mono font-bold text-chartreuse pt-2 group-hover:underline">
-                <span>Launch Showdown →</span>
-              </div>
-            </Link>
-          </div>
-        </section>
-      </main>
-
+            )
+          })}
+        </div>
+      </section>
     </div>
   )
 }

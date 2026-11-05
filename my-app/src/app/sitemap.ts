@@ -2,26 +2,24 @@ import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://macrosnap-two.vercel.app'
-  const lastModified = new Date()
-
   const routes = [
     '',
     '/explore',
-    '/compare',
     '/budget',
-    '/basket',
+    '/calculator',
+    '/learn',
+    '/compare',
     '/recipes',
     '/kitchen',
-    '/calculator',
     '/labels',
-    '/learn',
     '/library',
+    '/basket',
   ]
 
   return routes.map((route) => ({
     url: `${baseUrl}${route}`,
-    lastModified,
-    changeFrequency: route === '' ? 'daily' : 'weekly',
+    lastModified: new Date(),
+    changeFrequency: 'weekly' as const,
     priority: route === '' ? 1.0 : 0.8,
   }))
 }

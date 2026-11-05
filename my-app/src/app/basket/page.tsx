@@ -1,11 +1,9 @@
 'use client'
 
 import React, { useState } from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { motion, AnimatePresence } from 'framer-motion'
-import { FOOD_DATABASE } from '@/data/foods'
 import { useUserStore } from '@/store/useUserStore'
+import { FOOD_DATABASE } from '@/data/foods'
+import Link from 'next/link'
 import {
   ShoppingBag,
   Trash2,
@@ -13,393 +11,354 @@ import {
   Minus,
   ArrowRight,
   Sparkles,
-  AlertTriangle,
-  Compass,
+  Trophy,
+  CheckCircle2,
+  Share2,
+  Check,
+  Receipt,
+  Printer,
 } from 'lucide-react'
 
 export default function BasketPage() {
-  const {
-    basketItems,
-    updateBasketQuantity,
-    removeFromBasket,
-    clearBasket,
-    dailyTargetProteinGrams,
-    addToBasket,
-    loadSampleBasket,
-  } = useUserStore()
+  const basketItems = useUserStore((state) => state.basketItems)
+  const updateQuantity = useUserStore((state) => state.updateBasketQuantity)
+  const removeFromBasket = useUserStore((state) => state.removeFromBasket)
+  const clearBasket = useUserStore((state) => state.clearBasket)
+  const loadSampleBasket = useUserStore((state) => state.loadSampleBasket)
+  const dailyTarget = useUserStore((state) => state.dailyTargetProteinGrams) || 80
 
-  const [budgetLimit, setBudgetLimit] = useState<number>(100)
+  const [copied, setCopied] = useState(false)
 
-  // Compute Basket Totals
-  const totalCost = basketItems.reduce((acc, item) => {
-    const food = FOOD_DATABASE.find((f) => f.id === item.foodId)
-    if (!food) return acc
-    return acc + (food.estimatedCostPer100g * item.quantityGrams) / 100
-  }, 0)
+  // Calculate totals
+  let totalCost = 0
+  let totalProteinGrams = 0
 
-  const totalProtein = basketItems.reduce((acc, item) => {
-    const food = FOOD_DATABASE.find((f) => f.id === item.foodId)
-    if (!food) return acc
-    return acc + (food.proteinPer100g * item.quantityGrams) / 100
-  }, 0)
+  const enrichedItems = basketItems
+    .map((item) => {
+      const food = FOOD_DATABASE.find((f) => f.id === item.foodId)
+      if (!food) return null
 
-  const remainingBudget = budgetLimit - totalCost
-  const budgetPercent = Math.min(100, Math.round((totalCost / budgetLimit) * 100))
-  const targetProteinGoal = dailyTargetProteinGrams > 0 ? dailyTargetProteinGrams : 90
-  const proteinTargetPercent = Math.min(100, Math.round((totalProtein / targetProteinGoal) * 100))
+      const multiplier = item.quantityGrams / 100
+      const itemCost = food.estimatedCostPer100g * multiplier
+      const itemProtein = food.proteinPer100g * multiplier
+
+      totalCost += itemCost
+      totalProteinGrams += itemProtein
+
+      return {
+        food,
+        quantityGrams: item.quantityGrams,
+        itemCost,
+        itemProtein,
+      }
+    })
+    .filter(Boolean) as {
+    food: (typeof FOOD_DATABASE)[0]
+    quantityGrams: number
+    itemCost: number
+    itemProtein: number
+  }[]
+
+  const avgCostPer10g =
+    totalProteinGrams > 0 ? ((totalCost / totalProteinGrams) * 10).toFixed(2) : '0.00'
+  const commercialEquivalentCost = Math.round((totalProteinGrams / 10) * 55)
+  const moneySaved = Math.max(0, commercialEquivalentCost - Math.round(totalCost))
+  const targetMet = totalProteinGrams >= dailyTarget
+
+  const handleCopyList = () => {
+    const lines = [
+      '🧾 MACROSNAP SCIENTIFIC GROCERY LEDGER',
+      '====================================',
+      ...enrichedItems.map(
+        (i) =>
+          `• ${i.food.name}: ${i.quantityGrams}g (${i.itemProtein.toFixed(1)}g protein, ₹${Math.round(i.itemCost)})`
+      ),
+      '------------------------------------',
+      `TOTAL PROTEIN: ${totalProteinGrams.toFixed(1)}g / ${dailyTarget}g target`,
+      `TOTAL ESTIMATED COST: ₹${Math.round(totalCost)}`,
+      `EST. SAVINGS VS COMMERCIAL BARS: ₹${moneySaved}`,
+      '====================================',
+      'Generated with MacroSnap — Know what you eat.',
+    ]
+
+    navigator.clipboard.writeText(lines.join('\n')).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2400)
+    })
+  }
 
   return (
-    <div className="min-h-screen bg-[#050B07] text-cream pb-24 selection:bg-chartreuse selection:text-forest">
-      {/* ─────────────────────────────────────────────────────────────
-          HERO BANNER
-      ───────────────────────────────────────────────────────────── */}
-      <section className="relative w-full pt-12 pb-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-8">
-          <div className="space-y-3 max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-chartreuse border border-chartreuse/30 text-xs font-mono font-bold tracking-wider uppercase shadow-sm">
-              <ShoppingBag className="w-3.5 h-3.5" />
-              <span>Nutrition & Budget Planner · Personal Grocery Basket</span>
-            </div>
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black font-serif text-white tracking-tight leading-[0.94]">
-              Build Your <br />
-              <span className="text-chartreuse italic font-normal">Protein Basket.</span>
-            </h1>
-            <p className="text-sm sm:text-base font-mono text-cream/70 max-w-2xl leading-relaxed">
-              Real grocery yields, instant protein calculation, and live budget tracking against wholesale kirana benchmarks.
-            </p>
+    <div className="min-h-screen pt-28 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      {/* Editorial Header */}
+      <div className="pb-8 border-b border-[rgba(91,110,44,0.18)] mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[rgba(125,141,57,0.12)] border border-[rgba(91,110,44,0.2)] text-xs font-mono uppercase tracking-widest text-[#5B6E2C] mb-3">
+            <Receipt className="w-3.5 h-3.5 text-[#7D8D39]" />
+            <span>Thermal Whole-Food Provisioning Ledger</span>
           </div>
-
-          {/* Quick Actions */}
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={loadSampleBasket}
-              className="min-h-[44px] px-4 py-2 rounded-2xl text-xs font-mono font-black bg-chartreuse text-forest shadow-[0_0_15px_rgba(216,243,67,0.3)] hover:bg-white transition-all flex items-center gap-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-forest" />
-              <span>+ Load Starter Staples (90g Protein)</span>
-            </button>
-            {basketItems.length > 0 && (
-              <button
-                onClick={clearBasket}
-                className="min-h-[44px] px-4 py-2 rounded-2xl text-xs font-mono font-bold bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 transition-all flex items-center gap-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>Clear Basket</span>
-              </button>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* ─────────────────────────────────────────────────────────────
-          MAIN BASKET GRID & FINANCIAL LEDGER
-      ───────────────────────────────────────────────────────────── */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* LEFT COLUMN: BASKET ITEMS */}
-        <div className="lg:col-span-8 bg-[#0B1710]/95 backdrop-blur-md rounded-3xl border border-white/10 p-6 sm:p-8 shadow-xl space-y-6 text-cream">
-          <div className="flex items-center justify-between pb-4 border-b border-white/10 font-mono text-xs">
-            <span className="font-bold uppercase tracking-wider text-muted-foreground">
-              Basket Contents ({basketItems.length} Products)
-            </span>
-            <Link
-              href="/explore"
-              className="text-chartreuse hover:underline font-bold flex items-center gap-1 min-h-[36px] py-1 px-2 rounded focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
-            >
-              <span>+ Add More Foods</span>
-              <ArrowRight className="w-3 h-3" />
-            </Link>
-          </div>
-
-          {basketItems.length > 0 ? (
-            <div className="space-y-4">
-              <AnimatePresence>
-                {basketItems.map((item) => {
-                  const food = FOOD_DATABASE.find((f) => f.id === item.foodId)
-                  if (!food) return null
-                  const itemProtein = ((food.proteinPer100g * item.quantityGrams) / 100).toFixed(1)
-                  const itemCost = ((food.estimatedCostPer100g * item.quantityGrams) / 100).toFixed(1)
-
-                  return (
-                    <motion.div
-                      key={item.foodId}
-                      layout
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.25 }}
-                      className="p-4 sm:p-5 rounded-2xl bg-[#050B07]/80 border border-white/10 hover:border-chartreuse/30 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
-                    >
-                      {/* Thumbnail & Info */}
-                      <div className="flex items-center gap-4">
-                        <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border border-white/10 bg-black/40">
-                          <Image
-                            src={food.imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=200&q=80'}
-                            alt={food.name}
-                            fill
-                            sizes="64px"
-                            className="object-cover"
-                          />
-                        </div>
-
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase font-bold bg-white/5 text-chartreuse border border-chartreuse/20">
-                              {food.category}
-                            </span>
-                            <span className="text-xs font-mono text-chartreuse font-bold uppercase">
-                              {food.affordabilityTier.replace('-', ' ')}
-                            </span>
-                          </div>
-                          <h3 className="font-bold font-serif text-lg text-white leading-snug">
-                            {food.name}
-                          </h3>
-                          <p className="text-xs font-mono text-muted-foreground">
-                            +{itemProtein}g protein · ₹{itemCost} est.
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Controls (min 44px touch targets) */}
-                      <div className="flex items-center gap-4 self-end sm:self-center">
-                        <div className="flex items-center gap-1 sm:gap-2 bg-white/5 px-2 py-1 rounded-xl border border-white/15 font-mono text-xs">
-                          <button
-                            onClick={() => updateBasketQuantity(item.foodId, Math.max(50, item.quantityGrams - 50))}
-                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors flex items-center justify-center font-bold cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
-                            aria-label={`Decrease ${food.name} quantity by 50g`}
-                          >
-                            <Minus className="w-3.5 h-3.5" />
-                          </button>
-                          <span className="w-16 text-center font-black text-chartreuse text-sm">
-                            {item.quantityGrams}g
-                          </span>
-                          <button
-                            onClick={() => updateBasketQuantity(item.foodId, item.quantityGrams + 50)}
-                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors flex items-center justify-center font-bold cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
-                            aria-label={`Increase ${food.name} quantity by 50g`}
-                          >
-                            <Plus className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-
-                        <button
-                          onClick={() => removeFromBasket(item.foodId)}
-                          className="min-w-[44px] min-h-[44px] flex items-center justify-center text-white/40 hover:text-red-400 transition-colors rounded-xl hover:bg-red-500/10 cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
-                          title="Remove item"
-                          aria-label={`Remove ${food.name} from basket`}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </motion.div>
-                  )
-                })}
-              </AnimatePresence>
-            </div>
-          ) : (
-            <div className="text-center py-16 space-y-5">
-              <ShoppingBag className="w-16 h-16 text-white/20 mx-auto" />
-              <div className="space-y-1.5">
-                <p className="text-2xl font-bold font-serif text-white">Your grocery basket is empty</p>
-                <p className="text-xs font-mono text-cream/70 max-w-sm mx-auto leading-relaxed">
-                  Start fresh by browsing our database of whole Indian staples, or click below to load our curated starter staples pack.
-                </p>
-              </div>
-              <div className="flex flex-wrap justify-center gap-3 pt-2">
-                <button
-                  onClick={loadSampleBasket}
-                  className="min-h-[44px] inline-flex items-center gap-2 px-6 py-3 rounded-full bg-chartreuse text-forest font-mono text-xs font-black uppercase tracking-wider hover:bg-white transition-all shadow-[0_0_20px_rgba(216,243,67,0.3)] active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
-                >
-                  <Sparkles className="w-4 h-4 text-forest" />
-                  <span>Load Starter Staples (90g Protein)</span>
-                </button>
-                <Link
-                  href="/explore"
-                  className="min-h-[44px] inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-cream font-mono text-xs font-bold uppercase tracking-wider transition-all focus-visible:ring-2 focus-visible:ring-chartreuse focus-visible:outline-none"
-                >
-                  <Compass className="w-4 h-4 text-chartreuse" />
-                  <span>Explore Whole Foods</span>
-                </Link>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* RIGHT COLUMN: FINANCIAL & BIOLOGICAL LEDGER */}
-        <aside className="lg:col-span-4 space-y-6">
-          <div className="bg-[#0B1710]/95 text-cream rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl border border-chartreuse/30">
-            <div className="space-y-1 pb-4 border-b border-white/10">
-              <span className="text-[10px] font-mono text-chartreuse uppercase font-bold tracking-widest block">
-                ECONOMIC AUDIT
-              </span>
-              <h2 className="text-2xl font-black font-serif text-white">
-                Nutrition Ledger
-              </h2>
-            </div>
-
-            {/* Target Budget Slider */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center text-xs font-mono">
-                <label htmlFor="budget-slider" className="text-cream/70 uppercase">Daily Budget Ceiling:</label>
-                <span className="font-bold text-chartreuse text-base">₹{budgetLimit}</span>
-              </div>
-              <input
-                id="budget-slider"
-                type="range"
-                min="30"
-                max="300"
-                step="10"
-                value={budgetLimit}
-                onChange={(e) => setBudgetLimit(Number(e.target.value))}
-                className="w-full accent-chartreuse cursor-pointer"
-              />
-              <div className="flex justify-between text-[10px] font-mono text-cream/40">
-                <span>₹30 (Survival)</span>
-                <span>₹100 (Optimal)</span>
-                <span>₹300 (Premium)</span>
-              </div>
-            </div>
-
-            {/* Live Progress Meters */}
-            <div className="space-y-4 pt-2">
-              {/* Budget Spent Meter */}
-              <div className="space-y-1.5 font-mono text-xs">
-                <div className="flex justify-between">
-                  <span className="text-cream/70">Budget Utilization:</span>
-                  <span className={remainingBudget >= 0 ? 'text-chartreuse font-bold' : 'text-red-400 font-bold'}>
-                    {budgetPercent}% (₹{totalCost.toFixed(0)} / ₹{budgetLimit})
-                  </span>
-                </div>
-                <div className="w-full bg-black/60 h-2.5 rounded-full overflow-hidden border border-white/10">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${Math.min(100, budgetPercent)}%` }}
-                    className={`h-full rounded-full transition-all duration-300 ${
-                      remainingBudget >= 0 ? 'bg-chartreuse shadow-[0_0_8px_#D8F343]' : 'bg-red-500'
-                    }`}
-                  />
-                </div>
-              </div>
-
-              {/* Protein Target Meter */}
-              <div className="space-y-1.5 font-mono text-xs">
-                <div className="flex justify-between">
-                  <span className="text-cream/70">Daily Protein Target:</span>
-                  <span className="text-chartreuse font-bold">
-                    {proteinTargetPercent}% ({totalProtein.toFixed(0)}g / {targetProteinGoal}g)
-                  </span>
-                </div>
-                <div className="w-full bg-black/60 h-2.5 rounded-full overflow-hidden border border-white/10">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${Math.min(100, proteinTargetPercent)}%` }}
-                    className="h-full bg-chartreuse rounded-full transition-all duration-300 shadow-[0_0_8px_#D8F343]"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Financial Summary */}
-            <div className="pt-4 border-t border-white/10 space-y-3 font-mono text-xs">
-              <div className="flex justify-between items-baseline">
-                <span className="text-cream/60">Estimated Basket Cost:</span>
-                <span className="text-3xl font-black text-white">₹{totalCost.toFixed(1)}</span>
-              </div>
-              <div className="flex justify-between items-baseline">
-                <span className="text-cream/60">Total Protein Yield:</span>
-                <span className="text-3xl font-black text-chartreuse">{totalProtein.toFixed(1)}g</span>
-              </div>
-              <div className="flex justify-between items-baseline">
-                <span className="text-cream/60">Cost Per 10g Protein:</span>
-                <span className="text-xl font-bold text-chartreuse">
-                  ₹{totalProtein > 0 ? ((totalCost / totalProtein) * 10).toFixed(1) : '0'}
-                </span>
-              </div>
-              <div className="flex justify-between items-center pt-2 border-t border-white/10">
-                <span className="text-cream/70">Remaining Balance:</span>
-                <span className={`text-base font-bold ${
-                  remainingBudget >= 0 ? 'text-chartreuse' : 'text-red-400'
-                }`}>
-                  {remainingBudget >= 0 ? `+₹${remainingBudget.toFixed(1)} under` : `-₹${Math.abs(remainingBudget).toFixed(1)} over`}
-                </span>
-              </div>
-            </div>
-
-            {remainingBudget < 0 && (
-              <div className="p-3.5 rounded-2xl bg-red-950/50 border border-red-500/40 text-xs font-mono space-y-1">
-                <div className="flex items-center gap-1.5 text-red-400 font-bold">
-                  <AlertTriangle className="w-4 h-4" />
-                  <span>Budget Limit Exceeded</span>
-                </div>
-                <p className="text-cream/75 text-[11px] leading-relaxed">
-                  Swap out packaged products with raw bulk soy chunks or chana sattu to bring total spend under ₹{budgetLimit}.
-                </p>
-              </div>
-            )}
-
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 font-mono text-[11px] space-y-1.5 text-cream/70">
-              <span className="text-chartreuse font-bold uppercase block text-[10px]">
-                Preserved In Local Cache
-              </span>
-              <p>
-                Your selected basket state is saved in your browser localStorage. It will remain populated when you revisit this device.
-              </p>
-            </div>
-          </div>
-
-        </aside>
-      </main>
-
-      {/* Complete Lower-Page Experience: Next Steps with Your Planning Basket */}
-      <section className="pt-10 mt-12 border-t border-white/10 space-y-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="space-y-2">
-          <span className="text-xs font-mono font-bold uppercase tracking-widest text-chartreuse block">
-            Practical Execution
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-black font-serif text-white">
-            Next Steps With Your Protein Basket
-          </h2>
-          <p className="text-sm font-mono text-cream/70 max-w-2xl">
-            This is a nutritional planning basket designed to help you organize whole-food shopping without fitness brand marketing markups.
+          <h1 className="font-display text-4xl sm:text-6xl font-bold text-[#20271D] tracking-tight">
+            The Kirana Receipt
+          </h1>
+          <p className="text-sm sm:text-base text-[#737B70] mt-3 max-w-2xl leading-relaxed">
+            Your live virtual grocery ledger. Standardizes raw wholesale ingredients into daily protein yield, total rupees, and comparative commercial savings.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="p-6 sm:p-8 rounded-3xl bg-[#0B1710]/90 border border-white/10 space-y-3 shadow-xl">
-            <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Tip 01 · Kirana Strategy</span>
-            <h3 className="text-lg font-bold font-serif text-white">Buy Unbranded Wholesale</h3>
-            <p className="text-xs text-cream/75 font-sans leading-relaxed">
-              Ask your local neighborhood grocery or grain merchant for loose roasted chana, yellow moong dal, and bulk soy chunks for the lowest prices per gram.
-            </p>
-          </div>
+        <div className="flex items-center gap-3 shrink-0">
+          {enrichedItems.length === 0 && (
+            <button
+              type="button"
+              onClick={loadSampleBasket}
+              className="px-5 py-2.5 rounded-full bg-[#5B6E2C] text-[#F3F6F4] text-xs font-mono tracking-wider uppercase font-semibold hover:bg-[#7D8D39] transition-all shadow-xs"
+            >
+              Load Sample Starter Basket
+            </button>
+          )}
 
-          <div className="p-6 sm:p-8 rounded-3xl bg-[#0B1710]/90 border border-white/10 space-y-3 shadow-xl">
-            <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Tip 02 · Cooking Speed</span>
-            <h3 className="text-lg font-bold font-serif text-white">Cook 15-Minute Meals</h3>
-            <p className="text-xs text-cream/75 font-sans leading-relaxed">
-              Turn the items in your basket into savory sattu elixirs, quick high-protein soy bhurji, or gentle moong dal bowls.
-            </p>
-            <div className="pt-2">
-              <Link href="/recipes" className="text-xs font-mono font-bold text-chartreuse hover:underline">
-                View Matching Recipes →
-              </Link>
+          {enrichedItems.length > 0 && (
+            <>
+              <button
+                type="button"
+                onClick={handleCopyList}
+                className="px-4 py-2.5 rounded-full bg-white text-[#20271D] border border-[rgba(91,110,44,0.25)] text-xs font-mono tracking-wider uppercase hover:border-[#5B6E2C] transition-all flex items-center gap-2 shadow-xs"
+              >
+                {copied ? <Check className="w-4 h-4 text-[#5B6E2C]" /> : <Share2 className="w-4 h-4" />}
+                <span>{copied ? 'Copied Receipt' : 'Export Receipt'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={clearBasket}
+                className="p-2.5 rounded-full text-[#737B70] hover:text-[#FF5A22] hover:bg-[#FF5A22]/10 transition-colors"
+                aria-label="Clear All Items"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {enrichedItems.length === 0 ? (
+        <div className="p-16 rounded-3xl bg-white border border-[rgba(91,110,44,0.18)] shadow-sm text-center max-w-2xl mx-auto my-12">
+          <div className="w-16 h-16 rounded-full bg-[#F3F6F4] text-[#5B6E2C] flex items-center justify-center mx-auto mb-6">
+            <ShoppingBag className="w-8 h-8" />
+          </div>
+          <h2 className="font-display text-3xl font-bold text-[#20271D] mb-3">
+            Your Grocery Ledger is Empty
+          </h2>
+          <p className="text-xs sm:text-sm text-[#737B70] mb-8 leading-relaxed max-w-md mx-auto">
+            Browse the 3D Book Archive or Nutritional Duel and add whole foods to calculate your real daily nutrition economics.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={loadSampleBasket}
+              className="px-6 py-3 rounded-full bg-[#5B6E2C] text-[#F3F6F4] text-xs font-mono uppercase tracking-wider font-semibold hover:bg-[#7D8D39] transition-all shadow-xs"
+            >
+              Load Sample Starter Basket
+            </button>
+            <Link
+              href="/explore"
+              className="px-6 py-3 rounded-full bg-[#F3F6F4] text-[#20271D] text-xs font-mono uppercase tracking-wider font-semibold border border-[rgba(91,110,44,0.2)] hover:border-[#5B6E2C] transition-all"
+            >
+              Browse 3D Archive
+            </Link>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+          {/* Left Column: Physical Thermal Receipt Tape */}
+          <div className="lg:col-span-7">
+            <div className="relative p-8 sm:p-10 rounded-2xl bg-[#FCFAF5] border-x border-t border-[rgba(91,110,44,0.25)] shadow-xl font-mono text-[#20271D]">
+              {/* Jagged Perforated Top Edge */}
+              <div
+                className="absolute -top-3 left-0 right-0 h-3 pointer-events-none opacity-80"
+                style={{
+                  backgroundImage:
+                    'radial-gradient(circle, transparent, transparent 50%, #FCFAF5 50%, #FCFAF5 100%)',
+                  backgroundSize: '12px 12px',
+                }}
+                aria-hidden="true"
+              />
+
+              {/* Kirana Receipt Header */}
+              <div className="text-center pb-6 border-b-2 border-dashed border-[#20271D]/20 mb-6 space-y-1">
+                <div className="flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest text-[#5B6E2C]">
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>MACROSNAP NUTRITION DISPENSARY</span>
+                </div>
+                <p className="text-[10px] text-[#737B70]">
+                  TERMINAL: #MS-MUMBAI-01 &bull; ICMR-NIN IFCT 2017 STANDARDS
+                </p>
+                <p className="text-[10px] text-[#737B70]">
+                  TIMESTAMP: {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                </p>
+              </div>
+
+              {/* Line Items List */}
+              <div className="space-y-4 pb-6 border-b-2 border-dashed border-[#20271D]/20">
+                <div className="flex justify-between text-[11px] font-bold text-[#737B70] uppercase pb-2 border-b border-[#20271D]/10">
+                  <span>ITEM / QUANTITY</span>
+                  <div className="flex gap-8">
+                    <span>PROTEIN</span>
+                    <span>INR</span>
+                  </div>
+                </div>
+
+                {enrichedItems.map((item) => (
+                  <div
+                    key={item.food.id}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-2 border-b border-[#20271D]/5"
+                  >
+                    <div>
+                      <span className="font-bold text-xs uppercase block">
+                        {item.food.name}
+                      </span>
+                      <span className="text-[10px] text-[#737B70] block">
+                        ₹{item.food.estimatedCostPer100g} / 100g &bull; {item.food.proteinPer100g}g protein
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between sm:justify-end gap-6 pt-1 sm:pt-0">
+                      {/* Quantity Stepper */}
+                      <div className="flex items-center gap-2 bg-white px-2 py-1 rounded-lg border border-[rgba(91,110,44,0.2)]">
+                        <button
+                          type="button"
+                          onClick={() => updateQuantity(item.food.id, Math.max(0, item.quantityGrams - 50))}
+                          className="p-1 hover:text-[#FF5A22]"
+                          aria-label="Decrease quantity"
+                        >
+                          <Minus className="w-3 h-3" />
+                        </button>
+                        <span className="text-xs font-bold w-12 text-center">
+                          {item.quantityGrams}g
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => updateQuantity(item.food.id, item.quantityGrams + 50)}
+                          className="p-1 hover:text-[#5B6E2C]"
+                          aria-label="Increase quantity"
+                        >
+                          <Plus className="w-3 h-3" />
+                        </button>
+                      </div>
+
+                      <span className="text-xs font-bold text-[#5B6E2C] w-14 text-right">
+                        {item.itemProtein.toFixed(1)}g
+                      </span>
+
+                      <span className="text-xs font-bold text-[#20271D] w-14 text-right">
+                        ₹{Math.round(item.itemCost)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Receipt Totals Summary */}
+              <div className="space-y-2 pt-6">
+                <div className="flex justify-between text-xs">
+                  <span className="text-[#737B70]">TOTAL PROTEIN YIELD:</span>
+                  <span className="font-bold text-sm text-[#5B6E2C]">
+                    {totalProteinGrams.toFixed(1)}g
+                  </span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-[#737B70]">AVG COST / 10G PROTEIN:</span>
+                  <span className="font-bold text-xs text-[#20271D]">
+                    ₹{avgCostPer10g}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm font-bold pt-3 border-t border-[#20271D]/15">
+                  <span>TOTAL ESTIMATED CASH:</span>
+                  <span className="text-base text-[#20271D]">
+                    ₹{Math.round(totalCost)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Simulated Thermal Barcode at Bottom */}
+              <div className="pt-8 text-center">
+                <div className="h-10 w-48 mx-auto bg-black flex items-center justify-between px-2 text-[8px] text-white tracking-widest">
+                  |||||| |||| ||||||| ||||| |||||||
+                </div>
+                <span className="text-[9px] text-[#737B70] tracking-widest mt-1 block">
+                  MACROSNAP-VERIFIED-AUTH-00912
+                </span>
+              </div>
+
+              {/* Rubber Stamp of Physiological Target Met */}
+              {targetMet && (
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-[-12deg] pointer-events-none p-4 rounded-xl border-4 border-[#5B6E2C] text-[#5B6E2C] font-mono text-center uppercase tracking-widest bg-white/90 shadow-2xl animate-in zoom-in-90 duration-300">
+                  <span className="text-sm sm:text-base font-extrabold block">
+                    ★ 100% TARGET MET ★
+                  </span>
+                  <span className="text-[10px] font-bold block mt-0.5">
+                    PHYSIOLOGICAL DEMAND SATISFIED
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="p-6 sm:p-8 rounded-3xl bg-[#0B1710]/90 border border-white/10 space-y-3 shadow-xl">
-            <span className="text-xs font-mono font-bold text-chartreuse uppercase block">Tip 03 · Verification</span>
-            <h3 className="text-lg font-bold font-serif text-white">Compare Contenders</h3>
-            <p className="text-xs text-cream/75 font-sans leading-relaxed">
-              Unsure if a packaged product is worth it? Put it side-by-side with raw paneer or eggs in our head-to-head showdown.
-            </p>
-            <div className="pt-2">
-              <Link href="/compare" className="text-xs font-mono font-bold text-chartreuse hover:underline">
-                Launch Showdown Arena →
-              </Link>
+          {/* Right Column: Economics & Goal Analysis */}
+          <div className="lg:col-span-5 space-y-6">
+            {/* Target Progress Card */}
+            <div className="p-8 rounded-3xl bg-white border border-[rgba(91,110,44,0.18)] shadow-sm space-y-4">
+              <span className="text-xs font-mono uppercase tracking-widest text-[#5B6E2C] font-semibold">
+                DAILY PROTEIN COMPLETION
+              </span>
+              <div className="flex justify-between items-baseline">
+                <span className="font-display text-4xl font-bold text-[#20271D]">
+                  {Math.round(totalProteinGrams)}
+                  <span className="text-lg font-sans font-normal text-[#737B70]"> / {dailyTarget}g</span>
+                </span>
+                <span className="text-xs font-mono font-bold text-[#5B6E2C]">
+                  {Math.round((totalProteinGrams / dailyTarget) * 100)}%
+                </span>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="w-full h-3 rounded-full bg-[#F3F6F4] overflow-hidden border border-[rgba(91,110,44,0.15)]">
+                <div
+                  className="h-full bg-[#5B6E2C] rounded-full transition-all duration-500"
+                  style={{
+                    width: `${Math.min(100, (totalProteinGrams / dailyTarget) * 100)}%`,
+                  }}
+                />
+              </div>
+
+              <p className="text-xs text-[#737B70] leading-relaxed">
+                {targetMet
+                  ? 'Congratulations! This grocery basket completely fulfills your daily cellular nitrogen requirement using whole foods.'
+                  : `Add ${(dailyTarget - totalProteinGrams).toFixed(0)}g more protein to hit your customized daily physiological target.`}
+              </p>
+            </div>
+
+            {/* Monthly Household Savings Card */}
+            <div className="p-8 rounded-3xl bg-[rgba(125,141,57,0.08)] border border-[rgba(91,110,44,0.2)] shadow-xs space-y-4">
+              <div className="flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-[#FF5A22]" />
+                <span className="text-xs font-mono uppercase tracking-widest text-[#20271D] font-bold">
+                  COMMERCIAL EQUIVALENT SAVINGS
+                </span>
+              </div>
+
+              <div>
+                <span className="font-display text-4xl font-bold text-[#FF5A22]">
+                  ₹{moneySaved}
+                </span>
+                <span className="text-xs text-[#737B70] ml-2 font-mono">Saved on this basket</span>
+              </div>
+
+              <p className="text-xs text-[#737B70] leading-relaxed">
+                Purchasing the same {totalProteinGrams.toFixed(0)}g of protein via commercial bars or RTD shakes would cost approximately <strong className="text-[#20271D]">₹{commercialEquivalentCost}</strong>. That translates to <strong className="text-[#5B6E2C]">~₹{moneySaved * 30} saved per month</strong>.
+              </p>
             </div>
           </div>
         </div>
-      </section>
-
+      )}
     </div>
   )
 }

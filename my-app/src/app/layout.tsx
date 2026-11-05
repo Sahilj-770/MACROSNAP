@@ -1,45 +1,39 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono, Playfair_Display } from 'next/font/google'
-import { LenisProvider } from '@/providers/lenis-provider'
+import './globals.css'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
-import './globals.css'
-
-const geistSans = Geist({
-  variable: '--font-sans',
-  subsets: ['latin'],
-})
-
-const geistMono = Geist_Mono({
-  variable: '--font-mono',
-  subsets: ['latin'],
-})
-
-const playfair = Playfair_Display({
-  variable: '--font-serif',
-  subsets: ['latin'],
-})
+import { SmoothScrollProvider } from '@/providers/lenis-provider'
 
 export const metadata: Metadata = {
-  title: 'MACROSNAP — Independent Food Intelligence & Protein Economics',
+  title: 'MacroSnap — Know what you eat',
   description:
-    'Vibrant, evidence-informed food intelligence. Discover affordable protein, compare packaged foods with kitchen staples, and decode nutrition labels with zero marketing bias.',
-  keywords: ['protein calculator', 'food comparison', 'affordable protein India', 'nutrition label decoder', 'sattu', 'soy chunks'],
+    'Biological food values, Indian dietary benchmarks, and uncompromised rupee-to-protein economics.',
+  keywords: [
+    'nutrition',
+    'protein cost',
+    'Indian diet',
+    'ICMR-NIN IFCT',
+    'soy chunks',
+    'paneer',
+    'macro calculator',
+    'dietary benchmarks',
+  ],
 }
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode
-}) {
+}>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-[#050B07] text-cream font-sans selection:bg-chartreuse selection:text-forest">
-        <LenisProvider>
+    <html lang="en">
+      <body className="min-h-screen flex flex-col bg-[#F3F6F4] text-[#20271D] selection:bg-[#7D8D39] selection:text-[#F3F6F4]">
+        <SmoothScrollProvider>
+          {/* Global Navbar is strictly the first visible UI element */}
           <Navbar />
-          <div className="flex-1 w-full">{children}</div>
+          <main className="flex-1 w-full">{children}</main>
           <Footer />
-        </LenisProvider>
+        </SmoothScrollProvider>
       </body>
     </html>
   )
