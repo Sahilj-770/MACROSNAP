@@ -1,18 +1,34 @@
 'use client'
 
-import React, { useEffect, useRef, useState, useMemo } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { FOOD_DATABASE } from '@/data/foods'
-import { FoodItem } from '@/types/food'
 import { useUserStore } from '@/store/useUserStore'
-import { ShoppingBag, Check, X, ShieldCheck, ArrowRight, ArrowLeft, BookOpen, Sparkles } from 'lucide-react'
+import { ShoppingBag, Check, X, ArrowRight, ArrowLeft, BookOpen, Sparkles } from 'lucide-react'
 
-// Map 12 authentic food items into archival monographs
+// Authentic daylight food imagery mapping
+const FOOD_IMAGES: Record<string, string> = {
+  'soy-chunks': '/images/food/food_0.webp',
+  'roasted-chana': '/images/food/food_6.webp',
+  'paneer-fresh': '/images/food/food_4.webp',
+  'whole-eggs': '/images/food/food_3.webp',
+  'yellow-moong-dal': '/images/food/food_1.webp',
+  'sattu-roasted': '/images/food/food_2.webp',
+  'chicken-breast': '/images/food/food_8.webp',
+  'greek-yogurt-curd': '/images/food/food_7.webp',
+  'peanuts-roasted': '/images/food/food_9.webp',
+  'tofu-firm': '/images/food/food_5.webp',
+  'almonds-raw': '/images/food/food_9.webp',
+  'whey-protein-isolate': '/images/food/food_0.webp',
+}
+
+// 12 authentic food items from FOOD_DATABASE
 const FOOD_ARCHIVE_DATA = FOOD_DATABASE.slice(0, 12).map((item, idx) => ({
   ...item,
   index: idx,
   romaji: item.hindiName || item.name.toUpperCase(),
   proteinVal: item.proteinPer100g,
   costPer10g: ((item.estimatedCostPer100g / item.proteinPer100g) * 10).toFixed(2),
+  image: FOOD_IMAGES[item.id] || item.imageUrl || '/images/food/food_0.webp',
   coverColor:
     idx % 4 === 0
       ? '#3F4D20' // Deep Archival Forest
@@ -25,11 +41,10 @@ const FOOD_ARCHIVE_DATA = FOOD_DATABASE.slice(0, 12).map((item, idx) => ({
 
 export function LeonVasariFoodArchive() {
   const containerRef = useRef<HTMLDivElement | null>(null)
-  const probeRef = useRef<HTMLDivElement | null>(null)
   const detailRef = useRef<HTMLDivElement | null>(null)
   const svgGroupRef = useRef<SVGGElement | null>(null)
 
-  const [activeIndex, setActiveIndex] = useState(5)
+  const [activeIndex, setActiveIndex] = useState(0)
   const [detailOpen, setDetailOpen] = useState(false)
   const [addedToBasket, setAddedToBasket] = useState(false)
   const addToBasket = useUserStore((state) => state.addToBasket)
@@ -38,41 +53,18 @@ export function LeonVasariFoodArchive() {
 
   // Shelf physics refs
   const stateRef = useRef({
-    s: 17, // start at virtual index (12 + 5)
-    T: 17,
+    s: 0,
+    T: 0,
     velocity: 0,
     isDragging: false,
     dragStartX: 0,
     lastDragX: 0,
     lastDragTime: 0,
-    T0: 17,
+    T0: 0,
     tiltX: 0,
     tiltY: 0,
-    mouseX: 0,
-    mouseY: 0,
-    hoveredIndex: -1,
     detailOpen: false,
-    H: 360,
-    ws: 62,
-    d: 230,
-    gap: 24,
-    U: 480,
-    P: 1400,
-    XS: [] as number[],
   })
-
-  // Precompute integral XS for depth curve
-  useEffect(() => {
-    const U = 480
-    const XS: number[] = []
-    let acc = 0
-    const maxU = 3 * U
-    for (let u = 0; u <= maxU; u += 2) {
-      acc += 2 / Math.pow(1 + Math.pow(u / U, 1.6), 1)
-      XS.push(acc)
-    }
-    stateRef.current.XS = XS
-  }, [])
 
   // Animation Loop with Butter-Smooth Spring Physics & Inertia
   useEffect(() => {
@@ -82,29 +74,14 @@ export function LeonVasariFoodArchive() {
     let animId: number
     let lastTime = performance.now()
 
-    const tapeEls: HTMLElement[] = Array.from(
-      container.querySelectorAll<HTMLElement>('.vasari-tape')
+    const itemEls: HTMLElement[] = Array.from(
+      container.querySelectorAll<HTMLElement>('.archive-shelf-item')
     )
 
-    const updateGeometry = () => {
-      const probe = probeRef.current
-      if (probe) {
-        const h = probe.getBoundingClientRect().height || 360
-        const isMobile = window.innerWidth <= 768
-        stateRef.current.H = h
-        stateRef.current.ws = isMobile ? 48 : 58
-        stateRef.current.d = isMobile ? 180 : 230
-        stateRef.current.gap = isMobile ? 16 : 26
-        stateRef.current.U = isMobile ? h * 1.05 : h * 1.35
-      }
-    }
-    updateGeometry()
-    window.addEventListener('resize', updateGeometry)
-
-    // Wheel event for desktop trackpad / mousewheel scrolling through the shelf
+    // Wheel event for trackpad / mousewheel scrolling through the shelf
     const handleWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaY) > 4) {
-        stateRef.current.T += e.deltaY > 0 ? 0.45 : -0.45
+        stateRef.current.T += e.deltaY > 0 ? 0.35 : -0.35
       }
     }
     container.addEventListener('wheel', handleWheel, { passive: true })
@@ -121,28 +98,6 @@ export function LeonVasariFoodArchive() {
     }
     window.addEventListener('keydown', handleKeyDown)
 
-    const B = (r: number) => {
-      if (Math.abs(r) < 1) {
-        return (r + Math.sin(Math.PI * r) / Math.PI) / 2
-      }
-      return r > 0 ? 0.5 : -0.5
-    }
-
-    const F = (r: number, ws: number, d: number, gap: number) => {
-      return r * (ws + gap) + (d - ws + 1.2 * gap) * B(r)
-    }
-
-    const scl = (u: number, U: number) => {
-      return 1 / (1 + Math.pow(Math.abs(u) / U, 1.55))
-    }
-
-    const xsc = (u: number, U: number, XS: number[]) => {
-      const sign = u < 0 ? -1 : 1
-      const absU = Math.abs(u)
-      const idx = Math.min(XS.length - 1, Math.floor(absU / 2))
-      return sign * (XS[idx] || absU * 0.72)
-    }
-
     const smoothstep = (x: number) => {
       const c = Math.max(0, Math.min(1, x))
       return c * c * (3 - 2 * c)
@@ -154,18 +109,24 @@ export function LeonVasariFoodArchive() {
 
       const st = stateRef.current
 
-      // Inertial spring damping
+      // Crisp spring damping
       if (!st.isDragging) {
         const diff = st.T - st.s
-        st.velocity = st.velocity * 0.85 + diff * 12 * dt
-        st.s += st.velocity
+        if (Math.abs(diff) < 0.003 && Math.abs(st.velocity) < 0.003) {
+          st.s = st.T
+          st.velocity = 0
+        } else {
+          st.velocity = st.velocity * 0.72 + diff * 28 * dt
+          st.s += st.velocity
+        }
       }
 
-      // Keep within virtual loops (36 items: 3 sets of 12)
-      if (st.s > 30) {
+      // Continuous loop normalization around 12 items
+      while (st.s >= 12) {
         st.s -= 12
         st.T -= 12
-      } else if (st.s < 6) {
+      }
+      while (st.s < 0) {
         st.s += 12
         st.T += 12
       }
@@ -174,47 +135,78 @@ export function LeonVasariFoodArchive() {
       const currIdx = (Math.round(st.s) % 12 + 12) % 12
       setActiveIndex((prev) => (prev !== currIdx ? currIdx : prev))
 
-      const { H, ws, d, gap, U, P, XS } = st
+      const isMobile = window.innerWidth <= 768
 
       // Render each monograph in 3D arc space
-      tapeEls.forEach((el) => {
-        const v = Number(el.dataset.v)
-        let r = ((v - st.s) % 36 + 36) % 36
-        if (r >= 18) r -= 36
+      itemEls.forEach((el) => {
+        const idx = Number(el.dataset.idx)
+        let r = ((idx - st.s) % 12 + 12) % 12
+        if (r >= 6) r -= 12
 
-        const o = smoothstep(Math.max(0, 1 - Math.abs(r)))
-        const u = F(r, ws, d, gap)
+        const d = Math.abs(r)
+        const o = smoothstep(Math.max(0, 1 - d))
 
-        if (Math.abs(u) > U * 2.1) {
+        // Culling: items beyond distance 4.5 are hidden
+        if (d > 4.5) {
           el.style.display = 'none'
           return
         }
         el.style.display = 'block'
 
-        const sc = scl(u, U)
-        const k = 1 / Math.max(0.001, sc)
-        const z = P * (1 - k) + o * H * 0.16
-        const x = xsc(u, U, XS) * k
-        const y = (H * 0.5 * (1 - sc) * 0.38 + o * H * 0.015) * k
+        // Lateral X offset
+        const lateralSpacing = isMobile ? 48 : 72
+        const centerSpread = isMobile ? 110 : 160
+        let x = 0
+        if (r > 0) {
+          x = centerSpread * Math.min(1, r) + Math.max(0, r - 1) * lateralSpacing
+        } else if (r < 0) {
+          x = -centerSpread * Math.min(1, -r) - Math.max(0, -r - 1) * lateralSpacing
+        }
 
-        const signU = u < 0 ? -1 : 1
+        // Depth Z offset (Center card stands forward; sides recede into background)
+        const z = 30 * o - Math.pow(d, 1.35) * (isMobile ? 40 : 65)
+
+        // Vertical Y subtle arc
+        const y = Math.pow(d, 1.2) * (isMobile ? 2.5 : 5)
+
+        // Rotation Y (Active card faces directly forward at 0deg; side cards turn to show spines)
         const rotY =
-          signU * Math.min(1, Math.abs(u) / U) * 24 * (1 - o) -
-          90 * o +
-          st.tiltY * o
+          r > 0
+            ? -(55 + Math.min(15, (r - 1) * 5)) * (1 - o)
+            : r < 0
+            ? (55 + Math.min(15, (-r - 1) * 5)) * (1 - o)
+            : st.tiltY * o
+
         const rotX = st.tiltX * o
 
-        // Active book scale boost (1.1x)
-        const scaleBoost = 1 + o * 0.12
+        // Scale: active card is prominent; side cards scale gently
+        const scale = 1.04 * o + (1 - o) * Math.max(0.72, 1 - d * 0.05)
 
-        el.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale(${scaleBoost})`
-        const relativeZ = Math.round(10 + Math.max(0, 1 - Math.abs(r) / 8) * 35)
+        el.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale(${scale})`
+
+        // Z-Index: center is on top
+        const relativeZ = Math.round(50 - d * 6)
         el.style.zIndex = String(relativeZ)
 
-        // Set shading custom property
-        const shade = Math.min(0.55, o * 0.45 + (1 - sc) * 0.3)
-        el.style.setProperty('--shade', String(shade))
-        el.style.setProperty('--cover-shade', String((1 - o) * 0.75))
+        // Cards remain 100% solid & opaque
+        el.style.opacity = '1'
+
+        // Clean toggle between Cover and Spine representations
+        const coverFace = el.querySelector<HTMLElement>('.card-cover-face')
+        const spineFace = el.querySelector<HTMLElement>('.card-spine-face')
+        if (coverFace && spineFace) {
+          if (o > 0.45) {
+            coverFace.style.opacity = '1'
+            coverFace.style.pointerEvents = 'auto'
+            spineFace.style.opacity = '0'
+            spineFace.style.pointerEvents = 'none'
+          } else {
+            coverFace.style.opacity = '0'
+            coverFace.style.pointerEvents = 'none'
+            spineFace.style.opacity = '1'
+            spineFace.style.pointerEvents = 'auto'
+          }
+        }
       })
 
       animId = requestAnimationFrame(loop)
@@ -224,7 +216,6 @@ export function LeonVasariFoodArchive() {
 
     return () => {
       cancelAnimationFrame(animId)
-      window.removeEventListener('resize', updateGeometry)
       window.removeEventListener('keydown', handleKeyDown)
       container.removeEventListener('wheel', handleWheel)
     }
@@ -254,7 +245,7 @@ export function LeonVasariFoodArchive() {
       const now = performance.now()
       const dt = Math.max(1, now - st.lastDragTime)
       const dx = e.clientX - st.dragStartX
-      const stepDist = st.H * 0.42
+      const stepDist = 180
 
       st.T = st.T0 - dx / stepDist
       st.velocity = -((e.clientX - st.lastDragX) / stepDist) / (dt / 16)
@@ -265,8 +256,8 @@ export function LeonVasariFoodArchive() {
       if (rect) {
         const mx = (e.clientX - rect.left) / rect.width - 0.5
         const my = (e.clientY - rect.top) / rect.height - 0.5
-        st.tiltY = mx * 18
-        st.tiltX = -my * 14
+        st.tiltY = mx * 10
+        st.tiltX = -my * 8
       }
     }
   }
@@ -274,8 +265,7 @@ export function LeonVasariFoodArchive() {
   const handlePointerUp = () => {
     const st = stateRef.current
     st.isDragging = false
-    // Magnetically snap to the nearest integer index plus residual velocity fling
-    const fling = Math.max(-2, Math.min(2, Math.round(st.velocity * 3)))
+    const fling = Math.max(-2, Math.min(2, Math.round(st.velocity * 2.2)))
     st.T = Math.round(st.T + fling)
   }
 
@@ -307,26 +297,12 @@ export function LeonVasariFoodArchive() {
     setDetailOpen(false)
   }
 
-  const handleAddToBasket = () => {
-    addToBasket(activeFood.id, 100)
+  const handleAddToBasket = (foodId: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation()
+    addToBasket(foodId, 100)
     setAddedToBasket(true)
     setTimeout(() => setAddedToBasket(false), 2400)
   }
-
-  // Virtual items (36 items: 3 sets of 12)
-  const tapes = useMemo(() => {
-    const list = []
-    for (let c = 0; c < 3; c++) {
-      for (let i = 0; i < FOOD_ARCHIVE_DATA.length; i++) {
-        const item = FOOD_ARCHIVE_DATA[i]!
-        list.push({
-          ...item,
-          virtualIndex: c * 12 + i,
-        })
-      }
-    }
-    return list
-  }, [])
 
   return (
     <div
@@ -334,19 +310,12 @@ export function LeonVasariFoodArchive() {
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
-      className="relative w-full min-h-screen flex flex-col justify-between items-center bg-[#F3F6F4] overflow-hidden select-none pt-24 sm:pt-28 pb-10"
+      className="relative w-full min-h-screen flex flex-col justify-between items-center bg-[#F3F6F4] overflow-hidden select-none pt-20 sm:pt-28 pb-8"
       style={{
         cursor: stateRef.current.isDragging ? 'grabbing' : 'default',
         isolation: 'isolate',
       }}
     >
-      {/* Hidden Probe Element to Measure H */}
-      <div
-        ref={probeRef}
-        className="absolute pointer-events-none opacity-0 h-[min(52vh,38vw)] max-h-[420px] min-h-[280px]"
-        aria-hidden="true"
-      />
-
       {/* SVG Ink Blot Filter Definition */}
       <svg className="absolute w-0 h-0 pointer-events-none" aria-hidden="true">
         <defs>
@@ -370,33 +339,33 @@ export function LeonVasariFoodArchive() {
       </svg>
 
       {/* Top Archival Header Bar */}
-      <div className="relative z-20 flex flex-col items-center text-center max-w-2xl mx-auto px-4 mt-2 mb-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[rgba(125,141,57,0.12)] border border-[rgba(91,110,44,0.2)] text-[11px] font-mono tracking-widest uppercase text-[#5B6E2C] mb-3">
+      <div className="relative z-20 flex flex-col items-center text-center max-w-2xl mx-auto px-4 mb-2">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[rgba(125,141,57,0.12)] border border-[rgba(91,110,44,0.2)] text-[11px] font-mono tracking-widest uppercase text-[#5B6E2C] mb-2 sm:mb-3">
           <BookOpen className="w-3.5 h-3.5 text-[#7D8D39]" />
           <span>Curated Monograph Collection &bull; ICMR-NIN IFCT 2017</span>
         </div>
-        <h1 className="font-display text-4xl sm:text-5xl font-bold text-[#20271D] tracking-tight">
+        <h1 className="font-display text-3xl sm:text-5xl font-bold text-[#20271D] tracking-tight">
           The Living Food Archive
         </h1>
-        <p className="text-xs sm:text-sm text-[#737B70] mt-2 max-w-lg leading-relaxed">
-          Drag horizontally, scroll, or step to browse 12 authentic biological monographs. Click the active volume to unfold its chemical composition dossier.
+        <p className="text-xs sm:text-sm text-[#737B70] mt-1.5 sm:mt-2 max-w-lg leading-relaxed hidden sm:block">
+          Drag horizontally, scroll, or step through 12 authentic biological monographs. Click the active volume to unfold its chemical composition dossier.
         </p>
       </div>
 
-      {/* 3D Arc Shelf Stage (Luxury Monograph Gallery) */}
+      {/* 3D Arc Shelf Stage */}
       <div
-        className="relative w-full h-[min(52vh,38vw)] max-h-[420px] min-h-[280px] flex items-center justify-center my-auto"
+        className="relative w-full h-[380px] sm:h-[450px] flex items-center justify-center my-auto"
         style={{ perspective: '1400px', perspectiveOrigin: '50% 50%' }}
       >
-        {/* Soft Floor Shadow Under Active Volume */}
+        {/* Soft Ambient Floor Shadow */}
         <div
           className="absolute pointer-events-none z-0"
           style={{
-            top: '82%',
+            top: '84%',
             width: 'min(92vw, 1020px)',
-            height: '90px',
+            height: '70px',
             background:
-              'radial-gradient(50% 50% at 50% 45%, rgba(45,56,24,.32), rgba(91,110,44,.10) 60%, transparent 75%)',
+              'radial-gradient(50% 50% at 50% 45%, rgba(45,56,24,.24), rgba(91,110,44,.06) 60%, transparent 75%)',
           }}
           aria-hidden="true"
         />
@@ -406,141 +375,173 @@ export function LeonVasariFoodArchive() {
           className="relative w-0 h-0"
           style={{ transformStyle: 'preserve-3d' }}
         >
-          {tapes.map((tape) => {
-            const isCenter = (tape.virtualIndex % 12) === activeIndex
+          {FOOD_ARCHIVE_DATA.map((item) => {
+            const isCenter = item.index === activeIndex
 
             return (
               <div
-                key={tape.virtualIndex}
-                data-v={tape.virtualIndex}
-                className="vasari-tape absolute top-[-180px] left-0 w-0 h-[360px]"
+                key={item.id}
+                data-idx={item.index}
+                onClick={(e) => {
+                  if (!isCenter) {
+                    stateRef.current.T = item.index
+                  }
+                }}
+                className="archive-shelf-item absolute top-[-180px] sm:top-[-200px] left-[-125px] sm:left-[-145px] w-[250px] sm:w-[290px] h-[360px] sm:h-[420px] will-change-transform cursor-pointer"
                 style={{
                   transformStyle: 'preserve-3d',
                   backfaceVisibility: 'hidden',
                 }}
               >
-                {/* 1. Spine Face (Archival Cloth Binding with Raised Gold Ribs) */}
+                {/* 
+                  ==============================================================
+                  1. FRONT COVER FACE (Prominent daylight photo, never clipped title, stats & action)
+                  ==============================================================
+                */}
                 <div
-                  className="absolute top-0 left-[-26px] w-[52px] h-[360px] rounded-xs overflow-hidden flex flex-col justify-between py-3 px-2 text-center shadow-xl transition-transform border-r border-black/30"
+                  className="card-cover-face absolute inset-0 rounded-2xl overflow-hidden bg-[#1C2417] text-[#F3F6F4] shadow-2xl border border-[#7D8D39]/30 flex flex-col justify-between transition-opacity duration-200"
                   style={{
-                    backgroundColor: tape.coverColor,
-                    color: '#F3F6F4',
-                    transform: 'translateZ(105px)',
                     backgroundImage:
-                      'radial-gradient(circle at 50% 30%, rgba(255,255,255,0.08) 0%, transparent 80%)',
+                      'radial-gradient(circle at 50% 15%, rgba(91,110,44,0.25) 0%, rgba(20,26,17,0.98) 85%)',
                   }}
                 >
-                  {/* Darkness Overlay Driven by CSS variable --shade */}
-                  <div
-                    className="absolute inset-0 pointer-events-none bg-black transition-opacity"
-                    style={{ opacity: 'var(--shade, 0.2)' }}
-                  />
+                  {/* Daylight Food Photography Window */}
+                  <div className="relative w-full h-[155px] sm:h-[190px] overflow-hidden bg-[#2D3818]">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                      loading="eager"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#1C2417] via-transparent to-black/30 pointer-events-none" />
 
+                    {/* Top Folio Strip */}
+                    <div className="absolute top-2.5 left-3 right-3 flex items-center justify-between z-10">
+                      <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-xs text-[10px] font-mono text-[#A3B18A] uppercase tracking-wider">
+                        FOLIO #0{item.index + 1}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-[#FF5A22] text-[10px] font-mono text-white font-bold shadow-xs">
+                        ₹{item.costPer10g} / 10g
+                      </span>
+                    </div>
+
+                    {/* Category Pill at bottom of image */}
+                    <div className="absolute bottom-2 left-3 z-10">
+                      <span className="text-[10px] uppercase font-mono tracking-widest text-[#A3B18A]/90 bg-black/50 px-2 py-0.5 rounded-xs backdrop-blur-xs">
+                        {item.category.replace('-', ' ')}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Body Content */}
+                  <div className="p-3.5 sm:p-4 flex-1 flex flex-col justify-between">
+                    <div>
+                      <h3 className="font-display text-base sm:text-xl font-bold text-[#F3F6F4] leading-snug line-clamp-2">
+                        {item.name}
+                      </h3>
+                      <p className="text-[11px] sm:text-xs text-[#7D8D39] font-mono mt-0.5">
+                        {item.romaji}
+                      </p>
+                    </div>
+
+                    {/* Macro Matrix */}
+                    <div className="grid grid-cols-3 gap-1.5 py-2 sm:py-2.5 border-y border-white/10 my-1 sm:my-2 text-center">
+                      <div className="p-1 rounded-lg bg-white/5">
+                        <span className="block text-[8px] sm:text-[9px] font-mono text-[#A3B18A] uppercase">Protein</span>
+                        <strong className="text-xs font-mono font-bold text-white">{item.proteinVal}g</strong>
+                      </div>
+                      <div className="p-1 rounded-lg bg-white/5">
+                        <span className="block text-[8px] sm:text-[9px] font-mono text-white/60 uppercase">Energy</span>
+                        <strong className="text-xs font-mono font-bold text-white">{item.caloriesPer100g}k</strong>
+                      </div>
+                      <div className="p-1 rounded-lg bg-white/5">
+                        <span className="block text-[8px] sm:text-[9px] font-mono text-[#FF5A22] uppercase">Cost/100g</span>
+                        <strong className="text-xs font-mono font-bold text-[#FF5A22]">₹{item.estimatedCostPer100g}</strong>
+                      </div>
+                    </div>
+
+                    {/* Action Bar */}
+                    <div className="flex items-center gap-2 pt-0.5 sm:pt-1">
+                      <button
+                        type="button"
+                        onClick={(e) => handleAddToBasket(item.id, e)}
+                        className={`flex-1 py-1.5 sm:py-2 px-3 rounded-full text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-xs ${
+                          isCenter && addedToBasket
+                            ? 'bg-[#7D8D39] text-white'
+                            : 'bg-[#5B6E2C] hover:bg-[#7D8D39] text-[#F3F6F4]'
+                        }`}
+                      >
+                        {isCenter && addedToBasket ? (
+                          <>
+                            <Check className="w-3.5 h-3.5" />
+                            <span>Added</span>
+                          </>
+                        ) : (
+                          <>
+                            <ShoppingBag className="w-3.5 h-3.5" />
+                            <span>Add 100g</span>
+                          </>
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={openDetailSheet}
+                        className="p-1.5 sm:p-2 rounded-full border border-white/20 hover:border-[#7D8D39] text-white/80 hover:text-white transition-colors"
+                        title="Inspect Biological Dossier"
+                        aria-label="Inspect Biological Dossier"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-[#FF5A22]" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 
+                  ==============================================================
+                  2. SPINE FACE (Archival Cloth Binding with Debossed Gold Title)
+                  ==============================================================
+                */}
+                <div
+                  className="card-spine-face absolute inset-0 rounded-xs overflow-hidden flex flex-col justify-between py-4 px-2 text-center shadow-xl border-r border-black/30 transition-opacity duration-200"
+                  style={{
+                    backgroundColor: item.coverColor,
+                    color: '#F3F6F4',
+                    width: '56px',
+                    left: 'calc(50% - 28px)',
+                    backgroundImage:
+                      'radial-gradient(circle at 50% 30%, rgba(255,255,255,0.12) 0%, transparent 80%)',
+                  }}
+                >
                   {/* Top Rib & Monogram */}
-                  <div className="relative z-10 flex flex-col items-center">
+                  <div className="flex flex-col items-center">
                     <div className="w-full h-[2px] bg-[#F3F6F4]/30 mb-2 shadow-xs" />
                     <span className="text-[8px] font-mono tracking-widest uppercase opacity-75">
                       FOLIO
                     </span>
-                    <span className="text-[9px] font-mono font-bold text-[#FF5A22]">
-                      #0{tape.index + 1}
+                    <span className="text-[10px] font-mono font-bold text-[#FF5A22]">
+                      #0{item.index + 1}
                     </span>
                   </div>
 
                   {/* Vertical Debossed Gold Title */}
                   <div
-                    className="relative z-10 text-[11px] font-display font-bold tracking-widest uppercase my-auto whitespace-nowrap text-[#F3F6F4] drop-shadow-sm"
+                    className="text-[11px] font-display font-bold tracking-widest uppercase my-auto whitespace-nowrap text-[#F3F6F4] drop-shadow-sm"
                     style={{
                       writingMode: 'vertical-rl',
                       transform: 'rotate(180deg)',
                       textShadow: '0 1px 2px rgba(0,0,0,0.6)',
                     }}
                   >
-                    {tape.name}
+                    {item.name}
                   </div>
 
                   {/* Bottom Rib & Protein Seal */}
-                  <div className="relative z-10 flex flex-col items-center">
-                    <div className="px-1.5 py-0.5 rounded-xs bg-black/30 border border-white/20 text-[9px] font-mono font-bold text-[#A3B18A]">
-                      {tape.proteinVal}g
+                  <div className="flex flex-col items-center">
+                    <div className="px-1.5 py-0.5 rounded-xs bg-black/40 border border-white/20 text-[9px] font-mono font-bold text-[#A3B18A]">
+                      {item.proteinVal}g
                     </div>
                     <div className="w-full h-[2px] bg-[#F3F6F4]/30 mt-2 shadow-xs" />
-                  </div>
-                </div>
-
-                {/* 2. Simulated Deckled Paper Edges Block (Physical 3D Volume) */}
-                <div
-                  className="absolute top-[4px] bottom-[4px] left-[-24px] w-[208px] h-[352px] pointer-events-none opacity-90 shadow-md"
-                  style={{
-                    transform: 'rotateY(0deg) translateZ(0px)',
-                    backgroundColor: '#EBE6D8',
-                    backgroundImage:
-                      'repeating-linear-gradient(180deg, #EBE6D8 0px, #EBE6D8 2px, #D5CEBE 3px)',
-                  }}
-                  aria-hidden="true"
-                />
-
-                {/* 3. Cover Face (Antique Archival Monograph with Gold Foil Inset) */}
-                <div
-                  onClick={(e) => {
-                    if (isCenter) {
-                      openDetailSheet(e)
-                    } else {
-                      stateRef.current.T = Math.round(tape.virtualIndex)
-                    }
-                  }}
-                  className="absolute top-0 left-[-104px] w-[210px] h-[360px] rounded-xs overflow-hidden p-5 flex flex-col justify-between shadow-2xl cursor-pointer hover:brightness-105 transition-all border border-[#7D8D39]/30"
-                  style={{
-                    backgroundColor: '#20271D',
-                    color: '#F3F6F4',
-                    transform: 'rotateY(90deg) translateZ(26px)',
-                    backgroundImage:
-                      'radial-gradient(circle at 50% 20%, rgba(91,110,44,0.22) 0%, rgba(21,27,18,0.98) 80%)',
-                  }}
-                >
-                  {/* Debossed Inset Border */}
-                  <div
-                    className="absolute inset-2.5 rounded-xs border border-[rgba(125,141,57,0.35)] pointer-events-none"
-                    aria-hidden="true"
-                  />
-
-                  {/* Silk Bookmark Ribbon peeking from bottom */}
-                  <div
-                    className="absolute bottom-0 right-7 w-3.5 h-7 bg-[#FF5A22] shadow-md pointer-events-none rounded-b-xs"
-                    aria-hidden="true"
-                  />
-
-                  {/* Top Folio Bar */}
-                  <div className="relative z-10 flex items-center justify-between border-b border-white/20 pb-2">
-                    <span className="text-[9px] font-mono uppercase tracking-widest text-[#7D8D39]">
-                      ICMR-NIN &bull; 0{tape.index + 1}
-                    </span>
-                    <span className="text-[9px] font-mono text-[#FF5A22] font-bold">
-                      ₹{tape.costPer10g}/10g
-                    </span>
-                  </div>
-
-                  {/* Center Archival Bookplate */}
-                  <div className="relative z-10 my-auto text-center py-4 px-2 bg-black/25 rounded-xs border border-white/10">
-                    <span className="text-[9px] uppercase font-mono tracking-widest text-[#A3B18A] block mb-1">
-                      {tape.category}
-                    </span>
-                    <h3 className="font-display text-2xl font-bold leading-tight text-[#F3F6F4] mb-1">
-                      {tape.name}
-                    </h3>
-                    <p className="text-[11px] text-[#7D8D39] font-mono">
-                      {tape.romaji}
-                    </p>
-                  </div>
-
-                  {/* Bottom Macro Bar */}
-                  <div className="relative z-10 pt-2 border-t border-white/20 flex items-center justify-between text-[10px] font-mono">
-                    <span className="text-[#A3B18A] font-bold bg-white/10 px-2 py-0.5 rounded-xs">
-                      {tape.proteinVal}g PROTEIN
-                    </span>
-                    <span className="text-white/70">
-                      {tape.caloriesPer100g} kcal
-                    </span>
                   </div>
                 </div>
               </div>
@@ -549,29 +550,29 @@ export function LeonVasariFoodArchive() {
         </div>
       </div>
 
-      {/* Caption & Navigation Controls */}
-      <div className="relative z-20 flex flex-col items-center gap-3 w-full max-w-xl mx-auto px-4 mt-2">
-        <div className="flex items-center justify-center gap-6 sm:gap-12 w-full">
+      {/* Caption & Step Navigation Controls */}
+      <div className="relative z-20 flex flex-col items-center gap-2.5 w-full max-w-xl mx-auto px-4 mt-2 sm:mt-4">
+        <div className="flex items-center justify-center gap-5 sm:gap-10 w-full">
           {/* Left Arrow Button */}
           <button
             type="button"
             onClick={stepLeft}
-            className="w-11 h-11 rounded-full border border-[rgba(91,110,44,0.3)] text-[#5B6E2C] hover:bg-[#5B6E2C] hover:text-[#F3F6F4] flex items-center justify-center transition-all shadow-xs"
-            aria-label="Previous Tape"
+            className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[rgba(91,110,44,0.3)] bg-white/70 backdrop-blur-xs text-[#5B6E2C] hover:bg-[#5B6E2C] hover:text-[#F3F6F4] flex items-center justify-center transition-all shadow-xs active:scale-95"
+            aria-label="Previous Monograph"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
 
           {/* Center Masked Caption */}
-          <div className="text-center overflow-hidden flex flex-col items-center">
-            <h3 className="font-display text-3xl sm:text-4xl font-bold text-[#5B6E2C] tracking-tight leading-none mb-1">
+          <div className="text-center overflow-hidden flex flex-col items-center max-w-xs sm:max-w-sm">
+            <h3 className="font-display text-xl sm:text-3xl font-bold text-[#5B6E2C] tracking-tight leading-tight mb-0.5">
               {activeFood.name}
             </h3>
-            <span className="text-[11px] font-mono uppercase tracking-widest text-[#7D8D39] block mb-2">
+            <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-widest text-[#7D8D39] block mb-1">
               {activeFood.romaji}
             </span>
-            <div className="w-8 h-[1.5px] bg-[#5B6E2C] mb-2" />
-            <span className="text-xs font-mono font-medium text-[#20271D]">
+            <div className="w-8 h-[1.5px] bg-[#5B6E2C] my-1" />
+            <span className="text-[11px] sm:text-xs font-mono font-medium text-[#20271D]">
               {activeFood.proteinVal}G PROTEIN / 100G &mdash; ₹{activeFood.costPer10g} PER 10G
             </span>
           </div>
@@ -580,10 +581,10 @@ export function LeonVasariFoodArchive() {
           <button
             type="button"
             onClick={stepRight}
-            className="w-11 h-11 rounded-full border border-[rgba(91,110,44,0.3)] text-[#5B6E2C] hover:bg-[#5B6E2C] hover:text-[#F3F6F4] flex items-center justify-center transition-all shadow-xs"
-            aria-label="Next Tape"
+            className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[rgba(91,110,44,0.3)] bg-white/70 backdrop-blur-xs text-[#5B6E2C] hover:bg-[#5B6E2C] hover:text-[#F3F6F4] flex items-center justify-center transition-all shadow-xs active:scale-95"
+            aria-label="Next Monograph"
           >
-            <ArrowRight className="w-5 h-5" />
+            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
 
@@ -591,16 +592,16 @@ export function LeonVasariFoodArchive() {
         <button
           type="button"
           onClick={openDetailSheet}
-          className="mt-2 px-5 py-2 rounded-full bg-[#5B6E2C] text-[#F3F6F4] text-xs font-mono tracking-wider uppercase hover:bg-[#7D8D39] transition-all flex items-center gap-2 shadow-xs"
+          className="mt-1 sm:mt-2 px-5 sm:px-6 py-2 sm:py-2.5 rounded-full bg-[#5B6E2C] text-[#F3F6F4] text-xs font-mono tracking-wider uppercase hover:bg-[#7D8D39] transition-all flex items-center gap-2 shadow-xs hover:shadow-md"
         >
           <Sparkles className="w-3.5 h-3.5 text-[#FF5A22]" />
-          <span>Inspect Biological Dossier</span>
+          <span>Inspect Full Biological Dossier</span>
         </button>
       </div>
 
       {/* Timeline / Protein Metric Ruler */}
-      <div className="relative z-20 w-full max-w-2xl mx-auto px-6 mt-6 mb-2">
-        <div className="relative h-10 flex items-center">
+      <div className="relative z-20 w-full max-w-2xl mx-auto px-6 mt-4 sm:mt-6 mb-1">
+        <div className="relative h-9 sm:h-10 flex items-center">
           {/* Base Ruler Line */}
           <div className="absolute left-0 right-0 h-[1.5px] bg-[rgba(91,110,44,0.3)]" />
 
@@ -613,8 +614,8 @@ export function LeonVasariFoodArchive() {
                 className="absolute top-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none"
                 style={{ left: `${leftPct}%` }}
               >
-                <div className="w-[1px] h-3 bg-[#5B6E2C]" />
-                <span className="text-[9px] font-mono text-[#7D8D39] mt-2">
+                <div className="w-[1px] h-2.5 sm:h-3 bg-[#5B6E2C]" />
+                <span className="text-[8px] sm:text-[9px] font-mono text-[#7D8D39] mt-1.5 sm:mt-2">
                   {tick}g
                 </span>
               </div>
@@ -623,7 +624,7 @@ export function LeonVasariFoodArchive() {
 
           {/* Sliding Tangerine Active Dot */}
           <div
-            className="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[#FF5A22] border-2 border-[#F3F6F4] shadow-md transition-all duration-300"
+            className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-[#FF5A22] border-2 border-[#F3F6F4] shadow-md transition-all duration-300 pointer-events-none"
             style={{
               left: `clamp(0%, ${((activeFood.proteinVal - 5) / 55) * 100}%, 100%)`,
               transform: 'translate(-50%, -50%)',
@@ -661,7 +662,7 @@ export function LeonVasariFoodArchive() {
                 {activeFood.romaji} / {activeFood.category}
               </span>
 
-              <h1 className="font-display text-5xl sm:text-7xl font-bold text-[#5B6E2C] leading-none">
+              <h1 className="font-display text-4xl sm:text-6xl font-bold text-[#5B6E2C] leading-none">
                 {activeFood.name}
               </h1>
 
@@ -695,7 +696,7 @@ export function LeonVasariFoodArchive() {
               <div className="flex items-center gap-4 pt-4">
                 <button
                   type="button"
-                  onClick={handleAddToBasket}
+                  onClick={() => handleAddToBasket(activeFood.id)}
                   className={`px-8 py-3.5 rounded-full text-xs font-semibold flex items-center gap-2 transition-all shadow-md ${
                     addedToBasket
                       ? 'bg-[#7D8D39] text-white'
@@ -717,7 +718,7 @@ export function LeonVasariFoodArchive() {
               </div>
             </div>
 
-            {/* Right Column: SVG Poster with Expanding Ink Bleed Circles */}
+            {/* Right Column: High-Res Plated Food Poster with SVG Ink Bleed */}
             <div className="lg:col-span-5 flex justify-center">
               <div className="relative w-[320px] sm:w-[380px] h-[480px] rounded-2xl overflow-hidden bg-[#20271D] shadow-2xl p-6 text-[#F3F6F4] flex flex-col justify-between border border-white/20">
                 {/* SVG Ink Bleed Mask */}
@@ -758,17 +759,24 @@ export function LeonVasariFoodArchive() {
                 </div>
 
                 <div className="relative z-10 my-auto text-center">
+                  <div className="w-28 h-28 mx-auto rounded-full overflow-hidden border-2 border-white/30 shadow-lg mb-4">
+                    <img
+                      src={activeFood.image}
+                      alt={activeFood.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                   <span className="text-xs font-mono uppercase tracking-widest text-[#F3F6F4]/80 block mb-2">
                     BIOLOGICAL FOOD PROFILE
                   </span>
-                  <h2 className="font-display text-4xl sm:text-5xl font-bold leading-tight mb-2">
+                  <h2 className="font-display text-3xl sm:text-4xl font-bold leading-tight mb-2">
                     {activeFood.name}
                   </h2>
                   <p className="text-sm font-sans text-[#F3F6F4]/90">{activeFood.romaji}</p>
                 </div>
 
                 <div className="relative z-10 pt-4 border-t border-white/30 flex items-center justify-between text-xs font-mono">
-                  <span>52% PURE DENSITY</span>
+                  <span>{activeFood.proteinVal}G PROTEIN / 100G</span>
                   <span className="text-[#FF5A22] font-bold">₹{activeFood.costPer10g} / 10G</span>
                 </div>
               </div>
