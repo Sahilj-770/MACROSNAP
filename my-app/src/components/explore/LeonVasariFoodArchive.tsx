@@ -1,128 +1,173 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useMemo } from 'react'
+import { createPortal } from 'react-dom'
+import Link from 'next/link'
 import { FOOD_DATABASE } from '@/data/foods'
 import { useUserStore } from '@/store/useUserStore'
-import { ShoppingBag, Check, X, ArrowRight, ArrowLeft, BookOpen, Sparkles } from 'lucide-react'
+import {
+  BookOpen,
+  ArrowLeft,
+  ArrowRight,
+  ShoppingBag,
+  Check,
+  X,
+  Sparkles,
+  Scale,
+  ExternalLink,
+  ChevronRight,
+} from 'lucide-react'
 
-// Authentic daylight food imagery mapping
-const FOOD_IMAGES: Record<string, string> = {
-  'soy-chunks': '/images/food/food_0.webp',
-  'roasted-chana': '/images/food/food_6.webp',
-  'paneer-fresh': '/images/food/food_4.webp',
-  'whole-eggs': '/images/food/food_3.webp',
-  'yellow-moong-dal': '/images/food/food_1.webp',
-  'sattu-roasted': '/images/food/food_2.webp',
-  'chicken-breast': '/images/food/food_8.webp',
-  'greek-yogurt-curd': '/images/food/food_7.webp',
-  'peanuts-roasted': '/images/food/food_9.webp',
-  'tofu-firm': '/images/food/food_5.webp',
-  'almonds-raw': '/images/food/food_9.webp',
-  'whey-protein-isolate': '/images/food/food_0.webp',
-}
+// 12 Authentic Indian Food Items from FOOD_DATABASE
+const FOOD_ARCHIVE_ITEMS = FOOD_DATABASE.slice(0, 12).map((item, idx) => {
+  const costPer10gVal = ((item.estimatedCostPer100g / item.proteinPer100g) * 10).toFixed(2)
+  const diaasScore =
+    item.id === 'whole-eggs'
+      ? 1.18
+      : item.id === 'paneer-fresh' || item.id === 'greek-yogurt-curd'
+      ? 1.15
+      : item.id === 'chicken-breast'
+      ? 1.08
+      : item.id === 'whey-protein-isolate'
+      ? 1.15
+      : item.id === 'soy-chunks' || item.id === 'tofu-firm'
+      ? 0.91
+      : item.id === 'roasted-chana' || item.id === 'sattu-roasted'
+      ? 0.82
+      : item.id === 'yellow-moong-dal'
+      ? 0.74
+      : 0.52
 
-// 12 authentic food items from FOOD_DATABASE
-const FOOD_ARCHIVE_DATA = FOOD_DATABASE.slice(0, 12).map((item, idx) => ({
-  ...item,
-  index: idx,
-  romaji: item.hindiName || item.name.toUpperCase(),
-  proteinVal: item.proteinPer100g,
-  costPer10g: ((item.estimatedCostPer100g / item.proteinPer100g) * 10).toFixed(2),
-  image: FOOD_IMAGES[item.id] || item.imageUrl || '/images/food/food_0.webp',
-  coverColor:
-    idx % 4 === 0
-      ? '#3F4D20' // Deep Archival Forest
-      : idx % 4 === 1
-      ? '#5B6E2C' // Deep Olive
-      : idx % 4 === 2
-      ? '#6B7A30' // Classic Sage Olive
-      : '#2D3818', // Heavy Botanical Khaki
-}))
+  // Archival Bookcloth Palette for the Spines
+  const spinePalettes = [
+    { bg: '#2D3818', accent: '#A3B18A', foil: '#D4AF37' }, // Forest Olive & Gold
+    { bg: '#3F4D20', accent: '#BAC79B', foil: '#E5C158' }, // Deep Sage Linen
+    { bg: '#1C2616', accent: '#8F9F72', foil: '#C9A038' }, // Dark Botanical
+    { bg: '#4A3B22', accent: '#D4C49E', foil: '#DEB887' }, // Antique Buckram
+    { bg: '#334024', accent: '#A9BA90', foil: '#D8B244' }, // Olive Khaki
+    { bg: '#222B19', accent: '#97A97C', foil: '#C49A2D' }, // Slate Cypress
+  ]
+  const spineStyle = spinePalettes[idx % spinePalettes.length]!
+
+  return {
+    ...item,
+    archiveIndex: idx,
+    costPer10g: costPer10gVal,
+    diaas: diaasScore,
+    spineBg: spineStyle.bg,
+    spineAccent: spineStyle.accent,
+    spineFoil: spineStyle.foil,
+    image: item.imageUrl || `/images/food/food_${idx % 10}.webp`,
+  }
+})
+
+// 5 Curated Nutritional Dietary Categories
+const CATEGORIES = [
+  { id: 'all', label: 'ALL / सब खाद्य', targetIndex: 0 },
+  { id: 'legumes', label: 'LEGUMES / दालें व चना', targetIndex: 1 },
+  { id: 'dairy', label: 'DAIRY & EGGS / दुग्ध व अंडे', targetIndex: 2 },
+  { id: 'soy', label: 'SOY & PLANT / सोया व पादप', targetIndex: 0 },
+  { id: 'poultry', label: 'NUTS & MEATS / मेवे व पोल्ट्री', targetIndex: 6 },
+]
 
 export function LeonVasariFoodArchive() {
   const containerRef = useRef<HTMLDivElement | null>(null)
-  const detailRef = useRef<HTMLDivElement | null>(null)
-  const svgGroupRef = useRef<SVGGElement | null>(null)
+  const stageRef = useRef<HTMLDivElement | null>(null)
+  const detailModalRef = useRef<HTMLDivElement | null>(null)
+  const inkMaskGroupRef = useRef<SVGGElement | null>(null)
+  const tapeElsRef = useRef<(HTMLDivElement | null)[]>([])
 
   const [activeIndex, setActiveIndex] = useState(0)
+  const [activeCategory, setActiveCategory] = useState('all')
   const [detailOpen, setDetailOpen] = useState(false)
-  const [addedToBasket, setAddedToBasket] = useState(false)
+  const [addedToast, setAddedToast] = useState<string | null>(null)
+
+  // Custom Cursor State
+  const [cursorPos, setCursorPos] = useState({ x: -100, y: -100 })
+  const [cursorMode, setCursorMode] = useState<'default' | 'spine' | 'cover' | 'button'>('default')
+
   const addToBasket = useUserStore((state) => state.addToBasket)
+  const activeFood = FOOD_ARCHIVE_ITEMS[activeIndex] || FOOD_ARCHIVE_ITEMS[0]!
 
-  const activeFood = FOOD_ARCHIVE_DATA[activeIndex] || FOOD_ARCHIVE_DATA[0]!
-
-  // Shelf physics refs
+  // Shelf Physics State (Continuous Endless 36-Tape Loop)
   const stateRef = useRef({
-    s: 0,
-    T: 0,
+    s: 12, // start on second copy at item 0 (12)
+    T: 12,
     velocity: 0,
     isDragging: false,
     dragStartX: 0,
-    lastDragX: 0,
-    lastDragTime: 0,
-    T0: 0,
+    dragLastX: 0,
+    dragLastTime: 0,
+    T0: 12,
     tiltX: 0,
     tiltY: 0,
+    onCover: false,
     detailOpen: false,
+    cursorX: -100,
+    cursorY: -100,
+    targetCursorX: -100,
+    targetCursorY: -100,
+    hoverVirtualIdx: -1,
+    liftValues: new Array(36).fill(0),
   })
 
-  // Animation Loop with Butter-Smooth Spring Physics & Inertia
+  // Smoothstep helper: S-curve transition
+  const smoothstep = (x: number) => {
+    const c = Math.max(0, Math.min(1, x))
+    return c * c * (3 - 2 * c)
+  }
+
+  // Smooth Step Push B(r) from Leon Vasari Math
+  const pushStep = (r: number) => {
+    if (Math.abs(r) < 1) {
+      return (r + Math.sin(Math.PI * r) / Math.PI) / 2
+    }
+    return Math.sign(r) * 0.5
+  }
+
+  // Determine active category based on current item
   useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
+    const item = FOOD_ARCHIVE_ITEMS[activeIndex]
+    if (!item) return
+    if (item.category === 'lentils-legumes') setActiveCategory('legumes')
+    else if (item.category === 'dairy' || item.category === 'eggs') {
+      if (item.id === 'chicken-breast') setActiveCategory('poultry')
+      else setActiveCategory('dairy')
+    } else if (item.category === 'soy-products') setActiveCategory('soy')
+    else if (item.category === 'nuts-seeds') setActiveCategory('poultry')
+    else setActiveCategory('all')
+  }, [activeIndex])
 
+  // Main Animation Loop
+  useEffect(() => {
     let animId: number
-    let lastTime = performance.now()
+    let prevTime = performance.now()
 
-    const itemEls: HTMLElement[] = Array.from(
-      container.querySelectorAll<HTMLElement>('.archive-shelf-item')
-    )
-
-    // Wheel event for trackpad / mousewheel scrolling through the shelf
-    const handleWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaY) > 4) {
-        stateRef.current.T += e.deltaY > 0 ? 0.35 : -0.35
-      }
-    }
-    container.addEventListener('wheel', handleWheel, { passive: true })
-
-    // Keyboard navigation
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') {
-        stateRef.current.T -= 1
-      } else if (e.key === 'ArrowRight') {
-        stateRef.current.T += 1
-      } else if (e.key === 'Escape' && stateRef.current.detailOpen) {
-        closeDetailSheet()
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-
-    const smoothstep = (x: number) => {
-      const c = Math.max(0, Math.min(1, x))
-      return c * c * (3 - 2 * c)
-    }
-
-    const loop = (currentTime: number) => {
-      const dt = Math.min(0.04, (currentTime - lastTime) / 1000)
-      lastTime = currentTime
+    const loop = (now: number) => {
+      const dt = Math.min((now - prevTime) / 1000, 0.05)
+      prevTime = now
 
       const st = stateRef.current
-
-      // Crisp spring damping
-      if (!st.isDragging) {
-        const diff = st.T - st.s
-        if (Math.abs(diff) < 0.003 && Math.abs(st.velocity) < 0.003) {
-          st.s = st.T
-          st.velocity = 0
-        } else {
-          st.velocity = st.velocity * 0.72 + diff * 28 * dt
-          st.s += st.velocity
-        }
+      const container = containerRef.current
+      if (!container) {
+        animId = requestAnimationFrame(loop)
+        return
       }
 
-      // Continuous loop normalization around 12 items
-      while (st.s >= 12) {
+      // Smooth cursor lerp
+      st.cursorX += (st.targetCursorX - st.cursorX) * (1 - Math.exp(-16 * dt))
+      st.cursorY += (st.targetCursorY - st.cursorY) * (1 - Math.exp(-16 * dt))
+      setCursorPos({ x: st.cursorX, y: st.cursorY })
+
+      // Spring physics for shelf scroll position s towards target T
+      const springK = st.isDragging ? 18 : 5.2
+      st.s += (st.T - st.s) * (1 - Math.exp(-springK * dt))
+      if (Math.abs(st.T - st.s) < 1e-4) {
+        st.s = st.T
+      }
+
+      // Keep s normalized within [0, 36)
+      while (st.s >= 36) {
         st.s -= 12
         st.T -= 12
       }
@@ -131,192 +176,332 @@ export function LeonVasariFoodArchive() {
         st.T += 12
       }
 
-      // Current active index
-      const currIdx = (Math.round(st.s) % 12 + 12) % 12
-      setActiveIndex((prev) => (prev !== currIdx ? currIdx : prev))
+      // Active item index
+      const currActive = ((Math.round(st.s) % 12) + 12) % 12
+      setActiveIndex((prev) => (prev !== currActive ? currActive : prev))
 
-      const isMobile = window.innerWidth <= 768
+      // Dimensions calculated dynamically from viewport
+      const vw = window.innerWidth
+      const vh = window.innerHeight
+      const isMobile = vw <= 768
+      const H = isMobile ? Math.min(vw * 0.62, vh * 0.42) : Math.min(vh * 0.48, vw * 0.32)
+      const ws = (H * 142) / 840 // spine width
+      const d = (H * 474) / 900 // cover width
+      const gap = H * 0.032
 
-      // Render each monograph in 3D arc space
-      itemEls.forEach((el) => {
-        const idx = Number(el.dataset.idx)
-        let r = ((idx - st.s) % 12 + 12) % 12
-        if (r >= 6) r -= 12
+      // Write CSS variables on stage
+      if (stageRef.current) {
+        stageRef.current.style.setProperty('--H', `${H}px`)
+        stageRef.current.style.setProperty('--ws', `${ws}px`)
+        stageRef.current.style.setProperty('--d', `${d}px`)
+      }
 
-        const d = Math.abs(r)
-        const o = smoothstep(Math.max(0, 1 - d))
+      // Cursor tilt calculation when hovering active cover
+      const cx = vw / 2
+      const cy = vh / 2
+      const onCover =
+        Math.abs(st.targetCursorX - cx) < 0.55 * d &&
+        Math.abs(st.targetCursorY - cy) < 0.55 * H &&
+        !st.detailOpen &&
+        Math.abs(st.T - st.s) < 0.3
 
-        // Culling: items beyond distance 4.5 are hidden
-        if (d > 4.5) {
-          el.style.display = 'none'
+      st.onCover = onCover
+      if (onCover) {
+        const targetTiltY = ((st.targetCursorX - cx) / (0.55 * d)) * 9
+        const targetTiltX = -((st.targetCursorY - cy) / (H / 2)) * 6
+        st.tiltY += (targetTiltY - st.tiltY) * (1 - Math.exp(-7 * dt))
+        st.tiltX += (targetTiltX - st.tiltX) * (1 - Math.exp(-7 * dt))
+      } else {
+        const driftTiltY = ((st.targetCursorX - cx) / vw) * 5
+        st.tiltY += (driftTiltY - st.tiltY) * (1 - Math.exp(-7 * dt))
+        st.tiltX += (0 - st.tiltX) * (1 - Math.exp(-7 * dt))
+      }
+
+      // Update Cursor Mode
+      if (!isMobile) {
+        if (onCover) {
+          setCursorMode('cover')
+        } else if (st.hoverVirtualIdx !== -1) {
+          const hoveredRelative = ((((st.hoverVirtualIdx - st.s) % 36) + 36) % 36) - 18
+          if (Math.abs(hoveredRelative) > 0.5) {
+            setCursorMode('spine')
+          } else {
+            setCursorMode('cover')
+          }
+        } else {
+          setCursorMode('default')
+        }
+      }
+
+      // Render each of the 36 tapes in 3D
+      tapeElsRef.current.forEach((el, vIdx) => {
+        if (!el) return
+
+        // Relative index r in [-18, 18]
+        let r = ((((vIdx - st.s) % 36) + 36) % 36) - 18
+        const absR = Math.abs(r)
+
+        // Culling: off-screen tapes beyond horizontal range
+        if (absR > 14) {
+          el.style.visibility = 'hidden'
           return
         }
-        el.style.display = 'block'
+        el.style.visibility = 'visible'
 
-        // Lateral X offset
-        const lateralSpacing = isMobile ? 48 : 72
-        const centerSpread = isMobile ? 110 : 160
-        let x = 0
-        if (r > 0) {
-          x = centerSpread * Math.min(1, r) + Math.max(0, r - 1) * lateralSpacing
-        } else if (r < 0) {
-          x = -centerSpread * Math.min(1, -r) - Math.max(0, -r - 1) * lateralSpacing
-        }
+        // Smooth placement X with neighbor push B(r)
+        const B = pushStep(r)
+        const x = r * (ws + gap) + (d - ws + 1.6 * gap) * B
 
-        // Depth Z offset (Center card stands forward; sides recede into background)
-        const z = 30 * o - Math.pow(d, 1.35) * (isMobile ? 40 : 65)
+        // Openness o: 1 for active item, 0 for side spines
+        const o = smoothstep(Math.max(0, 1 - absR))
 
-        // Vertical Y subtle arc
-        const y = Math.pow(d, 1.2) * (isMobile ? 2.5 : 5)
+        // Hover lift animation per spine
+        const isHovered = st.hoverVirtualIdx === vIdx && absR > 0.5
+        const targetLift = isHovered ? 1 : 0
+        st.liftValues[vIdx] += (targetLift - (st.liftValues[vIdx] || 0)) * (1 - Math.exp(-12 * dt))
+        const lift = st.liftValues[vIdx] || 0
 
-        // Rotation Y (Active card faces directly forward at 0deg; side cards turn to show spines)
-        const rotY =
-          r > 0
-            ? -(55 + Math.min(15, (r - 1) * 5)) * (1 - o)
-            : r < 0
-            ? (55 + Math.min(15, (-r - 1) * 5)) * (1 - o)
-            : st.tiltY * o
-
+        // 3D Transformations
+        const rotY = -90 * o + st.tiltY * o
         const rotX = st.tiltX * o
+        const rotZ = -4.5 * o
+        const z = o * 0.22 * H
+        const y = -o * 0.025 * H - lift * 0.048 * H
 
-        // Scale: active card is prominent; side cards scale gently
-        const scale = 1.04 * o + (1 - o) * Math.max(0.72, 1 - d * 0.05)
+        el.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateZ(${rotZ}deg) rotateX(${rotX}deg) rotateY(${rotY}deg)`
+        el.style.zIndex = String(Math.round(100 - absR * 4))
 
-        el.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale(${scale})`
-
-        // Z-Index: center is on top
-        const relativeZ = Math.round(50 - d * 6)
-        el.style.zIndex = String(relativeZ)
-
-        // Cards remain 100% solid & opaque
-        el.style.opacity = '1'
-
-        // Clean toggle between Cover and Spine representations
-        const coverFace = el.querySelector<HTMLElement>('.card-cover-face')
-        const spineFace = el.querySelector<HTMLElement>('.card-spine-face')
-        if (coverFace && spineFace) {
-          if (o > 0.45) {
-            coverFace.style.opacity = '1'
-            coverFace.style.pointerEvents = 'auto'
-            spineFace.style.opacity = '0'
-            spineFace.style.pointerEvents = 'none'
-          } else {
-            coverFace.style.opacity = '0'
-            coverFace.style.pointerEvents = 'none'
-            spineFace.style.opacity = '1'
-            spineFace.style.pointerEvents = 'auto'
-          }
-        }
+        // Shading: spine darkens to 55%, cover brightens from 50% dark to fully lit
+        el.style.setProperty('--shade-sp', String(o * 0.55))
+        el.style.setProperty('--shade-cv', String((1 - o) * 0.5))
       })
 
       animId = requestAnimationFrame(loop)
     }
 
     animId = requestAnimationFrame(loop)
-
-    return () => {
-      cancelAnimationFrame(animId)
-      window.removeEventListener('keydown', handleKeyDown)
-      container.removeEventListener('wheel', handleWheel)
-    }
+    return () => cancelAnimationFrame(animId)
   }, [])
 
-  // Navigation handlers
-  const stepLeft = () => {
-    stateRef.current.T -= 1
+  // Mouse Wheel / Trackpad Scrubbing
+  const handleWheel = (e: React.WheelEvent) => {
+    if (stateRef.current.detailOpen) return
+    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY
+    if (Math.abs(delta) > 2) {
+      stateRef.current.T += delta * 0.004
+    }
   }
 
-  const stepRight = () => {
-    stateRef.current.T += 1
-  }
-
-  // Pointer drag events with velocity tracking
+  // Pointer / Touch Scrubbing with Velocity Fling
   const handlePointerDown = (e: React.PointerEvent) => {
-    stateRef.current.isDragging = true
-    stateRef.current.dragStartX = e.clientX
-    stateRef.current.lastDragX = e.clientX
-    stateRef.current.lastDragTime = performance.now()
-    stateRef.current.T0 = stateRef.current.s
+    if (stateRef.current.detailOpen) return
+    const st = stateRef.current
+    st.isDragging = true
+    st.dragStartX = e.clientX
+    st.dragLastX = e.clientX
+    st.dragLastTime = performance.now()
+    st.T0 = st.s
   }
 
   const handlePointerMove = (e: React.PointerEvent) => {
     const st = stateRef.current
-    if (st.isDragging) {
-      const now = performance.now()
-      const dt = Math.max(1, now - st.lastDragTime)
-      const dx = e.clientX - st.dragStartX
-      const stepDist = 180
+    st.targetCursorX = e.clientX
+    st.targetCursorY = e.clientY
 
-      st.T = st.T0 - dx / stepDist
-      st.velocity = -((e.clientX - st.lastDragX) / stepDist) / (dt / 16)
-      st.lastDragX = e.clientX
-      st.lastDragTime = now
-    } else {
-      const rect = containerRef.current?.getBoundingClientRect()
-      if (rect) {
-        const mx = (e.clientX - rect.left) / rect.width - 0.5
-        const my = (e.clientY - rect.top) / rect.height - 0.5
-        st.tiltY = mx * 10
-        st.tiltX = -my * 8
-      }
+    if (st.isDragging && !st.detailOpen) {
+      const now = performance.now()
+      const dt = Math.max(1, now - st.dragLastTime)
+      const dx = e.clientX - st.dragStartX
+      const stepPitch = 90
+
+      st.T = st.T0 - dx / stepPitch
+      st.velocity = -((e.clientX - st.dragLastX) / stepPitch) / (dt / 16)
+      st.dragLastX = e.clientX
+      st.dragLastTime = now
     }
   }
 
   const handlePointerUp = () => {
     const st = stateRef.current
-    st.isDragging = false
-    const fling = Math.max(-2, Math.min(2, Math.round(st.velocity * 2.2)))
-    st.T = Math.round(st.T + fling)
+    if (st.isDragging) {
+      st.isDragging = false
+      const fling = Math.max(-3, Math.min(3, Math.round(st.velocity * 1.8)))
+      st.T = Math.round(st.T + fling)
+    }
   }
 
-  // Open / Close Detail Sheet
-  const openDetailSheet = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation()
-    stateRef.current.detailOpen = true
-    setDetailOpen(true)
-    setAddedToBasket(false)
+  // Keyboard navigation
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (stateRef.current.detailOpen) {
+        if (e.key === 'Escape') closeDetail()
+        return
+      }
+      if (e.key === 'ArrowLeft') {
+        stateRef.current.T = Math.round(stateRef.current.T) - 1
+      } else if (e.key === 'ArrowRight') {
+        stateRef.current.T = Math.round(stateRef.current.T) + 1
+      } else if (e.key === 'Enter') {
+        openDetail()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
 
-    // Trigger ink-bleed SVG circles expansion animation
+  // Step left / right handlers
+  const stepPrev = () => {
+    stateRef.current.T = Math.round(stateRef.current.T) - 1
+  }
+  const stepNext = () => {
+    stateRef.current.T = Math.round(stateRef.current.T) + 1
+  }
+
+  // Category Tab Click
+  const handleCategoryClick = (cat: (typeof CATEGORIES)[number]) => {
+    setActiveCategory(cat.id)
+    const st = stateRef.current
+    const currMod = ((Math.round(st.T) % 12) + 12) % 12
+    let diff = cat.targetIndex - currMod
+    if (diff > 6) diff -= 12
+    if (diff < -6) diff += 12
+    st.T = Math.round(st.T) + diff
+  }
+
+  // Click on a tape
+  const handleTapeClick = (vIdx: number) => {
+    const st = stateRef.current
+    const r = ((((vIdx - st.s) % 36) + 36) % 36) - 18
+    if (Math.abs(r) < 0.5) {
+      openDetail()
+    } else {
+      st.T = Math.round(st.T + r)
+    }
+  }
+
+  // Open Detail Sequence with Paper Sheet Growth & Ink Blot Animation
+  const openDetail = () => {
+    const st = stateRef.current
+    st.detailOpen = true
+    setDetailOpen(true)
+
+    // Web Animations API: Grow sheet out of active cover rect
     setTimeout(() => {
-      const g = svgGroupRef.current
+      const modal = detailModalRef.current
+      const activeEl = tapeElsRef.current.find((el) => {
+        if (!el) return false
+        const vIdx = Number(el.dataset.vidx)
+        const r = ((((vIdx - st.s) % 36) + 36) % 36) - 18
+        return Math.abs(r) < 0.5
+      })
+
+      if (modal && activeEl) {
+        const coverFace = activeEl.querySelector('.face-cover') as HTMLElement | null
+        const rect = (coverFace || activeEl).getBoundingClientRect()
+        const top = rect.top
+        const left = rect.left
+        const right = window.innerWidth - rect.right
+        const bottom = window.innerHeight - rect.bottom
+
+        modal.animate(
+          [
+            {
+              clipPath: `inset(${top}px ${right}px ${bottom}px ${left}px round 4px)`,
+              transform: 'rotate(-4.5deg)',
+            },
+            {
+              clipPath: 'inset(0px 0px 0px 0px round 0px)',
+              transform: 'rotate(0deg)',
+            },
+          ],
+          {
+            duration: 950,
+            easing: 'cubic-bezier(0.76, 0, 0.18, 1)',
+            fill: 'both',
+          }
+        )
+      }
+
+      // Trigger 7-blob Ink Blot Expansion
+      const g = inkMaskGroupRef.current
       if (g) {
         const circles = g.querySelectorAll('circle')
         circles.forEach((c) => {
+          c.setAttribute('r', '0')
           const delay = Number(c.dataset.delay || 0)
           setTimeout(() => {
             c.setAttribute('r', '780')
             c.style.transition = 'r 1.4s cubic-bezier(0.16, 1, 0.3, 1)'
-          }, delay)
+          }, delay + 450)
         })
       }
-    }, 50)
+    }, 20)
   }
 
-  const closeDetailSheet = () => {
-    stateRef.current.detailOpen = false
-    setDetailOpen(false)
+  const closeDetail = () => {
+    const modal = detailModalRef.current
+    if (modal) {
+      const anim = modal.animate(
+        [
+          { clipPath: 'inset(0px 0px 0px 0px round 0px)', transform: 'rotate(0deg)', opacity: 1 },
+          { clipPath: 'inset(25% 25% 25% 25% round 12px)', transform: 'rotate(-4deg)', opacity: 0 },
+        ],
+        {
+          duration: 450,
+          easing: 'cubic-bezier(0.76, 0, 0.18, 1)',
+          fill: 'both',
+        }
+      )
+      anim.onfinish = () => {
+        stateRef.current.detailOpen = false
+        setDetailOpen(false)
+      }
+    } else {
+      stateRef.current.detailOpen = false
+      setDetailOpen(false)
+    }
   }
 
-  const handleAddToBasket = (foodId: string, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation()
-    addToBasket(foodId, 100)
-    setAddedToBasket(true)
-    setTimeout(() => setAddedToBasket(false), 2400)
+  // Add active food to user basket
+  const handleAddToBasket = (foodId: string, grams = 100) => {
+    addToBasket(foodId, grams)
+    setAddedToast(`Added 100g of ${activeFood.name} to your Basket!`)
+    setTimeout(() => setAddedToast(null), 3200)
   }
+
+  // Generate 36 tapes (3 full copies of 12 foods)
+  const TAPES = useMemo(() => {
+    const list = []
+    for (let c = 0; c < 3; c++) {
+      for (let i = 0; i < FOOD_ARCHIVE_ITEMS.length; i++) {
+        list.push({
+          virtualIndex: c * 12 + i,
+          item: FOOD_ARCHIVE_ITEMS[i]!,
+        })
+      }
+    }
+    return list
+  }, [])
 
   return (
     <div
       ref={containerRef}
+      onWheel={handleWheel}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
-      className="relative w-full min-h-screen flex flex-col justify-between items-center bg-[#F3F6F4] overflow-hidden select-none pt-20 sm:pt-28 pb-8"
+      onPointerCancel={handlePointerUp}
+      className="relative w-full min-h-screen bg-[#F3F6F4] text-[#101410] overflow-hidden select-none flex flex-col justify-between pt-20 sm:pt-24 pb-8"
       style={{
         cursor: stateRef.current.isDragging ? 'grabbing' : 'default',
         isolation: 'isolate',
       }}
     >
-      {/* SVG Ink Blot Filter Definition */}
+      {/* 
+        ========================================================================
+        SVG INK BLOT TURBULENCE FILTER DEFINITION
+        ========================================================================
+      */}
       <svg className="absolute w-0 h-0 pointer-events-none" aria-hidden="true">
         <defs>
           <filter id="vasari-ink-bleed">
@@ -330,7 +515,7 @@ export function LeonVasariFoodArchive() {
             <feDisplacementMap
               in="SourceGraphic"
               in2="noise"
-              scale="90"
+              scale="95"
               xChannelSelector="R"
               yChannelSelector="G"
             />
@@ -338,96 +523,254 @@ export function LeonVasariFoodArchive() {
         </defs>
       </svg>
 
-      {/* Top Archival Header Bar */}
-      <div className="relative z-20 flex flex-col items-center text-center max-w-2xl mx-auto px-4 mb-2">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[rgba(125,141,57,0.12)] border border-[rgba(91,110,44,0.2)] text-[11px] font-mono tracking-widest uppercase text-[#5B6E2C] mb-2 sm:mb-3">
-          <BookOpen className="w-3.5 h-3.5 text-[#7D8D39]" />
-          <span>Curated Monograph Collection &bull; ICMR-NIN IFCT 2017</span>
+      {/* Toast Notification */}
+      {addedToast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-5 py-3 rounded-xl bg-[#08482D] text-[#F5F8EF] shadow-xl text-sm font-medium animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <Check className="w-4 h-4 text-[#DAE7C7]" />
+          <span>{addedToast}</span>
+          <Link href="/basket" className="underline font-semibold ml-2 hover:text-white">
+            View Basket
+          </Link>
         </div>
-        <h1 className="font-display text-3xl sm:text-5xl font-bold text-[#20271D] tracking-tight">
-          The Living Food Archive
-        </h1>
-        <p className="text-xs sm:text-sm text-[#737B70] mt-1.5 sm:mt-2 max-w-lg leading-relaxed hidden sm:block">
-          Drag horizontally, scroll, or step through 12 authentic biological monographs. Click the active volume to unfold its chemical composition dossier.
-        </p>
+      )}
+
+      {/* 
+        ========================================================================
+        CUSTOM RING CURSOR (desktop fine pointers)
+        ========================================================================
+      */}
+      <div
+        className="hidden md:block pointer-events-none fixed z-50 will-change-transform"
+        style={{
+          left: 0,
+          top: 0,
+          transform: `translate3d(${cursorPos.x}px, ${cursorPos.y}px, 0)`,
+        }}
+      >
+        <div
+          className={`-translate-x-1/2 -translate-y-1/2 rounded-full flex items-center justify-center transition-all duration-300 ${
+            cursorMode === 'cover'
+              ? 'w-24 h-24 bg-[#5B6E2C] text-white shadow-lg'
+              : cursorMode === 'spine'
+              ? 'w-9 h-9 border-[1.5px] border-[#5B6E2C] bg-white/20 backdrop-blur-xs'
+              : 'w-12 h-12 border-[1.5px] border-[#101410]/60'
+          }`}
+        >
+          {cursorMode === 'cover' ? (
+            <div className="text-center font-mono leading-tight">
+              <span className="block text-[10px] font-bold tracking-widest uppercase">OPEN</span>
+              <span className="block text-[8px] opacity-80">खोलें</span>
+            </div>
+          ) : (
+            <div className="w-1.5 h-1.5 rounded-full bg-[#5B6E2C]" />
+          )}
+        </div>
       </div>
 
-      {/* 3D Arc Shelf Stage */}
+      {/* 
+        ========================================================================
+        TOP ARCHIVAL HEADER & CATEGORY TABS
+        ========================================================================
+      */}
+      <div className="relative z-20 flex flex-col items-center text-center max-w-4xl mx-auto px-4">
+        {/* Top Provenance Monogram */}
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#5B6E2C]/10 border border-[#5B6E2C]/20 text-[#5B6E2C] text-xs font-mono tracking-wider uppercase mb-3">
+          <BookOpen className="w-3.5 h-3.5 text-[#7D8D39]" />
+          <span>Biological Food Archive &bull; ICMR-NIN IFCT 2017</span>
+        </div>
+
+        <h1 className="font-display text-3xl sm:text-5xl font-bold text-[#101410] tracking-tight">
+          The Living Food Archive.
+        </h1>
+        <p className="text-xs sm:text-sm text-[#5E5E61] mt-1.5 max-w-xl leading-relaxed hidden sm:block">
+          Explore 12 authentic biological monographs in physical 3D. Pull any volume out to inspect clinical macro economics and amino acid dossiers.
+        </p>
+
+        {/* Category Filter Tabs with Sliding Block */}
+        <div className="relative flex items-center justify-center gap-1 sm:gap-2 mt-4 p-1 rounded-full bg-black/5 border border-black/10">
+          {CATEGORIES.map((cat) => {
+            const isActive = activeCategory === cat.id
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => handleCategoryClick(cat)}
+                className={`relative z-10 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-mono uppercase tracking-wider transition-colors duration-300 ${
+                  isActive ? 'text-[#F3F6F4] font-bold' : 'text-[#5E5E61] hover:text-[#101410]'
+                }`}
+              >
+                {cat.label}
+                {isActive && (
+                  <span
+                    className="absolute inset-0 bg-[#5B6E2C] rounded-full -z-10 shadow-xs animate-in fade-in duration-300"
+                    style={{ transition: 'all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1)' }}
+                  />
+                )}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* 
+        ========================================================================
+        3D ENDLESS SHELF STAGE (perspective: 2200px)
+        ========================================================================
+      */}
       <div
-        className="relative w-full h-[380px] sm:h-[450px] flex items-center justify-center my-auto"
-        style={{ perspective: '1400px', perspectiveOrigin: '50% 50%' }}
+        className="relative w-full h-[400px] sm:h-[480px] flex items-center justify-center my-auto overflow-visible select-none"
+        style={{
+          perspective: '2200px',
+          perspectiveOrigin: '50% 50%',
+          touchAction: 'pan-y',
+        }}
       >
-        {/* Soft Ambient Floor Shadow */}
+        {/* Soft Ambient Shelf Shadow */}
         <div
           className="absolute pointer-events-none z-0"
           style={{
             top: '84%',
-            width: 'min(92vw, 1020px)',
-            height: '70px',
+            width: 'min(94vw, 1100px)',
+            height: '80px',
             background:
-              'radial-gradient(50% 50% at 50% 45%, rgba(45,56,24,.24), rgba(91,110,44,.06) 60%, transparent 75%)',
+              'radial-gradient(50% 50% at 50% 45%, rgba(45,56,24,0.28), rgba(91,110,44,0.08) 60%, transparent 75%)',
           }}
           aria-hidden="true"
         />
 
-        {/* 3D Center Stage Anchor */}
+        {/* Zero-Size 3D Stage Anchor */}
         <div
+          ref={stageRef}
           className="relative w-0 h-0"
           style={{ transformStyle: 'preserve-3d' }}
         >
-          {FOOD_ARCHIVE_DATA.map((item) => {
-            const isCenter = item.index === activeIndex
-
+          {TAPES.map(({ virtualIndex, item }) => {
             return (
               <div
-                key={item.id}
-                data-idx={item.index}
-                onClick={(e) => {
-                  if (!isCenter) {
-                    stateRef.current.T = item.index
+                key={virtualIndex}
+                data-vidx={virtualIndex}
+                ref={(el) => {
+                  tapeElsRef.current[virtualIndex] = el
+                }}
+                onPointerEnter={() => {
+                  stateRef.current.hoverVirtualIdx = virtualIndex
+                }}
+                onPointerLeave={() => {
+                  if (stateRef.current.hoverVirtualIdx === virtualIndex) {
+                    stateRef.current.hoverVirtualIdx = -1
                   }
                 }}
-                className="archive-shelf-item absolute top-[-180px] sm:top-[-200px] left-[-125px] sm:left-[-145px] w-[250px] sm:w-[290px] h-[360px] sm:h-[420px] will-change-transform cursor-pointer"
+                onClick={() => handleTapeClick(virtualIndex)}
+                className="tape absolute left-0 top-0 will-change-transform cursor-pointer"
                 style={{
                   transformStyle: 'preserve-3d',
-                  backfaceVisibility: 'hidden',
                 }}
               >
                 {/* 
                   ==============================================================
-                  1. FRONT COVER FACE (Prominent daylight photo, never clipped title, stats & action)
+                  1. SPINE FACE (.sp) — Front face of the 3D cuboid
+                  Width: --ws, Height: --H, Left: -ws/2, Transform: translateZ(d/2)
                   ==============================================================
                 */}
                 <div
-                  className="card-cover-face absolute inset-0 rounded-2xl overflow-hidden bg-[#1C2417] text-[#F3F6F4] shadow-2xl border border-[#7D8D39]/30 flex flex-col justify-between transition-opacity duration-200"
+                  className="face-spine absolute rounded-xs overflow-hidden flex flex-col justify-between py-4 px-2 text-center shadow-xl border-r border-black/30"
                   style={{
+                    width: 'var(--ws)',
+                    height: 'var(--H)',
+                    left: 'calc(-1 * var(--ws) / 2)',
+                    top: 'calc(-1 * var(--H) / 2)',
+                    transform: 'translateZ(calc(var(--d) / 2))',
+                    backfaceVisibility: 'hidden',
+                    backgroundColor: item.spineBg,
+                    color: '#F3F6F4',
                     backgroundImage:
-                      'radial-gradient(circle at 50% 15%, rgba(91,110,44,0.25) 0%, rgba(20,26,17,0.98) 85%)',
+                      'radial-gradient(circle at 50% 25%, rgba(255,255,255,0.14) 0%, transparent 75%)',
+                  }}
+                >
+                  {/* Top Rib & Foil Monogram */}
+                  <div className="flex flex-col items-center">
+                    <div className="w-full h-[1.5px] bg-white/30 mb-2 shadow-xs" />
+                    <span className="text-[7.5px] sm:text-[8.5px] font-mono tracking-widest uppercase opacity-75">
+                      FOLIO
+                    </span>
+                    <span
+                      className="text-[9.5px] sm:text-[11px] font-mono font-bold"
+                      style={{ color: item.spineFoil }}
+                    >
+                      #0{item.archiveIndex + 1}
+                    </span>
+                  </div>
+
+                  {/* Vertical Debossed Gold Title */}
+                  <div
+                    className="text-[10px] sm:text-[12px] font-display font-bold tracking-widest uppercase my-auto whitespace-nowrap text-[#F3F6F4] drop-shadow-sm select-none"
+                    style={{
+                      writingMode: 'vertical-rl',
+                      transform: 'rotate(180deg)',
+                      textShadow: '0 1px 2px rgba(0,0,0,0.7)',
+                    }}
+                  >
+                    {item.name}
+                  </div>
+
+                  {/* Bottom Rib & Protein Value Badge */}
+                  <div className="flex flex-col items-center">
+                    <div className="px-1.5 py-0.5 rounded-xs bg-black/50 border border-white/20 text-[8.5px] sm:text-[9.5px] font-mono font-bold text-[#DAE7C7]">
+                      {item.proteinPer100g}g
+                    </div>
+                    <div className="w-full h-[1.5px] bg-white/30 mt-2 shadow-xs" />
+                  </div>
+
+                  {/* Shading overlay: darkens as the spine turns away */}
+                  <div
+                    className="absolute inset-0 bg-black pointer-events-none transition-opacity duration-75"
+                    style={{ opacity: 'var(--shade-sp, 0)' }}
+                  />
+                </div>
+
+                {/* 
+                  ==============================================================
+                  2. COVER FACE (.cv) — Right-hand side face of the 3D cuboid
+                  Width: --d, Height: --H, Left: -d/2, Transform: rotateY(90deg) translateZ(ws/2)
+                  ==============================================================
+                */}
+                <div
+                  className="face-cover absolute rounded-2xl overflow-hidden bg-[#182014] text-[#F3F6F4] border border-[#7D8D39]/35 flex flex-col justify-between"
+                  style={{
+                    width: 'var(--d)',
+                    height: 'var(--H)',
+                    left: 'calc(-1 * var(--d) / 2)',
+                    top: 'calc(-1 * var(--H) / 2)',
+                    transform: 'rotateY(90deg) translateZ(calc(var(--ws) / 2))',
+                    backfaceVisibility: 'hidden',
+                    boxShadow: '0 30px 60px -28px rgba(20,16,10,0.65)',
+                    backgroundImage:
+                      'radial-gradient(circle at 50% 12%, rgba(91,110,44,0.3) 0%, rgba(18,24,15,0.98) 85%)',
                   }}
                 >
                   {/* Daylight Food Photography Window */}
-                  <div className="relative w-full h-[155px] sm:h-[190px] overflow-hidden bg-[#2D3818]">
+                  <div className="relative w-full h-[48%] overflow-hidden bg-[#24301B]">
                     <img
                       src={item.image}
                       alt={item.name}
-                      className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
                       loading="eager"
+                      className="w-full h-full object-cover select-none pointer-events-none transition-transform duration-700 hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#1C2417] via-transparent to-black/30 pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#182014] via-transparent to-black/30 pointer-events-none" />
 
-                    {/* Top Folio Strip */}
+                    {/* Top Folio Header Strip */}
                     <div className="absolute top-2.5 left-3 right-3 flex items-center justify-between z-10">
-                      <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-xs text-[10px] font-mono text-[#A3B18A] uppercase tracking-wider">
-                        FOLIO #0{item.index + 1}
+                      <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-xs text-[9px] font-mono text-[#DAE7C7] uppercase tracking-wider">
+                        FOLIO #0{item.archiveIndex + 1}
                       </span>
-                      <span className="px-2 py-0.5 rounded-full bg-[#FF5A22] text-[10px] font-mono text-white font-bold shadow-xs">
+                      <span className="px-2 py-0.5 rounded-full bg-[#FF5A22] text-[9.5px] font-mono text-white font-bold shadow-xs">
                         ₹{item.costPer10g} / 10g
                       </span>
                     </div>
 
-                    {/* Category Pill at bottom of image */}
+                    {/* Category Label at bottom of image */}
                     <div className="absolute bottom-2 left-3 z-10">
-                      <span className="text-[10px] uppercase font-mono tracking-widest text-[#A3B18A]/90 bg-black/50 px-2 py-0.5 rounded-xs backdrop-blur-xs">
+                      <span className="text-[9px] uppercase font-mono tracking-widest text-[#DAE7C7]/90 bg-black/50 px-2 py-0.5 rounded-xs backdrop-blur-xs">
                         {item.category.replace('-', ' ')}
                       </span>
                     </div>
@@ -436,58 +779,51 @@ export function LeonVasariFoodArchive() {
                   {/* Body Content */}
                   <div className="p-3.5 sm:p-4 flex-1 flex flex-col justify-between">
                     <div>
-                      <h3 className="font-display text-base sm:text-xl font-bold text-[#F3F6F4] leading-snug line-clamp-2">
+                      <h3 className="font-display text-sm sm:text-lg font-bold text-[#F3F6F4] leading-snug line-clamp-1">
                         {item.name}
                       </h3>
-                      <p className="text-[11px] sm:text-xs text-[#7D8D39] font-mono mt-0.5">
-                        {item.romaji}
+                      <p className="text-[10px] sm:text-[11px] text-[#A3B18A] font-mono mt-0.5 line-clamp-1">
+                        {item.hindiName || item.name}
                       </p>
                     </div>
 
                     {/* Macro Matrix */}
-                    <div className="grid grid-cols-3 gap-1.5 py-2 sm:py-2.5 border-y border-white/10 my-1 sm:my-2 text-center">
-                      <div className="p-1 rounded-lg bg-white/5">
-                        <span className="block text-[8px] sm:text-[9px] font-mono text-[#A3B18A] uppercase">Protein</span>
-                        <strong className="text-xs font-mono font-bold text-white">{item.proteinVal}g</strong>
+                    <div className="grid grid-cols-3 gap-1.5 py-1.5 sm:py-2 border-y border-white/10 text-center my-1">
+                      <div className="p-1 rounded-md bg-white/5">
+                        <span className="block text-[8px] font-mono text-[#A3B18A] uppercase">Protein</span>
+                        <strong className="text-xs font-mono font-bold text-white">{item.proteinPer100g}g</strong>
                       </div>
-                      <div className="p-1 rounded-lg bg-white/5">
-                        <span className="block text-[8px] sm:text-[9px] font-mono text-white/60 uppercase">Energy</span>
+                      <div className="p-1 rounded-md bg-white/5">
+                        <span className="block text-[8px] font-mono text-white/60 uppercase">Energy</span>
                         <strong className="text-xs font-mono font-bold text-white">{item.caloriesPer100g}k</strong>
                       </div>
-                      <div className="p-1 rounded-lg bg-white/5">
-                        <span className="block text-[8px] sm:text-[9px] font-mono text-[#FF5A22] uppercase">Cost/100g</span>
+                      <div className="p-1 rounded-md bg-white/5">
+                        <span className="block text-[8px] font-mono text-[#FF5A22] uppercase">Cost/100g</span>
                         <strong className="text-xs font-mono font-bold text-[#FF5A22]">₹{item.estimatedCostPer100g}</strong>
                       </div>
                     </div>
 
                     {/* Action Bar */}
-                    <div className="flex items-center gap-2 pt-0.5 sm:pt-1">
+                    <div className="flex items-center gap-2 pt-0.5">
                       <button
                         type="button"
-                        onClick={(e) => handleAddToBasket(item.id, e)}
-                        className={`flex-1 py-1.5 sm:py-2 px-3 rounded-full text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-xs ${
-                          isCenter && addedToBasket
-                            ? 'bg-[#7D8D39] text-white'
-                            : 'bg-[#5B6E2C] hover:bg-[#7D8D39] text-[#F3F6F4]'
-                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleAddToBasket(item.id, 100)
+                        }}
+                        className="flex-1 py-1.5 px-3 rounded-full text-xs font-semibold bg-[#5B6E2C] hover:bg-[#7D8D39] text-[#F3F6F4] flex items-center justify-center gap-1.5 transition-all shadow-xs"
                       >
-                        {isCenter && addedToBasket ? (
-                          <>
-                            <Check className="w-3.5 h-3.5" />
-                            <span>Added</span>
-                          </>
-                        ) : (
-                          <>
-                            <ShoppingBag className="w-3.5 h-3.5" />
-                            <span>Add 100g</span>
-                          </>
-                        )}
+                        <ShoppingBag className="w-3.5 h-3.5" />
+                        <span>Add 100g</span>
                       </button>
 
                       <button
                         type="button"
-                        onClick={openDetailSheet}
-                        className="p-1.5 sm:p-2 rounded-full border border-white/20 hover:border-[#7D8D39] text-white/80 hover:text-white transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          openDetail()
+                        }}
+                        className="p-1.5 rounded-full border border-white/20 hover:border-[#7D8D39] text-white/80 hover:text-white transition-colors"
                         title="Inspect Biological Dossier"
                         aria-label="Inspect Biological Dossier"
                       >
@@ -495,54 +831,12 @@ export function LeonVasariFoodArchive() {
                       </button>
                     </div>
                   </div>
-                </div>
 
-                {/* 
-                  ==============================================================
-                  2. SPINE FACE (Archival Cloth Binding with Debossed Gold Title)
-                  ==============================================================
-                */}
-                <div
-                  className="card-spine-face absolute inset-0 rounded-xs overflow-hidden flex flex-col justify-between py-4 px-2 text-center shadow-xl border-r border-black/30 transition-opacity duration-200"
-                  style={{
-                    backgroundColor: item.coverColor,
-                    color: '#F3F6F4',
-                    width: '56px',
-                    left: 'calc(50% - 28px)',
-                    backgroundImage:
-                      'radial-gradient(circle at 50% 30%, rgba(255,255,255,0.12) 0%, transparent 80%)',
-                  }}
-                >
-                  {/* Top Rib & Monogram */}
-                  <div className="flex flex-col items-center">
-                    <div className="w-full h-[2px] bg-[#F3F6F4]/30 mb-2 shadow-xs" />
-                    <span className="text-[8px] font-mono tracking-widest uppercase opacity-75">
-                      FOLIO
-                    </span>
-                    <span className="text-[10px] font-mono font-bold text-[#FF5A22]">
-                      #0{item.index + 1}
-                    </span>
-                  </div>
-
-                  {/* Vertical Debossed Gold Title */}
+                  {/* Shading overlay: brightens as cover turns forward */}
                   <div
-                    className="text-[11px] font-display font-bold tracking-widest uppercase my-auto whitespace-nowrap text-[#F3F6F4] drop-shadow-sm"
-                    style={{
-                      writingMode: 'vertical-rl',
-                      transform: 'rotate(180deg)',
-                      textShadow: '0 1px 2px rgba(0,0,0,0.6)',
-                    }}
-                  >
-                    {item.name}
-                  </div>
-
-                  {/* Bottom Rib & Protein Seal */}
-                  <div className="flex flex-col items-center">
-                    <div className="px-1.5 py-0.5 rounded-xs bg-black/40 border border-white/20 text-[9px] font-mono font-bold text-[#A3B18A]">
-                      {item.proteinVal}g
-                    </div>
-                    <div className="w-full h-[2px] bg-[#F3F6F4]/30 mt-2 shadow-xs" />
-                  </div>
+                    className="absolute inset-0 bg-black pointer-events-none transition-opacity duration-75"
+                    style={{ opacity: 'var(--shade-cv, 0.5)' }}
+                  />
                 </div>
               </div>
             )
@@ -550,239 +844,238 @@ export function LeonVasariFoodArchive() {
         </div>
       </div>
 
-      {/* Caption & Step Navigation Controls */}
-      <div className="relative z-20 flex flex-col items-center gap-2.5 w-full max-w-xl mx-auto px-4 mt-2 sm:mt-4">
-        <div className="flex items-center justify-center gap-5 sm:gap-10 w-full">
+      {/* 
+        ========================================================================
+        CAPTION BELOW SHELF WITH MASKED TEXT SLIDE & STEP CONTROLS
+        ========================================================================
+      */}
+      <div className="relative z-20 flex flex-col items-center gap-3 w-full max-w-xl mx-auto px-4 mt-2 sm:mt-4">
+        <div className="flex items-center justify-between w-full">
           {/* Left Arrow Button */}
           <button
             type="button"
-            onClick={stepLeft}
-            className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[rgba(91,110,44,0.3)] bg-white/70 backdrop-blur-xs text-[#5B6E2C] hover:bg-[#5B6E2C] hover:text-[#F3F6F4] flex items-center justify-center transition-all shadow-xs active:scale-95"
+            onClick={stepPrev}
+            className="w-11 h-11 rounded-full border border-[#5B6E2C]/25 bg-white/80 backdrop-blur-xs text-[#5B6E2C] hover:bg-[#5B6E2C] hover:text-[#F3F6F4] flex items-center justify-center transition-all shadow-2xs active:scale-95 group"
             aria-label="Previous Monograph"
           >
-            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
           </button>
 
-          {/* Center Masked Caption */}
-          <div className="text-center overflow-hidden flex flex-col items-center max-w-xs sm:max-w-sm">
-            <h3 className="font-display text-xl sm:text-3xl font-bold text-[#5B6E2C] tracking-tight leading-tight mb-0.5">
+          {/* Masked Sliding Caption Container */}
+          <div className="text-center overflow-hidden flex flex-col items-center flex-1 px-4">
+            <h2 className="font-display text-xl sm:text-2xl font-bold text-[#5B6E2C] tracking-tight leading-tight line-clamp-1">
               {activeFood.name}
-            </h3>
-            <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-widest text-[#7D8D39] block mb-1">
-              {activeFood.romaji}
+            </h2>
+            <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-widest text-[#7D8D39] block mt-0.5">
+              {activeFood.hindiName || activeFood.name} &bull; IFCT 2017
             </span>
-            <div className="w-8 h-[1.5px] bg-[#5B6E2C] my-1" />
-            <span className="text-[11px] sm:text-xs font-mono font-medium text-[#20271D]">
-              {activeFood.proteinVal}G PROTEIN / 100G &mdash; ₹{activeFood.costPer10g} PER 10G
+            <div className="w-8 h-[1.5px] bg-[#5B6E2C]/40 my-1.5" />
+            <span className="text-[11px] sm:text-xs font-mono font-medium text-[#101410]">
+              {activeFood.proteinPer100g}G PROTEIN / 100G &mdash; ₹{activeFood.costPer10g} PER 10G &mdash; DIAAS {activeFood.diaas}
             </span>
           </div>
 
           {/* Right Arrow Button */}
           <button
             type="button"
-            onClick={stepRight}
-            className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[rgba(91,110,44,0.3)] bg-white/70 backdrop-blur-xs text-[#5B6E2C] hover:bg-[#5B6E2C] hover:text-[#F3F6F4] flex items-center justify-center transition-all shadow-xs active:scale-95"
+            onClick={stepNext}
+            className="w-11 h-11 rounded-full border border-[#5B6E2C]/25 bg-white/80 backdrop-blur-xs text-[#5B6E2C] hover:bg-[#5B6E2C] hover:text-[#F3F6F4] flex items-center justify-center transition-all shadow-2xs active:scale-95 group"
             aria-label="Next Monograph"
           >
-            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
           </button>
         </div>
 
         {/* Inspect Dossier Action Button */}
         <button
           type="button"
-          onClick={openDetailSheet}
-          className="mt-1 sm:mt-2 px-5 sm:px-6 py-2 sm:py-2.5 rounded-full bg-[#5B6E2C] text-[#F3F6F4] text-xs font-mono tracking-wider uppercase hover:bg-[#7D8D39] transition-all flex items-center gap-2 shadow-xs hover:shadow-md"
+          onClick={openDetail}
+          className="mt-1 px-6 py-2.5 rounded-full bg-[#5B6E2C] hover:bg-[#7D8D39] text-[#F3F6F4] text-xs font-mono tracking-wider uppercase transition-all flex items-center gap-2 shadow-xs hover:shadow-md active:scale-98"
         >
           <Sparkles className="w-3.5 h-3.5 text-[#FF5A22]" />
           <span>Inspect Full Biological Dossier</span>
         </button>
       </div>
 
-      {/* Timeline / Protein Metric Ruler */}
-      <div className="relative z-20 w-full max-w-2xl mx-auto px-6 mt-4 sm:mt-6 mb-1">
-        <div className="relative h-9 sm:h-10 flex items-center">
-          {/* Base Ruler Line */}
-          <div className="absolute left-0 right-0 h-[1.5px] bg-[rgba(91,110,44,0.3)]" />
-
-          {/* Ticks 5g to 60g */}
-          {[10, 20, 30, 40, 50, 60].map((tick) => {
-            const leftPct = ((tick - 5) / 55) * 100
-            return (
-              <div
-                key={tick}
-                className="absolute top-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none"
-                style={{ left: `${leftPct}%` }}
-              >
-                <div className="w-[1px] h-2.5 sm:h-3 bg-[#5B6E2C]" />
-                <span className="text-[8px] sm:text-[9px] font-mono text-[#7D8D39] mt-1.5 sm:mt-2">
-                  {tick}g
-                </span>
-              </div>
-            )
-          })}
-
-          {/* Sliding Tangerine Active Dot */}
+      {/* 
+        ========================================================================
+        DETAIL MODAL (Paper Sheet Grow & SVG Ink Blot Poster Bleed-In)
+        ========================================================================
+      */}
+      {detailOpen &&
+        typeof document !== 'undefined' &&
+        createPortal(
           <div
-            className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-[#FF5A22] border-2 border-[#F3F6F4] shadow-md transition-all duration-300 pointer-events-none"
-            style={{
-              left: `clamp(0%, ${((activeFood.proteinVal - 5) / 55) * 100}%, 100%)`,
-              transform: 'translate(-50%, -50%)',
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Full-Screen Biological Dossier with Ink Blot Bleed */}
-      {detailOpen && (
-        <div
-          ref={detailRef}
-          className="fixed inset-0 z-[120] bg-[#F3F6F4] text-[#20271D] overflow-y-auto flex flex-col justify-between p-6 sm:p-14 animate-in fade-in duration-200"
-        >
-          {/* Top Bar: Close & Brand */}
-          <div className="flex items-center justify-between pb-6 border-b border-[rgba(91,110,44,0.2)]">
+            ref={detailModalRef}
+            role="dialog"
+            aria-modal="true"
+            className="fixed inset-0 z-[200] bg-[#F4F2ED] text-[#101410] overflow-y-auto flex flex-col justify-between will-change-transform"
+          >
+          {/* Top Modal Navigation Bar */}
+          <div className="sticky top-0 z-20 flex items-center justify-between px-6 sm:px-12 py-5 bg-[#F4F2ED]/95 backdrop-blur-md border-b border-black/10">
             <button
               type="button"
-              onClick={closeDetailSheet}
-              className="px-4 py-2 rounded-full border border-[rgba(91,110,44,0.3)] text-xs font-mono uppercase tracking-widest text-[#20271D] hover:bg-[#5B6E2C] hover:text-[#F3F6F4] transition-all flex items-center gap-2"
+              onClick={closeDetail}
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-black/30 hover:border-black text-xs font-mono uppercase tracking-wider transition-colors"
             >
-              <X className="w-4 h-4" />
-              <span>CLOSE ARCHIVE</span>
+              <X className="w-3.5 h-3.5" />
+              <span>CLOSE / बंद करें</span>
             </button>
-            <span className="text-xs font-mono uppercase tracking-widest text-[#5B6E2C]">
-              MACROSNAP &mdash; BIOLOGICAL DOSSIER // FOLIO #0{activeFood.index + 1}
-            </span>
-          </div>
 
-          {/* Two-Column Editorial Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 my-auto py-8 max-w-6xl mx-auto w-full items-center">
-            {/* Left Column: Scientific Breakdown */}
-            <div className="lg:col-span-7 space-y-6">
-              <span className="text-xs font-mono uppercase tracking-widest text-[#FF5A22]">
-                {activeFood.romaji} / {activeFood.category}
+            <div className="flex flex-col items-center">
+              <span className="font-display font-bold text-sm tracking-widest text-[#5B6E2C]">
+                MACROSNAP LABS
               </span>
+              <span className="text-[9px] font-mono text-[#5E5E61] uppercase tracking-widest">
+                BIOLOGICAL DOSSIER #{activeFood.archiveIndex + 1}
+              </span>
+            </div>
 
-              <h1 className="font-display text-4xl sm:text-6xl font-bold text-[#5B6E2C] leading-none">
-                {activeFood.name}
-              </h1>
+            <button
+              type="button"
+              onClick={() => handleAddToBasket(activeFood.id, 100)}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#5B6E2C] hover:bg-[#7D8D39] text-white text-xs font-semibold shadow-xs transition-all"
+            >
+              <ShoppingBag className="w-3.5 h-3.5" />
+              <span>Add 100g to Basket</span>
+            </button>
+          </div>
 
-              <div className="text-xs font-mono text-[#737B70]">
-                {activeFood.proteinVal}G PROTEIN &bull; {activeFood.caloriesPer100g} KCAL &bull;{' '}
-                {activeFood.servingSizeGrams}G SERVING
+          {/* Modal Grid Content */}
+          <div className="max-w-6xl mx-auto w-full px-6 sm:px-12 py-8 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center flex-1">
+            {/* Left Column: Clinical Dossier Information */}
+            <div className="flex flex-col gap-6">
+              <div>
+                <span className="inline-block px-3 py-1 rounded-full bg-[#5B6E2C]/10 text-[#5B6E2C] text-xs font-mono uppercase tracking-wider mb-2">
+                  {activeFood.category.replace('-', ' ')} &bull; IFCT 2017
+                </span>
+                <h2 className="font-display text-3xl sm:text-5xl font-bold text-[#101410] tracking-tight">
+                  {activeFood.name}
+                </h2>
+                <p className="text-sm sm:text-base text-[#7D8D39] font-mono mt-1">
+                  {activeFood.hindiName}
+                </p>
               </div>
 
-              <p className="text-sm sm:text-base text-[#20271D] font-serif leading-relaxed max-w-xl">
-                {activeFood.shortDescription}
-              </p>
-
-              <div className="p-4 rounded-2xl bg-white border border-[rgba(91,110,44,0.18)] text-xs space-y-1 shadow-xs">
-                <strong className="text-[#5B6E2C]">Preparation &amp; Bioavailability Tip:</strong>
-                <p className="text-[#737B70]">{activeFood.highlightTip}</p>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-[#5B6E2C]/10 border border-[#5B6E2C]/20 flex items-center justify-between">
+              {/* Complete Macronutrient Matrix */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-2xl bg-white border border-black/10 shadow-xs">
                 <div>
-                  <span className="text-[10px] uppercase font-mono text-[#5B6E2C] block">
-                    Retail Kirana Benchmark
-                  </span>
-                  <span className="text-xs text-[#20271D]">{activeFood.costNote}</span>
+                  <span className="text-[10px] font-mono text-[#5E5E61] uppercase block">Protein</span>
+                  <strong className="text-xl font-display font-bold text-[#5B6E2C]">
+                    {activeFood.proteinPer100g}g
+                  </strong>
+                  <span className="text-[9px] text-[#5E5E61] block">per 100g raw</span>
                 </div>
-                <strong className="font-display text-3xl font-bold text-[#5B6E2C]">
-                  ₹{activeFood.costPer10g}
-                  <span className="text-xs font-sans font-normal text-[#737B70]"> / 10g</span>
-                </strong>
+                <div>
+                  <span className="text-[10px] font-mono text-[#5E5E61] uppercase block">Energy</span>
+                  <strong className="text-xl font-display font-bold text-[#101410]">
+                    {activeFood.caloriesPer100g}
+                  </strong>
+                  <span className="text-[9px] text-[#5E5E61] block">kcal / 100g</span>
+                </div>
+                <div>
+                  <span className="text-[10px] font-mono text-[#5E5E61] uppercase block">Carbs &bull; Fat</span>
+                  <strong className="text-base font-display font-bold text-[#101410]">
+                    {activeFood.carbsPer100g}g &bull; {activeFood.fatPer100g}g
+                  </strong>
+                  <span className="text-[9px] text-[#5E5E61] block">macronutrients</span>
+                </div>
+                <div>
+                  <span className="text-[10px] font-mono text-[#FF5A22] uppercase block">Rupee Cost</span>
+                  <strong className="text-xl font-display font-bold text-[#FF5A22]">
+                    ₹{activeFood.costPer10g}
+                  </strong>
+                  <span className="text-[9px] text-[#5E5E61] block">per 10g protein</span>
+                </div>
               </div>
 
-              <div className="flex items-center gap-4 pt-4">
-                <button
-                  type="button"
-                  onClick={() => handleAddToBasket(activeFood.id)}
-                  className={`px-8 py-3.5 rounded-full text-xs font-semibold flex items-center gap-2 transition-all shadow-md ${
-                    addedToBasket
-                      ? 'bg-[#7D8D39] text-white'
-                      : 'bg-[#5B6E2C] hover:bg-[#7D8D39] text-[#F3F6F4]'
-                  }`}
-                >
-                  {addedToBasket ? (
-                    <>
-                      <Check className="w-4 h-4" />
-                      <span>Added to Grocery Ledger</span>
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingBag className="w-4 h-4" />
-                      <span>Add 100g to Grocery Basket</span>
-                    </>
-                  )}
-                </button>
+              {/* Biological Description & Clinical Preparation Tip */}
+              <div className="space-y-3">
+                <p className="text-sm text-[#5E5E61] leading-relaxed">
+                  {activeFood.shortDescription}
+                </p>
+                <div className="p-3.5 rounded-xl bg-[#5B6E2C]/8 border border-[#5B6E2C]/20 text-xs text-[#2D3818] leading-relaxed">
+                  <strong className="font-semibold block mb-0.5 text-[#5B6E2C]">
+                    Clinical Kitchen Tip:
+                  </strong>
+                  {activeFood.highlightTip}
+                </div>
+              </div>
+
+              {/* Provenance & Action Strip */}
+              <div className="pt-4 border-t border-black/10 flex flex-wrap items-center justify-between gap-4">
+                <div className="text-[11px] font-mono text-[#5E5E61]">
+                  <span>Source: {activeFood.sourceProvenance}</span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <Link
+                    href={`/compare?foodA=${activeFood.id}&foodB=whole-eggs`}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#5B6E2C] hover:text-[#7D8D39] underline"
+                  >
+                    <span>Compare vs Eggs</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </Link>
+
+                  <button
+                    type="button"
+                    onClick={() => handleAddToBasket(activeFood.id, 100)}
+                    className="px-5 py-2.5 rounded-full bg-[#08482D] hover:bg-[#5B6E2C] text-[#F5F8EF] text-xs font-semibold shadow-xs flex items-center gap-2 transition-all"
+                  >
+                    <ShoppingBag className="w-3.5 h-3.5" />
+                    <span>Add 100g to Basket</span>
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Right Column: High-Res Plated Food Poster with SVG Ink Bleed */}
-            <div className="lg:col-span-5 flex justify-center">
-              <div className="relative w-[320px] sm:w-[380px] h-[480px] rounded-2xl overflow-hidden bg-[#20271D] shadow-2xl p-6 text-[#F3F6F4] flex flex-col justify-between border border-white/20">
-                {/* SVG Ink Bleed Mask */}
-                <svg
-                  className="absolute inset-0 w-full h-full pointer-events-none"
-                  viewBox="0 0 474 900"
-                  preserveAspectRatio="none"
-                >
-                  <defs>
-                    <mask id="vasari-poster-ink-mask">
-                      <rect width="474" height="900" fill="black" />
-                      <g ref={svgGroupRef} filter="url(#vasari-ink-bleed)">
-                        <circle cx="150" cy="330" r="0" fill="white" data-delay="0" />
-                        <circle cx="340" cy="600" r="0" fill="white" data-delay="120" />
-                        <circle cx="250" cy="120" r="0" fill="white" data-delay="220" />
-                        <circle cx="90" cy="760" r="0" fill="white" data-delay="300" />
-                        <circle cx="400" cy="250" r="0" fill="white" data-delay="360" />
-                        <circle cx="260" cy="860" r="0" fill="white" data-delay="420" />
-                        <circle cx="230" cy="470" r="0" fill="white" data-delay="180" />
-                      </g>
-                    </mask>
-                  </defs>
+            {/* Right Column: Poster with Spreading SVG Ink Blot Reveal */}
+            <div className="relative w-full h-[360px] sm:h-[480px] lg:h-[540px] flex items-center justify-center">
+              <svg
+                viewBox="0 0 474 900"
+                className="w-full h-full max-h-[540px] object-contain drop-shadow-2xl rounded-2xl overflow-hidden"
+              >
+                <defs>
+                  {/* Ragged Ink Mask with 7 Staggered Blobs */}
+                  <mask id="ink-mask" x="-200" y="-200" width="874" height="1300">
+                    <g ref={inkMaskGroupRef} filter="url(#vasari-ink-bleed)">
+                      <circle cx="150" cy="330" r="0" fill="white" data-delay="0" />
+                      <circle cx="340" cy="600" r="0" fill="white" data-delay="120" />
+                      <circle cx="250" cy="120" r="0" fill="white" data-delay="220" />
+                      <circle cx="90" cy="760" r="0" fill="white" data-delay="300" />
+                      <circle cx="400" cy="250" r="0" fill="white" data-delay="360" />
+                      <circle cx="260" cy="860" r="0" fill="white" data-delay="420" />
+                      <circle cx="230" cy="470" r="0" fill="white" data-delay="180" />
+                    </g>
+                  </mask>
+                </defs>
 
-                  <rect
-                    width="474"
-                    height="900"
-                    fill={activeFood.coverColor}
-                    mask="url(#vasari-poster-ink-mask)"
-                  />
-                </svg>
+                {/* The Masked Food Poster Image */}
+                <image
+                  href={activeFood.image}
+                  width="474"
+                  height="900"
+                  preserveAspectRatio="xMidYMid slice"
+                  mask="url(#ink-mask)"
+                />
 
-                {/* Poster Content */}
-                <div className="relative z-10 flex items-center justify-between border-b border-white/30 pb-3">
-                  <span className="text-xs font-mono font-bold tracking-widest text-[#FF5A22]">
-                    NIN-ICMR IFCT 2017
-                  </span>
-                  <span className="text-xs font-mono text-white/80">#0{activeFood.index + 1}</span>
-                </div>
-
-                <div className="relative z-10 my-auto text-center">
-                  <div className="w-28 h-28 mx-auto rounded-full overflow-hidden border-2 border-white/30 shadow-lg mb-4">
-                    <img
-                      src={activeFood.image}
-                      alt={activeFood.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <span className="text-xs font-mono uppercase tracking-widest text-[#F3F6F4]/80 block mb-2">
-                    BIOLOGICAL FOOD PROFILE
-                  </span>
-                  <h2 className="font-display text-3xl sm:text-4xl font-bold leading-tight mb-2">
-                    {activeFood.name}
-                  </h2>
-                  <p className="text-sm font-sans text-[#F3F6F4]/90">{activeFood.romaji}</p>
-                </div>
-
-                <div className="relative z-10 pt-4 border-t border-white/30 flex items-center justify-between text-xs font-mono">
-                  <span>{activeFood.proteinVal}G PROTEIN / 100G</span>
-                  <span className="text-[#FF5A22] font-bold">₹{activeFood.costPer10g} / 10G</span>
-                </div>
-              </div>
+                {/* Poster Editorial Border & Typography Overlay */}
+                <rect
+                  x="12"
+                  y="12"
+                  width="450"
+                  height="876"
+                  fill="none"
+                  stroke="#5B6E2C"
+                  strokeWidth="1.5"
+                  strokeOpacity="0.4"
+                  rx="8"
+                />
+              </svg>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
