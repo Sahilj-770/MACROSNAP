@@ -12,8 +12,8 @@ export default function BudgetPage() {
 
   return (
     <div className="min-h-screen bg-[#F3F6F4]">
-      {/* Exact Vante 3D Video Ribbon Rail Experience */}
-      <VanteVideoRibbon />
+      {/* Exact Vante 3D Video Ribbon Rail Experience with interactive options */}
+      <VanteVideoRibbon onSelectFood={setSelectedFood} />
 
       {/* National Value Comparison Podium & Monthly Savings Simulator */}
       <ValuePodium foods={FOOD_DATABASE} />

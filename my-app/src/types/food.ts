@@ -1,4 +1,4 @@
-export type DietaryTag = 'vegetarian' | 'vegan' | 'dairy-free' | 'egg-based' | 'gluten-free' | 'high-protein'
+export type DietaryTag = 'vegetarian' | 'vegan' | 'dairy-free' | 'egg-based' | 'gluten-free' | 'high-protein' | 'non-vegetarian'
 
 export type FoodCategory =
   | 'dairy'
@@ -9,6 +9,7 @@ export type FoodCategory =
   | 'grains'
   | 'packaged-snack'
   | 'supplements'
+  | 'poultry'
 
 export interface FoodItem {
   id: string

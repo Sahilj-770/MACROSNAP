@@ -2,20 +2,101 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
-import { ArrowDown, Trophy, ShoppingBag, Check } from 'lucide-react'
+import { Eye, ShoppingBag, Check, ArrowDown, Sparkles } from 'lucide-react'
 import { FOOD_DATABASE } from '@/data/foods'
+import { FoodItem } from '@/types/food'
 import { useUserStore } from '@/store/useUserStore'
 
 // 100% authentic MacroSnap nutritional economics staples with genuine food photography
 const NUTRITION_STAPLES = [
-  { name: 'Soya Chunks', protein: '52.0g', cost: '₹2.31 / 10g', tag: 'National Champion', desc: 'Highest Protein Density per Rupee', color: '#3A481B', image: '/images/food/food_0.webp' },
-  { name: 'Yellow Moong Dal', protein: '24.0g', cost: '₹6.25 / 10g', tag: 'Pantry Staple', desc: 'Easily Digestible Plant Foundation', color: '#5B6E2C', image: '/images/food/food_1.webp' },
-  { name: 'Roasted Sattu', protein: '22.5g', cost: '₹6.67 / 10g', tag: 'Zero Cooking', desc: 'Instant Whole-Grain Super Drink', color: '#66792D', image: '/images/food/food_2.webp' },
-  { name: 'Poultry Whole Eggs', protein: '13.3g', cost: '₹9.68 / 10g', tag: 'DIAAS 1.18', desc: 'Gold Standard Complete Bioavailability', color: '#4E5F24', image: '/images/food/food_3.webp' },
-  { name: 'Cow Milk Paneer', protein: '18.0g', cost: '₹18.89 / 10g', tag: 'Dairy Matrix', desc: 'Slow-Release Micellar Casein', color: '#3E4E1C', image: '/images/food/food_4.webp' },
-  { name: 'Non-GMO Firm Tofu', protein: '15.0g', cost: '₹14.71 / 10g', tag: 'Pure Plant', desc: 'Clean Vegan Nitrogen Retention', color: '#5B6E2C', image: '/images/food/food_5.webp' },
-  { name: 'Chicken Breast', protein: '22.0g', cost: '₹9.68 / 10g', tag: 'Animal Lean', desc: 'Zero Carb High-Yield Muscle Fuel', color: '#354318', image: '/images/food/food_8.webp' },
-  { name: 'Commercial Protein Bar', protein: '20.0g', cost: '₹60.00 / 10g', tag: '26× Gym-Bro Tax', desc: 'Maltitol & Collagen Inflated Filler', color: '#C84013', image: '/images/food/food_9.webp' },
+  {
+    foodId: 'soy-chunks',
+    name: 'Soya Chunks',
+    protein: '52.0g',
+    cost: '₹2.31 / 10g',
+    tag: 'National Champion',
+    desc: 'Highest Protein Density per Rupee',
+    color: '#3A481B',
+    image: '/images/food/food_0.webp',
+    isBar: false,
+  },
+  {
+    foodId: 'yellow-moong-dal',
+    name: 'Yellow Moong Dal',
+    protein: '24.0g',
+    cost: '₹6.25 / 10g',
+    tag: 'Pantry Staple',
+    desc: 'Easily Digestible Plant Foundation',
+    color: '#5B6E2C',
+    image: '/images/food/food_1.webp',
+    isBar: false,
+  },
+  {
+    foodId: 'sattu-chana',
+    name: 'Roasted Sattu',
+    protein: '22.5g',
+    cost: '₹6.67 / 10g',
+    tag: 'Zero Cooking',
+    desc: 'Instant Whole-Grain Super Drink',
+    color: '#66792D',
+    image: '/images/food/food_2.webp',
+    isBar: false,
+  },
+  {
+    foodId: 'eggs-whole',
+    name: 'Poultry Whole Eggs',
+    protein: '13.3g',
+    cost: '₹9.68 / 10g',
+    tag: 'DIAAS 1.18',
+    desc: 'Gold Standard Complete Bioavailability',
+    color: '#4E5F24',
+    image: '/images/food/food_3.webp',
+    isBar: false,
+  },
+  {
+    foodId: 'paneer-fresh',
+    name: 'Cow Milk Paneer',
+    protein: '18.0g',
+    cost: '₹18.89 / 10g',
+    tag: 'Dairy Matrix',
+    desc: 'Slow-Release Micellar Casein',
+    color: '#3E4E1C',
+    image: '/images/food/food_4.webp',
+    isBar: false,
+  },
+  {
+    foodId: 'tofu-firm',
+    name: 'Non-GMO Firm Tofu',
+    protein: '15.0g',
+    cost: '₹14.71 / 10g',
+    tag: 'Pure Plant',
+    desc: 'Clean Vegan Nitrogen Retention',
+    color: '#5B6E2C',
+    image: '/images/food/food_5.webp',
+    isBar: false,
+  },
+  {
+    foodId: 'chicken-breast',
+    name: 'Chicken Breast',
+    protein: '31.0g',
+    cost: '₹9.68 / 10g',
+    tag: 'Animal Lean',
+    desc: 'Zero Carb High-Yield Muscle Fuel',
+    color: '#354318',
+    image: '/images/food/food_8.webp',
+    isBar: false,
+  },
+  {
+    foodId: 'commercial-protein-bar',
+    name: 'Commercial Protein Bar',
+    protein: '20.0g',
+    cost: '₹60.00 / 10g',
+    tag: '26× Gym-Bro Tax',
+    desc: 'Maltitol & Collagen Inflated Filler',
+    color: '#C84013',
+    image: '/images/food/food_9.webp',
+    isBar: true,
+  },
 ]
 
 // Generate rich texture rendering genuine food photography and clear typography
@@ -26,7 +107,7 @@ function createStapleTexture(item: typeof NUTRITION_STAPLES[0]): THREE.CanvasTex
   const ctx = canvas.getContext('2d')
   if (!ctx) return new THREE.CanvasTexture(canvas)
 
-  const isBar = item.cost.includes('60.00')
+  const isBar = item.isBar
 
   const renderContent = (loadedImg?: HTMLImageElement) => {
     ctx.clearRect(0, 0, 720, 450)
@@ -140,7 +221,18 @@ function createStapleTexture(item: typeof NUTRITION_STAPLES[0]): THREE.CanvasTex
   return tex
 }
 
-export function VanteVideoRibbon() {
+export interface VanteVideoRibbonProps {
+  onSelectFood?: (food: FoodItem) => void
+}
+
+interface ScreenRect {
+  left: number
+  top: number
+  width: number
+  height: number
+}
+
+export function VanteVideoRibbon({ onSelectFood }: VanteVideoRibbonProps) {
   const trackRef = useRef<HTMLDivElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const nameElRef = useRef<HTMLDivElement | null>(null)
@@ -148,6 +240,33 @@ export function VanteVideoRibbon() {
   const l2Ref = useRef<HTMLDivElement | null>(null)
   const capRef = useRef<HTMLDivElement | null>(null)
   const ruleRef = useRef<HTMLDivElement | null>(null)
+
+  const [isSettled, setIsSettled] = useState(false)
+  const isSettledRef = useRef(false)
+  const [cardPositions, setCardPositions] = useState<ScreenRect[]>([])
+  const [addedStapleId, setAddedStapleId] = useState<string | null>(null)
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
+
+  const addToBasket = useUserStore((state) => state.addToBasket)
+
+  const handleInspect = (foodId: string) => {
+    const food = FOOD_DATABASE.find((f) => f.id === foodId)
+    if (food && onSelectFood) {
+      onSelectFood(food)
+    }
+  }
+
+  const handleAddToBasket = (foodId: string, name: string) => {
+    addToBasket(foodId, 100)
+    setAddedStapleId(foodId)
+    setToastMessage(`Added 100g ${name} to your Basket`)
+    setTimeout(() => {
+      setAddedStapleId((prev) => (prev === foodId ? null : prev))
+    }, 2000)
+    setTimeout(() => {
+      setToastMessage(null)
+    }, 2500)
+  }
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -260,7 +379,16 @@ export function VanteVideoRibbon() {
       mesh.frustumCulled = false
       scene.add(mesh)
 
-      return { i, title: `${staple.name} — ${staple.cost}`, tex, geo, mat, mesh, rect: null as any }
+      return {
+        i,
+        staple,
+        title: `${staple.name} — ${staple.cost}`,
+        tex,
+        geo,
+        mat,
+        mesh,
+        rect: null as any,
+      }
     })
 
     // Layout Sizing
@@ -268,7 +396,7 @@ export function VanteVideoRibbon() {
     let W = window.innerWidth
     let H = window.innerHeight
     let asp = W / H
-    let cols = 3
+    let cols = 4
     let rows = 2
     let tanH = 0.3153
 
@@ -282,18 +410,22 @@ export function VanteVideoRibbon() {
       camera.updateProjectionMatrix()
       tanH = Math.tan(((FOV / 2) * Math.PI) / 180)
 
-      cols = W < 600 ? 1 : W < 1000 ? 2 : 3
+      cols = W < 640 ? 1 : W < 1024 ? 2 : 4
       rows = Math.ceil(cards.length / cols)
       const gw = 2 * tanH * GZ * asp
       const gh = 2 * tanH * GZ
-      const mX = gw * (W < 600 ? 0.08 : 0.06)
-      const mY = gh * 0.12
-      const gapX = gw * 0.03
-      const gapY = gh * 0.04
+      const mX = gw * (W < 640 ? 0.05 : 0.035)
+      const gapX = gw * (W < 640 ? 0.02 : 0.02)
+      const gapY = gh * (W < 640 ? 0.02 : 0.03)
+
       const cw = (gw - 2 * mX - (cols - 1) * gapX) / cols
       const ch = cw / (CARD_W / CARD_H)
-      const ox = -gw / 2 + mX + cw / 2
-      const oy = gh / 2 - mY - ch / 2
+
+      // Perfectly center grid both horizontally and vertically
+      const totalGridW = cols * cw + (cols - 1) * gapX
+      const totalGridH = rows * ch + (rows - 1) * gapY
+      const ox = -totalGridW / 2 + cw / 2
+      const oy = totalGridH / 2 - ch / 2
 
       cards.forEach((c) => {
         const col = c.i % cols
@@ -307,6 +439,17 @@ export function VanteVideoRibbon() {
           vh: gh,
         }
       })
+
+      // Calculate pixel coordinates for HTML overlay cards
+      const screenRects: ScreenRect[] = cards.map((c) => {
+        const left = ((c.rect.x - c.rect.w / 2) / gw + 0.5) * W
+        const top = (0.5 - (c.rect.y + c.rect.h / 2) / gh) * H
+        const width = (c.rect.w / gw) * W
+        const height = (c.rect.h / gh) * H
+        return { left, top, width, height }
+      })
+      setCardPositions(screenRects)
+
       buildPath()
     }
     resize()
@@ -327,40 +470,74 @@ export function VanteVideoRibbon() {
     window.addEventListener('scroll', onScroll, { passive: true })
     onScroll()
 
-    // Interactive Hover raycast
+    // Interactive Hover raycast on canvas
     const nameEl = nameElRef.current
-    if (nameEl) {
-      window.addEventListener('pointermove', (e) => {
-        if (p < 0.8) {
+    const handlePointerMove = (e: PointerEvent) => {
+      if (p < 0.75) {
+        if (nameEl) nameEl.style.opacity = '0'
+        canvas.style.cursor = 'default'
+        return
+      }
+      const nx = e.clientX / window.innerWidth - 0.5
+      const ny = 0.5 - e.clientY / window.innerHeight
+      let hit: typeof cards[0] | null = null
+      for (const c of cards) {
+        const g = c.rect
+        if (!g) continue
+        const x = nx * g.vw
+        const y = ny * g.vh
+        if (Math.abs(x - g.x) < g.w / 2 && Math.abs(y - g.y) < g.h / 2) {
+          hit = c
+          break
+        }
+      }
+      canvas.style.cursor = hit ? 'pointer' : 'default'
+      if (nameEl) {
+        // When grid is fully settled, HTML overlay handles card interactions
+        if (p >= 0.82) {
           nameEl.style.opacity = '0'
-          return
-        }
-        const nx = e.clientX / window.innerWidth - 0.5
-        const ny = 0.5 - e.clientY / window.innerHeight
-        let hit: typeof cards[0] | null = null
-        for (const c of cards) {
-          const g = c.rect
-          if (!g) continue
-          const x = nx * g.vw
-          const y = ny * g.vh
-          if (Math.abs(x - g.x) < g.w / 2 && Math.abs(y - g.y) < g.h / 2) {
-            hit = c
-          }
-        }
-        if (nameEl) {
+        } else {
           nameEl.style.opacity = hit ? '1' : '0'
           if (hit) {
             nameEl.textContent = hit.title ?? ''
             nameEl.style.transform = `translate(${e.clientX + 14}px,${e.clientY + 16}px)`
           }
         }
-      })
+      }
     }
+    window.addEventListener('pointermove', handlePointerMove)
+
+    // Click raycast on canvas
+    const handleCanvasClick = (e: MouseEvent) => {
+      if (p < 0.75) return
+      const rect = canvas.getBoundingClientRect()
+      const clientX = e.clientX - rect.left
+      const clientY = e.clientY - rect.top
+      const nx = clientX / rect.width - 0.5
+      const ny = 0.5 - clientY / rect.height
+      for (const c of cards) {
+        if (!c.rect) continue
+        const x = nx * c.rect.vw
+        const y = ny * c.rect.vh
+        if (Math.abs(x - c.rect.x) < c.rect.w / 2 && Math.abs(y - c.rect.y) < c.rect.h / 2) {
+          handleInspect(c.staple.foodId)
+          break
+        }
+      }
+    }
+    canvas.addEventListener('click', handleCanvasClick)
 
     function loop() {
       if (!frozen) {
         p += (target - p) * 0.1
         if (Math.abs(target - p) < 0.00005) p = target
+
+        // Update settled state
+        const settled = p >= 0.82
+        if (settled !== isSettledRef.current) {
+          isSettledRef.current = settled
+          setIsSettled(settled)
+        }
 
         // Headlines Animation
         const l1 = l1Ref.current
@@ -381,11 +558,11 @@ export function VanteVideoRibbon() {
           rule.style.transform = `scaleX(${out(ru)})`
         }
 
-        // Camera positioning: stable vantage point viewing the Catmull-Rom rail into the 3x2 grid
+        // Camera positioning: stable vantage point viewing the Catmull-Rom rail into the grid
         camera.position.set(0, 0, 0)
         camera.lookAt(0, 0, -1)
 
-        // Cards along Catmull-Rom rail into 3x2 grid
+        // Cards along Catmull-Rom rail into 4x2 grid
         const head = p * (PATH_L + cards.length * STEP)
         const tGrid = out(span(p, 0.72, 0.98))
 
@@ -438,6 +615,8 @@ export function VanteVideoRibbon() {
       cancelAnimationFrame(animId)
       window.removeEventListener('resize', resize)
       window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('pointermove', handlePointerMove)
+      canvas.removeEventListener('click', handleCanvasClick)
       cards.forEach((c) => {
         c.tex.dispose()
         c.geo.dispose()
@@ -449,7 +628,7 @@ export function VanteVideoRibbon() {
 
   return (
     <div ref={trackRef} className="relative w-full h-[320vh]">
-      {/* Sticky 100vh Stage with Smooth Bottom Gradient Blending into Page */}
+      {/* Sticky 100vh Stage with pure dark botanical theme */}
       <div className="sticky top-0 h-screen w-full overflow-hidden bg-[#182015] text-[#F3F6F4] select-none pt-20">
         {/* Canvas for Three.js 3D Ribbon */}
         <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block z-10" />
@@ -487,7 +666,11 @@ export function VanteVideoRibbon() {
         />
 
         {/* Top Floating Controls */}
-        <div className="absolute left-8 right-8 top-24 flex items-center justify-between z-20 pointer-events-none">
+        <div
+          className={`absolute left-8 right-8 top-24 flex items-center justify-between z-20 pointer-events-none transition-opacity duration-300 ${
+            isSettled ? 'opacity-0' : 'opacity-100'
+          }`}
+        >
           <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-[#7D8D39]">
             <span className="w-2 h-2 rounded-full bg-[#FF5A22] animate-pulse" />
             <span>3D PROTEIN ECONOMIC RIBBON</span>
@@ -498,25 +681,145 @@ export function VanteVideoRibbon() {
         </div>
 
         {/* Bottom Floating Legend */}
-        <div className="absolute left-8 right-8 bottom-8 flex items-center justify-between z-20 pointer-events-none text-xs font-mono text-white/70">
+        <div
+          className={`absolute left-8 right-8 bottom-8 flex items-center justify-between z-20 pointer-events-none text-xs font-mono text-white/70 transition-opacity duration-300 ${
+            isSettled ? 'opacity-0' : 'opacity-100'
+          }`}
+        >
           <span>8 LIVE ECONOMIC STAPLES</span>
           <span className="text-[#FF5A22] font-bold">100% TRANSPARENT PUBLIC DATA</span>
         </div>
 
-        {/* Smooth Bottom Vignette blending into #F3F6F4 */}
+        {/* Interactive HTML Card Overlays when Grid Animation is Settled */}
         <div
-          className="absolute bottom-0 left-0 right-0 h-44 pointer-events-none z-30"
+          className="absolute inset-0 z-30 transition-opacity duration-300 pointer-events-none"
           style={{
-            background: 'linear-gradient(180deg, rgba(24,32,21,0) 0%, rgba(24,32,21,0.5) 30%, rgba(243,246,244,0.85) 85%, #F3F6F4 100%)',
+            opacity: isSettled ? 1 : 0,
+            pointerEvents: isSettled ? 'auto' : 'none',
           }}
-          aria-hidden="true"
-        />
+        >
+          {/* Top Settled Status Bar */}
+          <div className="absolute top-24 left-1/2 -translate-x-1/2 flex items-center gap-3 px-6 py-2 rounded-full bg-[#182015]/95 border border-[#7D8D39]/50 backdrop-blur-md shadow-2xl text-xs font-mono text-[#F3F6F4] pointer-events-auto">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#7D8D39] animate-pulse" />
+            <span className="font-semibold text-[#A3B18A]">STAPLES SETTLED</span>
+            <span className="text-white/30 hidden sm:inline">&bull;</span>
+            <span className="hidden sm:inline text-white/90">
+              Click any card to inspect clinical macros &bull; Tap +100g to add to basket
+            </span>
+          </div>
+
+          {/* Interactive Card Elements positioned directly over Three.js meshes */}
+          {cardPositions.map((pos, idx) => {
+            const staple = NUTRITION_STAPLES[idx]
+            if (!staple) return null
+            const isAdded = addedStapleId === staple.foodId
+
+            return (
+              <div
+                key={staple.foodId}
+                onClick={() => handleInspect(staple.foodId)}
+                style={{
+                  position: 'absolute',
+                  left: `${pos.left}px`,
+                  top: `${pos.top}px`,
+                  width: `${pos.width}px`,
+                  height: `${pos.height}px`,
+                }}
+                className={`group rounded-xl border transition-all duration-200 cursor-pointer flex flex-col justify-between p-3 select-none ${
+                  staple.isBar
+                    ? 'border-[#FF5A22]/50 hover:border-[#FF5A22] hover:bg-[#FF5A22]/15 hover:shadow-2xl hover:shadow-[#FF5A22]/25'
+                    : 'border-[#7D8D39]/40 hover:border-[#7D8D39] hover:bg-[#7D8D39]/15 hover:shadow-2xl hover:shadow-[#7D8D39]/25'
+                } hover:-translate-y-1.5 hover:scale-[1.02]`}
+              >
+                {/* Top Bar with Category and Inspect Hint */}
+                <div className="flex items-center justify-between pointer-events-none">
+                  <span
+                    className={`text-[9px] font-mono font-bold tracking-wider uppercase px-2 py-0.5 rounded-md shadow-xs ${
+                      staple.isBar
+                        ? 'bg-[#FF5A22] text-white'
+                        : 'bg-[#5B6E2C] text-[#F3F6F4]'
+                    }`}
+                  >
+                    {staple.tag}
+                  </span>
+                  <span className="text-[10px] font-mono text-white/60 group-hover:text-white transition-colors flex items-center gap-1">
+                    <Eye className="w-3 h-3 text-[#A3B18A]" />
+                    <span className="hidden sm:inline">Inspect</span>
+                  </span>
+                </div>
+
+                {/* Center Content Placeholder (Three.js canvas shows underlying photo + typography) */}
+                <div className="flex-1" />
+
+                {/* Bottom Action Dock */}
+                <div className="flex items-center justify-between gap-1.5 pt-1.5 border-t border-white/15 bg-black/40 backdrop-blur-xs px-2 py-1 rounded-lg">
+                  <div className="leading-tight">
+                    <div className="text-[8px] font-mono text-white/50 uppercase">Per 10g:</div>
+                    <div className={`font-mono font-bold text-xs ${staple.isBar ? 'text-[#FF5A22]' : 'text-[#7D8D39]'}`}>
+                      {staple.cost}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      type="button"
+                      onClick={() => handleInspect(staple.foodId)}
+                      className="px-2 py-1 rounded-md bg-white/10 hover:bg-white/20 active:scale-95 text-[#F3F6F4] text-[10px] font-mono font-medium flex items-center gap-1 transition-all border border-white/15 cursor-pointer"
+                      title="Inspect full nutritional & DIAAS analysis"
+                    >
+                      <Eye className="w-3 h-3 text-[#A3B18A]" />
+                      <span className="hidden sm:inline">Inspect</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleAddToBasket(staple.foodId, staple.name)}
+                      className={`px-2.5 py-1 rounded-md text-[10px] font-mono font-bold flex items-center gap-1 transition-all shadow-md active:scale-95 cursor-pointer ${
+                        isAdded
+                          ? 'bg-[#7D8D39] text-[#101410]'
+                          : staple.isBar
+                          ? 'bg-[#FF5A22] hover:bg-[#e04a16] text-white'
+                          : 'bg-[#5B6E2C] hover:bg-[#7D8D39] text-white'
+                      }`}
+                      title="Add 100g to MacroSnap basket"
+                    >
+                      {isAdded ? (
+                        <>
+                          <Check className="w-3 h-3 stroke-[2.5]" />
+                          <span>Added</span>
+                        </>
+                      ) : (
+                        <>
+                          <ShoppingBag className="w-3 h-3" />
+                          <span>+100g</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+
+          {/* Bottom Prompt indicating more content below */}
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 text-xs font-mono text-white/70 pointer-events-auto">
+            <span>Scroll down for 30-Day Grocery Savings Simulator</span>
+            <ArrowDown className="w-3.5 h-3.5 animate-bounce text-[#7D8D39]" />
+          </div>
+        </div>
 
         {/* Hover Pill Label Following Cursor */}
         <div
           ref={nameElRef}
           className="fixed left-0 top-0 px-4 py-2 rounded-full bg-[#5B6E2C] text-white text-xs font-bold font-mono tracking-wide pointer-events-none opacity-0 transition-opacity z-[130] whitespace-nowrap shadow-xl border border-white/20"
         />
+
+        {/* Added Feedback Toast */}
+        {toastMessage && (
+          <div className="fixed bottom-12 left-1/2 -translate-x-1/2 px-5 py-2.5 rounded-full bg-[#101410]/95 border border-[#7D8D39] text-white text-xs font-mono font-medium shadow-2xl flex items-center gap-2 z-[200] animate-in fade-in zoom-in-95 duration-200">
+            <Check className="w-4 h-4 text-[#7D8D39] stroke-[2.5]" />
+            <span>{toastMessage}</span>
+          </div>
+        )}
       </div>
     </div>
   )
