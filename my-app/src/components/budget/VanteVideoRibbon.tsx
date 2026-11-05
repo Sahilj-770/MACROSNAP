@@ -6,19 +6,19 @@ import { ArrowDown, Trophy, ShoppingBag, Check } from 'lucide-react'
 import { FOOD_DATABASE } from '@/data/foods'
 import { useUserStore } from '@/store/useUserStore'
 
-// 100% relevant MacroSnap nutritional economics staples
+// 100% authentic MacroSnap nutritional economics staples with genuine food photography
 const NUTRITION_STAPLES = [
-  { name: 'Soya Chunks', protein: '52.0g', cost: '₹2.31 / 10g', tag: 'National Champion', desc: 'Highest Protein Density per Rupee', color: '#3A481B' },
-  { name: 'Yellow Moong Dal', protein: '24.0g', cost: '₹6.25 / 10g', tag: 'Pantry Staple', desc: 'Easily Digestible Plant Foundation', color: '#5B6E2C' },
-  { name: 'Roasted Chana / Sattu', protein: '22.5g', cost: '₹6.67 / 10g', tag: 'Zero Cooking', desc: 'Instant Bihari Super-Drink Base', color: '#66792D' },
-  { name: 'Poultry Whole Eggs', protein: '13.3g', cost: '₹9.68 / 10g', tag: 'DIAAS 1.18', desc: 'Gold Standard Complete Bioavailability', color: '#4E5F24' },
-  { name: 'Cow Milk Paneer', protein: '18.0g', cost: '₹18.89 / 10g', tag: 'Dairy Matrix', desc: 'Slow-Release Micellar Casein', color: '#3E4E1C' },
-  { name: 'Non-GMO Firm Tofu', protein: '15.0g', cost: '₹14.71 / 10g', tag: 'Pure Plant', desc: 'Clean Vegan Nitrogen Retention', color: '#5B6E2C' },
-  { name: 'Chicken Breast', protein: '22.0g', cost: '₹9.68 / 10g', tag: 'Animal Lean', desc: 'Zero Carb High-Yield Muscle Fuel', color: '#354318' },
-  { name: 'Commercial Protein Bar', protein: '20.0g', cost: '₹60.00 / 10g', tag: '26× Gym-Bro Tax', desc: 'Maltitol & Collagen Inflated Filler', color: '#C84013' },
+  { name: 'Soya Chunks', protein: '52.0g', cost: '₹2.31 / 10g', tag: 'National Champion', desc: 'Highest Protein Density per Rupee', color: '#3A481B', image: '/images/food/food_0.webp' },
+  { name: 'Yellow Moong Dal', protein: '24.0g', cost: '₹6.25 / 10g', tag: 'Pantry Staple', desc: 'Easily Digestible Plant Foundation', color: '#5B6E2C', image: '/images/food/food_1.webp' },
+  { name: 'Roasted Sattu', protein: '22.5g', cost: '₹6.67 / 10g', tag: 'Zero Cooking', desc: 'Instant Whole-Grain Super Drink', color: '#66792D', image: '/images/food/food_2.webp' },
+  { name: 'Poultry Whole Eggs', protein: '13.3g', cost: '₹9.68 / 10g', tag: 'DIAAS 1.18', desc: 'Gold Standard Complete Bioavailability', color: '#4E5F24', image: '/images/food/food_3.webp' },
+  { name: 'Cow Milk Paneer', protein: '18.0g', cost: '₹18.89 / 10g', tag: 'Dairy Matrix', desc: 'Slow-Release Micellar Casein', color: '#3E4E1C', image: '/images/food/food_4.webp' },
+  { name: 'Non-GMO Firm Tofu', protein: '15.0g', cost: '₹14.71 / 10g', tag: 'Pure Plant', desc: 'Clean Vegan Nitrogen Retention', color: '#5B6E2C', image: '/images/food/food_5.webp' },
+  { name: 'Chicken Breast', protein: '22.0g', cost: '₹9.68 / 10g', tag: 'Animal Lean', desc: 'Zero Carb High-Yield Muscle Fuel', color: '#354318', image: '/images/food/food_8.webp' },
+  { name: 'Commercial Protein Bar', protein: '20.0g', cost: '₹60.00 / 10g', tag: '26× Gym-Bro Tax', desc: 'Maltitol & Collagen Inflated Filler', color: '#C84013', image: '/images/food/food_9.webp' },
 ]
 
-// Generate rich procedural canvas texture for each staple
+// Generate rich texture rendering genuine food photography and clear typography
 function createStapleTexture(item: typeof NUTRITION_STAPLES[0]): THREE.CanvasTexture {
   const canvas = document.createElement('canvas')
   canvas.width = 720
@@ -28,97 +28,115 @@ function createStapleTexture(item: typeof NUTRITION_STAPLES[0]): THREE.CanvasTex
 
   const isBar = item.cost.includes('60.00')
 
-  // Card Background with radial shading
-  const bg = ctx.createLinearGradient(0, 0, 720, 450)
-  if (isBar) {
-    bg.addColorStop(0, '#2A1712')
-    bg.addColorStop(0.5, '#3B1E17')
-    bg.addColorStop(1, '#1E0F0B')
-  } else {
-    bg.addColorStop(0, '#1E2519')
-    bg.addColorStop(0.5, '#263120')
-    bg.addColorStop(1, '#151C12')
-  }
-  ctx.fillStyle = bg
-  ctx.fillRect(0, 0, 720, 450)
+  const renderContent = (loadedImg?: HTMLImageElement) => {
+    ctx.clearRect(0, 0, 720, 450)
 
-  // Border Inset
-  ctx.strokeStyle = isBar ? 'rgba(255, 90, 34, 0.4)' : 'rgba(125, 141, 57, 0.35)'
-  ctx.lineWidth = 3
-  ctx.strokeRect(16, 16, 688, 418)
+    if (loadedImg) {
+      // Draw authentic daylight photograph
+      ctx.drawImage(loadedImg, 0, 0, 720, 450)
 
-  // Subtle cross-hatch or watermark
-  ctx.strokeStyle = isBar ? 'rgba(255, 90, 34, 0.06)' : 'rgba(125, 141, 57, 0.06)'
-  ctx.lineWidth = 1
-  for (let x = 30; x < 700; x += 30) {
+      // Editorial vignette overlay for guaranteed high-contrast legibility
+      const overlay = ctx.createLinearGradient(0, 0, 0, 450)
+      if (isBar) {
+        overlay.addColorStop(0, 'rgba(38, 18, 14, 0.82)')
+        overlay.addColorStop(0.45, 'rgba(30, 14, 10, 0.68)')
+        overlay.addColorStop(1, 'rgba(20, 10, 8, 0.95)')
+      } else {
+        overlay.addColorStop(0, 'rgba(22, 28, 19, 0.82)')
+        overlay.addColorStop(0.45, 'rgba(26, 35, 22, 0.68)')
+        overlay.addColorStop(1, 'rgba(16, 22, 14, 0.95)')
+      }
+      ctx.fillStyle = overlay
+      ctx.fillRect(0, 0, 720, 450)
+    } else {
+      // High-end dark botanical background while image loads
+      ctx.fillStyle = isBar ? '#2A1712' : '#1C2417'
+      ctx.fillRect(0, 0, 720, 450)
+    }
+
+    // Border Inset
+    ctx.strokeStyle = isBar ? 'rgba(255, 90, 34, 0.55)' : 'rgba(125, 141, 57, 0.5)'
+    ctx.lineWidth = 2.5
+    ctx.strokeRect(16, 16, 688, 418)
+
+    // Top Category Pill
+    ctx.fillStyle = isBar ? '#FF5A22' : '#5B6E2C'
     ctx.beginPath()
-    ctx.moveTo(x, 20)
-    ctx.lineTo(x, 430)
+    ctx.roundRect(36, 36, 260, 36, 18)
+    ctx.fill()
+
+    ctx.fillStyle = '#F3F6F4'
+    ctx.font = 'bold 13px monospace'
+    ctx.fillText(item.tag.toUpperCase(), 50, 59)
+
+    // Serial / Source
+    ctx.fillStyle = isBar ? '#FF5A22' : '#A3B18A'
+    ctx.font = '13px monospace'
+    ctx.textAlign = 'right'
+    ctx.fillText('ICMR-NIN IFCT 2017', 684, 59)
+    ctx.textAlign = 'left'
+
+    // Food Name
+    ctx.fillStyle = '#FFFFFF'
+    ctx.font = 'bold 42px "Inter Tight", -apple-system, sans-serif'
+    ctx.fillText(item.name, 36, 148)
+
+    // Food Description
+    ctx.fillStyle = 'rgba(243, 246, 244, 0.82)'
+    ctx.font = '17px "Inter Tight", -apple-system, sans-serif'
+    ctx.fillText(item.desc, 36, 186)
+
+    // Divider Line
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)'
+    ctx.lineWidth = 1.5
+    ctx.beginPath()
+    ctx.moveTo(36, 222)
+    ctx.lineTo(684, 222)
     ctx.stroke()
+
+    // Cost Per 10g Protein (Big Focus Metric)
+    ctx.fillStyle = 'rgba(243, 246, 244, 0.65)'
+    ctx.font = '13px monospace'
+    ctx.fillText('STANDARDIZED ECONOMIC YIELD:', 36, 268)
+
+    ctx.fillStyle = isBar ? '#FF5A22' : '#7D8D39'
+    ctx.font = 'bold 52px monospace'
+    ctx.fillText(item.cost, 36, 332)
+
+    // Protein Density Badge
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.45)'
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)'
+    ctx.lineWidth = 1.5
+    ctx.beginPath()
+    ctx.roundRect(460, 258, 224, 84, 16)
+    ctx.fill()
+    ctx.stroke()
+
+    ctx.fillStyle = 'rgba(243, 246, 244, 0.7)'
+    ctx.font = '12px monospace'
+    ctx.fillText('PROTEIN / 100G', 480, 288)
+
+    ctx.fillStyle = '#FFFFFF'
+    ctx.font = 'bold 36px monospace'
+    ctx.fillText(item.protein, 480, 326)
   }
 
-  // Top Category Pill
-  ctx.fillStyle = isBar ? '#FF5A22' : '#5B6E2C'
-  ctx.beginPath()
-  ctx.roundRect(36, 36, 260, 36, 18)
-  ctx.fill()
-
-  ctx.fillStyle = '#F3F6F4'
-  ctx.font = 'bold 14px monospace'
-  ctx.fillText(item.tag.toUpperCase(), 50, 60)
-
-  // Serial / Source
-  ctx.fillStyle = isBar ? '#FF5A22' : '#7D8D39'
-  ctx.font = '14px monospace'
-  ctx.textAlign = 'right'
-  ctx.fillText('ICMR-NIN IFCT 2017', 684, 60)
-  ctx.textAlign = 'left'
-
-  // Food Name
-  ctx.fillStyle = '#FFFFFF'
-  ctx.font = 'bold 44px "Inter Tight", -apple-system, sans-serif'
-  ctx.fillText(item.name, 36, 150)
-
-  // Food Description
-  ctx.fillStyle = 'rgba(243, 246, 244, 0.75)'
-  ctx.font = '18px "Inter Tight", -apple-system, sans-serif'
-  ctx.fillText(item.desc, 36, 190)
-
-  // Divider Line
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)'
-  ctx.lineWidth = 1.5
-  ctx.beginPath()
-  ctx.moveTo(36, 230)
-  ctx.lineTo(684, 230)
-  ctx.stroke()
-
-  // Cost Per 10g Protein (Big Focus Metric)
-  ctx.fillStyle = 'rgba(243, 246, 244, 0.6)'
-  ctx.font = '14px monospace'
-  ctx.fillText('STANDARDIZED ECONOMIC YIELD:', 36, 275)
-
-  ctx.fillStyle = isBar ? '#FF5A22' : '#7D8D39'
-  ctx.font = 'bold 54px monospace'
-  ctx.fillText(item.cost, 36, 340)
-
-  // Protein Density Badge
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.1)'
-  ctx.beginPath()
-  ctx.roundRect(460, 270, 224, 80, 16)
-  ctx.fill()
-
-  ctx.fillStyle = 'rgba(243, 246, 244, 0.7)'
-  ctx.font = '12px monospace'
-  ctx.fillText('PROTEIN / 100G', 480, 300)
-
-  ctx.fillStyle = '#FFFFFF'
-  ctx.font = 'bold 36px monospace'
-  ctx.fillText(item.protein, 480, 338)
+  renderContent()
 
   const tex = new THREE.CanvasTexture(canvas)
   tex.colorSpace = THREE.SRGBColorSpace
   tex.minFilter = THREE.LinearFilter
   tex.magFilter = THREE.LinearFilter
+
+  // Load genuine image and update texture
+  const img = new Image()
+  img.crossOrigin = 'anonymous'
+  img.src = item.image
+  img.onload = () => {
+    renderContent(img)
+    tex.needsUpdate = true
+  }
+
   return tex
 }
 
@@ -219,7 +237,7 @@ export function VanteVideoRibbon() {
       float d=length(max(q,0.))+min(max(q.x,q.y),0.)-radius;
       float px=fwidth(d),a=1.-smoothstep(-px,px,d);
       if(a<.01)discard;
-      vec2 uv=vUv;if(!gl_FrontFacing)uv.x=1.-uv.x;
+      vec2 uv=vUv;
       vec3 c=texture2D(map,uv).rgb;
       gl_FragColor=vec4(c,a);
     }`
@@ -363,10 +381,9 @@ export function VanteVideoRibbon() {
           rule.style.transform = `scaleX(${out(ru)})`
         }
 
-        // Camera positioning along ribbon
-        const camZ = mix(0, -GZ, span(p, 0.75, 1))
-        camera.position.set(0, 0, camZ)
-        camera.lookAt(0, 0, camZ - 1)
+        // Camera positioning: stable vantage point viewing the Catmull-Rom rail into the 3x2 grid
+        camera.position.set(0, 0, 0)
+        camera.lookAt(0, 0, -1)
 
         // Cards along Catmull-Rom rail into 3x2 grid
         const head = p * (PATH_L + cards.length * STEP)
@@ -488,9 +505,9 @@ export function VanteVideoRibbon() {
 
         {/* Smooth Bottom Vignette blending into #F3F6F4 */}
         <div
-          className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none z-30"
+          className="absolute bottom-0 left-0 right-0 h-44 pointer-events-none z-30"
           style={{
-            background: 'linear-gradient(to bottom, transparent 0%, rgba(243,246,244,0.3) 70%, #F3F6F4 100%)',
+            background: 'linear-gradient(180deg, rgba(24,32,21,0) 0%, rgba(24,32,21,0.5) 30%, rgba(243,246,244,0.85) 85%, #F3F6F4 100%)',
           }}
           aria-hidden="true"
         />
