@@ -2,8 +2,20 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { ChevronDown, CheckCircle, XCircle, Sparkles, BookOpen, ArrowRight, ShieldCheck } from 'lucide-react'
+import {
+  ChevronDown,
+  CheckCircle2,
+  XCircle,
+  Sparkles,
+  BookOpen,
+  ArrowRight,
+  ShieldCheck,
+  Check,
+  FileText,
+  HelpCircle,
+} from 'lucide-react'
 import { FOOD_MYTHS } from '@/data/recipes-and-lessons'
+import { CurtainSplitHero } from '@/components/ui/curtain-split-hero'
 
 export default function LearnPage() {
   const [activeCategory, setActiveCategory] = useState('All')
@@ -22,57 +34,50 @@ export default function LearnPage() {
   })
 
   return (
-    <div className="relative w-full bg-[#F3F6F4] text-[#101410] selection:bg-[#7D8D39] selection:text-white pt-24 pb-20">
+    <div className="relative w-full bg-[#F3F6F4] text-[#101410] pt-24 pb-24">
       {/* 
         ========================================================================
-        HERO (Fresh, Botanical, Editorial in Inter Tight)
+        CURTAIN SPLIT HERO COMPONENT
+        Two groups of authentic food photography panels pull apart horizontally
         ========================================================================
       */}
-      <section className="relative w-full py-16 md:py-24 px-6 md:px-12 max-w-6xl mx-auto">
-        <div className="max-w-3xl">
-          {/* Mint Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#DAE7C7] border border-[#08482D]/20 text-[#08482D] text-xs font-mono uppercase tracking-widest mb-6">
-            <ShieldCheck className="w-4 h-4 text-[#08482D]" />
-            <span>Clinical Evidence &bull; Zero Bro-Science</span>
-          </div>
-
-          <h1 className="font-display text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-[#101410] leading-[1.02] mb-6">
-            Deconstructing Nutrition Myths <br />
-            <span className="text-[#08482D]">with Peer-Reviewed Science.</span>
-          </h1>
-
-          <p className="text-base sm:text-lg text-[#5E5E61] max-w-2xl leading-relaxed mb-8">
-            Separating Indian gym folklore from empirical metabolic literature. Every dossier is rigorously cross-referenced with ICMR-NIN IFCT standards and randomized controlled clinical trials.
-          </p>
-
-          <button
-            type="button"
-            onClick={scrollToDossiers}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-[#08482D] hover:bg-[#5B6E2C] text-[#F3F6F4] text-sm font-semibold rounded-full transition-all cursor-pointer shadow-xs"
-          >
-            <span>Explore Evidence Dossiers</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-      </section>
+      <CurtainSplitHero onExploreClick={scrollToDossiers} />
 
       {/* 
         ========================================================================
-        EVIDENCE DOSSIERS SECTION (Light-First Botanical Editorial Layout)
+        SCIENTIFIC EVIDENCE DOSSIERS (Editorial Botanical Archive)
         ========================================================================
       */}
-      <section id="dossiers" className="py-24 px-6 md:px-12 max-w-6xl mx-auto bg-[#F3F6F4] text-[#20271D]">
-        <div className="pb-8 border-b border-[rgba(91,110,44,0.18)] mb-12">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[rgba(125,141,57,0.12)] border border-[rgba(91,110,44,0.2)] text-[#5B6E2C] text-xs font-mono uppercase tracking-widest mb-4">
-            <Sparkles className="w-3.5 h-3.5 text-[#FF5A22]" />
-            <span>ICMR-NIN &bull; Peer-Reviewed Scientific Archive</span>
+      <section id="dossiers" className="pt-20 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+        <div className="pb-8 border-b border-[#5B6E2C]/15 mb-10">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#5B6E2C]/10 border border-[#5B6E2C]/20 text-[#5B6E2C] text-xs font-mono uppercase tracking-widest mb-3">
+                <Sparkles className="w-3.5 h-3.5 text-[#FF5A22]" />
+                <span>ICMR-NIN &bull; Peer-Reviewed Clinical Archive</span>
+              </div>
+              <h2 className="font-display text-3xl sm:text-5xl font-bold text-[#101410] tracking-tight">
+                Scientific Myth Demolition Dossiers
+              </h2>
+              <p className="text-sm sm:text-base text-[#5E5E61] mt-2 max-w-2xl leading-relaxed">
+                Every dossier is rigorously cross-referenced with meta-analyses, randomized controlled
+                trials (RCTs), NIN publications, and clinical biochemical literature.
+              </p>
+            </div>
+
+            {/* Caveat Handwritten Callout */}
+            <div className="hidden md:flex flex-col items-end text-right">
+              <span
+                className="text-lg font-bold text-[#08482D] -rotate-2"
+                style={{ fontFamily: 'var(--font-caveat, Caveat, cursive)' }}
+              >
+                No fitness influencer myths survive here ↗
+              </span>
+              <span className="text-xs text-[#7D8D39] font-mono">
+                Peer-reviewed clinical evidence only
+              </span>
+            </div>
           </div>
-          <h2 className="font-display text-4xl sm:text-6xl text-[#20271D] tracking-tight">
-            Scientific Myth Demolition Dossiers
-          </h2>
-          <p className="text-sm sm:text-base text-[#737B70] mt-3 max-w-2xl leading-relaxed">
-            Every dossier is cross-referenced with randomized controlled trials (RCTs), NIN publications, and clinical dietary standards.
-          </p>
 
           {/* Category Filter Pills */}
           <div className="flex flex-wrap gap-2 mt-8">
@@ -81,10 +86,10 @@ export default function LearnPage() {
                 key={cat}
                 type="button"
                 onClick={() => setActiveCategory(cat)}
-                className={`px-4 py-1.5 rounded-full text-xs font-mono tracking-wider uppercase transition-all ${
+                className={`px-4 py-2 rounded-full text-xs font-mono uppercase tracking-wider transition-all cursor-pointer ${
                   activeCategory === cat
-                    ? 'bg-[#5B6E2C] text-[#F3F6F4] font-semibold shadow-xs'
-                    : 'bg-white text-[#20271D] hover:bg-[rgba(91,110,44,0.08)] border border-[rgba(91,110,44,0.18)]'
+                    ? 'bg-[#5B6E2C] text-[#F3F6F4] font-bold shadow-xs'
+                    : 'bg-white text-[#5E5E61] hover:text-[#101410] hover:bg-[#F3F6F4] border border-[#5B6E2C]/15'
                 }`}
               >
                 {cat}
@@ -93,28 +98,30 @@ export default function LearnPage() {
           </div>
         </div>
 
-        {/* Accordion Dossier Cards (Light-first botanical card aesthetic) */}
+        {/* Dossier Cards List */}
         <div className="space-y-6">
           {filteredMyths.map((myth) => {
             const isExpanded = expandedId === myth.id
             return (
               <div
                 key={myth.id}
-                className="rounded-3xl bg-white border border-[rgba(91,110,44,0.18)] overflow-hidden transition-all duration-300 hover:border-[#5B6E2C] shadow-2xs"
+                className={`rounded-3xl bg-white border transition-all duration-300 overflow-hidden shadow-2xs ${
+                  isExpanded ? 'border-[#5B6E2C] ring-1 ring-[#5B6E2C]/20' : 'border-[#5B6E2C]/15 hover:border-[#5B6E2C]/40'
+                }`}
               >
-                {/* Header Row */}
+                {/* Header Row Click Target */}
                 <button
                   type="button"
                   onClick={() => setExpandedId(isExpanded ? null : myth.id)}
                   className="w-full p-6 sm:p-8 flex items-start sm:items-center justify-between text-left gap-4 cursor-pointer"
                 >
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3">
-                      <span className="text-[10px] font-mono uppercase tracking-widest text-[#7D8D39] px-2.5 py-1 rounded-full bg-[rgba(125,141,57,0.1)]">
+                  <div className="space-y-3 max-w-3xl">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-[10px] font-mono uppercase tracking-widest text-[#7D8D39] px-2.5 py-0.5 rounded-full bg-[#5B6E2C]/10 font-bold">
                         {myth.category}
                       </span>
                       <span
-                        className={`text-[10px] font-mono font-bold tracking-wider px-2.5 py-1 rounded-full flex items-center gap-1.5 ${
+                        className={`text-[10px] font-mono font-bold tracking-wider px-2.5 py-0.5 rounded-full flex items-center gap-1.5 ${
                           myth.verdict === 'BUSTED'
                             ? 'bg-[#FF5A22]/15 text-[#FF5A22]'
                             : 'bg-[#5B6E2C]/15 text-[#5B6E2C]'
@@ -123,54 +130,82 @@ export default function LearnPage() {
                         {myth.verdict === 'BUSTED' ? (
                           <XCircle className="w-3.5 h-3.5" />
                         ) : (
-                          <CheckCircle className="w-3.5 h-3.5" />
+                          <CheckCircle2 className="w-3.5 h-3.5" />
                         )}
-                        <span>{myth.verdict}</span>
+                        <span>VERDICT: {myth.verdict}</span>
                       </span>
                     </div>
 
-                    <h3 className="font-display text-2xl sm:text-3xl text-[#20271D] leading-tight">
+                    <h3 className="font-display text-xl sm:text-2xl md:text-3xl text-[#101410] font-bold leading-snug">
                       &ldquo;{myth.myth}&rdquo;
                     </h3>
                   </div>
 
-                  <div className="w-9 h-9 rounded-full bg-[rgba(91,110,44,0.08)] flex items-center justify-center shrink-0 text-[#5B6E2C] transition-transform duration-300">
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border transition-all duration-300 ${
+                      isExpanded
+                        ? 'bg-[#5B6E2C] text-white border-[#5B6E2C]'
+                        : 'bg-[#F3F6F4] text-[#5B6E2C] border-[#5B6E2C]/15 hover:bg-white'
+                    }`}
+                  >
                     <ChevronDown
                       className={`w-4 h-4 transition-transform duration-300 ${
-                        isExpanded ? 'rotate-180 text-[#7D8D39]' : ''
+                        isExpanded ? 'rotate-180' : ''
                       }`}
                     />
                   </div>
                 </button>
 
-                {/* Expanded Details */}
+                {/* Expanded Clinical Dossier Body */}
                 {isExpanded && (
-                  <div className="p-6 sm:p-8 pt-0 border-t border-[rgba(91,110,44,0.12)] space-y-6 text-sm text-[#20271D] animate-in fade-in duration-200">
-                    <div>
-                      <h4 className="text-xs font-mono uppercase tracking-widest text-[#5B6E2C] mb-2 font-bold">
-                        Scientific Reality:
-                      </h4>
-                      <p className="leading-relaxed text-[#20271D] font-sans">{myth.theTruth}</p>
+                  <div className="p-6 sm:p-8 pt-0 border-t border-[#5B6E2C]/10 space-y-6 animate-in fade-in duration-300">
+                    
+                    {/* Myth vs Fact Two-Column Bento */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                      <div className="p-5 rounded-2xl bg-[#FF5A22]/5 border border-[#FF5A22]/20">
+                        <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#FF5A22] uppercase tracking-wider mb-2">
+                          <XCircle className="w-4 h-4" />
+                          <span>The Deceptive Claim</span>
+                        </div>
+                        <p className="text-xs sm:text-sm text-[#5E5E61] leading-relaxed">
+                          {myth.myth}
+                        </p>
+                      </div>
+
+                      <div className="p-5 rounded-2xl bg-[#5B6E2C]/5 border border-[#5B6E2C]/25">
+                        <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#08482D] uppercase tracking-wider mb-2">
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>The Biochemical Reality</span>
+                        </div>
+                        <p className="text-xs sm:text-sm text-[#101410] font-medium leading-relaxed">
+                          {myth.theTruth}
+                        </p>
+                      </div>
                     </div>
 
-                    <div className="p-4 rounded-2xl bg-[#F3F6F4] border border-[rgba(91,110,44,0.15)]">
-                      <h4 className="text-xs font-mono uppercase tracking-widest text-[#7D8D39] mb-1 font-bold">
-                        Clinical Context:
-                      </h4>
-                      <p className="text-xs leading-relaxed text-[#737B70]">
+                    {/* Scientific Context Box */}
+                    <div className="p-5 rounded-2xl bg-[#F3F6F4] border border-[#5B6E2C]/15">
+                      <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#7D8D39] uppercase tracking-wider mb-2">
+                        <FileText className="w-3.5 h-3.5" />
+                        <span>Clinical Trial & Physiological Analysis</span>
+                      </div>
+                      <p className="text-xs sm:text-sm text-[#5E5E61] leading-relaxed">
                         {myth.scientificContext}
                       </p>
                     </div>
 
-                    <div className="p-4 rounded-2xl bg-[#5B6E2C]/10 border border-[#5B6E2C]/20 text-xs text-[#20271D]">
-                      <strong className="text-[#5B6E2C] block mb-1">
-                        Practical Kitchen Takeaway:
+                    {/* Practical Takeaway Card */}
+                    <div className="p-4 sm:p-5 rounded-2xl bg-[#08482D]/10 border border-[#08482D]/20 text-[#101410]">
+                      <strong className="text-xs font-mono uppercase tracking-wider text-[#08482D] block mb-1">
+                        Practical Kitchen Rule:
                       </strong>
-                      <p>{myth.practicalTakeaway}</p>
+                      <p className="text-xs sm:text-sm leading-relaxed">{myth.practicalTakeaway}</p>
                     </div>
 
-                    <div className="text-[11px] font-mono text-[#737B70] pt-2 border-t border-[rgba(91,110,44,0.12)]">
-                      Ref: {myth.source}
+                    {/* Source Citation */}
+                    <div className="flex items-center justify-between text-[11px] font-mono text-[#737B70] pt-3 border-t border-[#5B6E2C]/10">
+                      <span>Primary Scientific Citation:</span>
+                      <span className="font-semibold text-[#101410] text-right">{myth.source}</span>
                     </div>
                   </div>
                 )}
