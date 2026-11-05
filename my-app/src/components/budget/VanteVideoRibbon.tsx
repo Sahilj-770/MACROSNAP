@@ -76,12 +76,12 @@ function createStapleTexture(item: typeof NUTRITION_STAPLES[0]): THREE.CanvasTex
 
   // Food Name
   ctx.fillStyle = '#FFFFFF'
-  ctx.font = 'bold 44px sans-serif'
+  ctx.font = 'bold 44px "Inter Tight", -apple-system, sans-serif'
   ctx.fillText(item.name, 36, 150)
 
   // Food Description
   ctx.fillStyle = 'rgba(243, 246, 244, 0.75)'
-  ctx.font = '18px sans-serif'
+  ctx.font = '18px "Inter Tight", -apple-system, sans-serif'
   ctx.fillText(item.desc, 36, 190)
 
   // Divider Line

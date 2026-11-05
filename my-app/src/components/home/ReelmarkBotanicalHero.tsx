@@ -4,10 +4,8 @@ import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Play, Sparkles, ArrowRight } from 'lucide-react'
 
-const VIDEO_URL =
-  'https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/04fd3d5f-99d7-476e-98a4-46c08518ffb3.mp4'
-const POSTER_URL =
-  'https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/b7ebb74a-8c8a-4f7e-8f80-55e2d74ecd05.webp'
+const VIDEO_URL = '/videos/food_reels_grid.mp4'
+const POSTER_URL = '/videos/food_reels_poster.webp'
 
 // 10 Indian Staples / Whole Food cards mapped to the 10 tiles of the 5x2 video grid
 const CARDS_DATA = [
@@ -276,9 +274,9 @@ export function ReelmarkBotanicalHero() {
           Transparent rupee-to-protein economics, verified by clinical scientific standards.
         </p>
 
-        {/* Handwritten Note: "100% verified / by science" rotated 16° at (1212, 310) with curling arrow */}
+        {/* Handwritten Note: "100% verified / by ICMR-NIN" rotated 16° in the right flank */}
         <div
-          className={`hidden xl:flex flex-col items-center absolute left-[calc(1190*var(--u))] top-[calc(290*var(--u))] z-20 transition-all duration-1000 delay-500 ${
+          className={`hidden xl:flex flex-col items-center absolute right-12 lg:right-20 top-40 lg:top-48 z-20 transition-all duration-1000 delay-500 ${
             mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           }`}
           style={{ transform: 'rotate(16deg)' }}
@@ -337,7 +335,14 @@ export function ReelmarkBotanicalHero() {
               >
                 {/* 5x2 Grid Video Offset Container */}
                 <div className="relative w-full h-full overflow-hidden bg-[#08482D]/20">
-                  {/* Single Shared Video for all 10 cards */}
+                  {/* High-res Food Image Instant Fallback */}
+                  <img
+                    src={`/images/food/food_${idx}.webp`}
+                    alt={card.staple}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+
+                  {/* Single Shared Food Motion Grid Video for all 10 cards */}
                   <video
                     src={VIDEO_URL}
                     poster={POSTER_URL}

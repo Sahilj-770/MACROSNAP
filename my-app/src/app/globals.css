@@ -1,16 +1,17 @@
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Inter+Tight:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600;1,700&family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
+/* Inter Tight Everywhere - User Preferred Editorial Display Font */
+.font-inter-tight,
+.font-display,
 .font-instrument {
-  font-family: 'Instrument Serif', Georgia, serif;
+  font-family: 'Inter Tight', var(--font-inter, sans-serif);
+  font-feature-settings: "kern" 1, "liga" 1;
+  letter-spacing: -0.03em;
 }
 
 .font-caveat {
   font-family: 'Caveat', cursive, sans-serif;
-}
-
-.font-inter-tight {
-  font-family: 'Inter Tight', var(--font-inter, sans-serif);
 }
 
 @theme {
@@ -18,11 +19,11 @@
   --color-ms-sage: #7D8D39;
   --color-ms-olive: #5B6E2C;
   --color-ms-orange: #FF5A22;
-  --color-ms-ink: #20271D;
-  --color-ms-muted: #737B70;
+  --color-ms-ink: #101410;
+  --color-ms-muted: #5E5E61;
   --color-ms-border: rgba(91, 110, 44, 0.18);
 
-  --font-serif: "Instrument Serif", "Georgia", "Times New Roman", serif;
+  --font-serif: "Inter Tight", var(--font-inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
   --font-sans: var(--font-inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
 }
 
@@ -64,11 +65,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Editorial Display Heading Styles */
+/* Editorial Display Heading Styles - Inter Tight */
 .font-display {
-  font-family: var(--font-serif);
+  font-family: 'Inter Tight', var(--font-inter, sans-serif);
   font-feature-settings: "kern" 1, "liga" 1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+  font-weight: 700;
 }
 
 /* Custom Scrollbar styled with Sage / Soft White */

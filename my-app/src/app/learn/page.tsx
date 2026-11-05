@@ -1,71 +1,15 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
-import { Flower2, ChevronDown, CheckCircle, XCircle, Sparkles, BookOpen, ArrowRight } from 'lucide-react'
+import { ChevronDown, CheckCircle, XCircle, Sparkles, BookOpen, ArrowRight, ShieldCheck } from 'lucide-react'
 import { FOOD_MYTHS } from '@/data/recipes-and-lessons'
 
-const VIDEO_URL =
-  'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260819_212700_3bb9329b-5c50-4257-a09b-ca85cf3654a3.mp4'
-
-const EASE_ENTRANCE = 'cubic-bezier(0.16, 1, 0.3, 1)'
-const EASE_OVERLAY = 'cubic-bezier(0.76, 0, 0.24, 1)'
-
-const OVERLAY_LINKS = [
-  { label: 'Home', href: '/' },
-  { label: 'Explore Foods', href: '/explore' },
-  { label: 'Compare', href: '/compare' },
-  { label: 'Protein on Budget', href: '/budget' },
-  { label: 'Recipes', href: '/recipes' },
-  { label: 'Calculator', href: '/calculator' },
-  { label: 'Evidence Dossiers', href: '#dossiers' },
-]
-
 export default function LearnPage() {
-  const [navMounted, setNavMounted] = useState(false)
-  const [heroMounted, setHeroMounted] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
-  const [overlayOpen, setOverlayOpen] = useState(false)
-
-  // Dossier section state
   const [activeCategory, setActiveCategory] = useState('All')
   const [expandedId, setExpandedId] = useState<string | null>(FOOD_MYTHS[0]?.id ?? null)
 
-  // Navbar & Hero Entrance Timers
-  useEffect(() => {
-    const tNav = setTimeout(() => setNavMounted(true), 100)
-    const tHero = setTimeout(() => setHeroMounted(true), 300)
-    return () => {
-      clearTimeout(tNav)
-      clearTimeout(tHero)
-    }
-  }, [])
-
-  // Scroll listener for Navbar
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 40)
-    }
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  // Prevent background scroll when overlay is open
-  useEffect(() => {
-    if (overlayOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'unset'
-    }
-    return () => {
-      document.body.style.overflow = 'unset'
-    }
-  }, [overlayOpen])
-
-  const toggleOverlay = () => setOverlayOpen((prev) => !prev)
-
   const scrollToDossiers = () => {
-    setOverlayOpen(false)
     const el = document.getElementById('dossiers')
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' })
@@ -78,189 +22,37 @@ export default function LearnPage() {
   })
 
   return (
-    <div className="relative w-full bg-[#F3F6F4] text-[#20271D] selection:bg-[#7D8D39] selection:text-white">
+    <div className="relative w-full bg-[#F3F6F4] text-[#101410] selection:bg-[#7D8D39] selection:text-white pt-24 pb-20">
       {/* 
         ========================================================================
-        AUREVON-INSPIRED NAVBAR (Adapted to MacroSnap Identity & Palette)
+        HERO (Fresh, Botanical, Editorial in Inter Tight)
         ========================================================================
       */}
-      <header
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
-          scrolled ? 'bg-[#20271D]/90 backdrop-blur-md' : 'bg-transparent'
-        }`}
-      >
-        <div className="max-w-[1440px] mx-auto px-6 md:px-10 flex items-center justify-between h-16 md:h-20">
-          {/* Left — MacroSnap Logo Link */}
-          <Link
-            href="/"
-            className={`flex items-center gap-2.5 z-50 transition-all duration-700 ${
-              navMounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
-            }`}
-            style={{ transitionTimingFunction: EASE_ENTRANCE, transitionDelay: '0ms' }}
-          >
-            <div className="w-8 h-8 rounded-full bg-[#5B6E2C] text-[#F3F6F4] flex items-center justify-center font-semibold text-sm border border-white/25">
-              <span className="font-display italic">M</span>
-            </div>
-            <span className="text-white text-xl md:text-2xl font-display font-semibold tracking-tight">
-              MacroSnap
-            </span>
-          </Link>
-
-          {/* Center — Desktop Only Pill Button */}
-          <div
-            className={`hidden md:flex transition-all duration-700 ${
-              navMounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
-            }`}
-            style={{ transitionTimingFunction: EASE_ENTRANCE, transitionDelay: '200ms' }}
-          >
-            <button
-              type="button"
-              onClick={toggleOverlay}
-              className="px-5 py-2 rounded-full border border-white/20 text-white/90 text-sm hover:bg-white/10 transition-colors flex items-center gap-2 cursor-pointer z-50 backdrop-blur-xs"
-            >
-              <span>{overlayOpen ? 'Close' : 'Navigate'}</span>
-            </button>
+      <section className="relative w-full py-16 md:py-24 px-6 md:px-12 max-w-6xl mx-auto">
+        <div className="max-w-3xl">
+          {/* Mint Badge */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#DAE7C7] border border-[#08482D]/20 text-[#08482D] text-xs font-mono uppercase tracking-widest mb-6">
+            <ShieldCheck className="w-4 h-4 text-[#08482D]" />
+            <span>Clinical Evidence &bull; Zero Bro-Science</span>
           </div>
 
-          {/* Right — Desktop Only Flower2 Icon */}
-          <div
-            className={`hidden md:flex transition-all duration-700 ${
-              navMounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
-            }`}
-            style={{ transitionTimingFunction: EASE_ENTRANCE, transitionDelay: '400ms' }}
-          >
-            <Flower2 className="w-7 h-7 text-[#7D8D39]" />
-          </div>
-
-          {/* Right — Mobile Hamburger Button */}
-          <button
-            type="button"
-            onClick={toggleOverlay}
-            className="md:hidden w-8 h-8 flex flex-col items-center justify-center gap-1.5 z-50 cursor-pointer"
-            aria-label="Toggle menu"
-          >
-            <span
-              className={`w-6 h-[2px] bg-white transition-all duration-500 ${
-                overlayOpen ? 'rotate-45 translate-y-[4px]' : ''
-              }`}
-              style={{ transitionTimingFunction: EASE_OVERLAY }}
-            />
-            <span
-              className={`w-6 h-[2px] bg-white transition-all duration-500 ${
-                overlayOpen ? '-rotate-45 -translate-y-[4px]' : ''
-              }`}
-              style={{ transitionTimingFunction: EASE_OVERLAY }}
-            />
-          </button>
-        </div>
-      </header>
-
-      {/* 
-        ========================================================================
-        FULL-SCREEN OVERLAY MENU (Aurevon Spec adapted with MacroSnap links)
-        ========================================================================
-      */}
-      <div
-        className={`fixed inset-0 z-40 bg-[#20271D] flex flex-col items-center justify-center transition-all duration-700 ${
-          overlayOpen ? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'
-        }`}
-        style={{ transitionTimingFunction: EASE_OVERLAY }}
-      >
-        <nav className="flex flex-col items-center justify-center gap-6">
-          {OVERLAY_LINKS.map((link, idx) => (
-            <Link
-              key={link.label}
-              href={link.href}
-              onClick={() => {
-                if (link.href === '#dossiers') {
-                  scrollToDossiers()
-                } else {
-                  setOverlayOpen(false)
-                }
-              }}
-              className={`font-display text-white text-3xl md:text-5xl hover:text-[#7D8D39] transition-all duration-500 ${
-                overlayOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-              }`}
-              style={{
-                transitionTimingFunction: EASE_OVERLAY,
-                transitionDelay: overlayOpen ? `${120 + idx * 60}ms` : '0ms',
-              }}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-      </div>
-
-      {/* 
-        ========================================================================
-        HERO (Full Viewport, Aurevon Spec with MacroSnap Botanical Tone)
-        ========================================================================
-      */}
-      <section className="relative w-full h-screen overflow-hidden flex items-end justify-center">
-        {/* Background Video Wrapper with Botanical Dark Wash */}
-        <div
-          className={`absolute inset-0 transition-all duration-[1400ms] ${
-            heroMounted ? 'scale-100 opacity-100' : 'scale-105 opacity-0'
-          }`}
-          style={{ transitionTimingFunction: EASE_ENTRANCE }}
-        >
-          <video
-            src={VIDEO_URL}
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="w-full h-full object-cover"
-          />
-          {/* Subtle Botanical Forest Gradient Overlay */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                'radial-gradient(ellipse 90% 70% at 50% 50%, rgba(32, 39, 29, 0.65) 0%, rgba(20, 26, 18, 0.92) 85%)',
-            }}
-          />
-        </div>
-
-        {/* Foreground Content */}
-        <div className="relative z-10 text-center px-6 pb-16 md:pb-24 max-w-4xl mx-auto">
-          {/* H1 in Instrument Serif */}
-          <h1
-            className={`font-display text-white text-4xl leading-[1.0] sm:text-6xl md:text-7xl lg:text-8xl mb-5 md:mb-6 transition-all duration-900 ${
-              heroMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`}
-            style={{ transitionTimingFunction: EASE_ENTRANCE, transitionDelay: heroMounted ? '400ms' : '0ms' }}
-          >
-            Deconstructing Nutrition Myths.
+          <h1 className="font-display text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-[#101410] leading-[1.02] mb-6">
+            Deconstructing Nutrition Myths <br />
+            <span className="text-[#08482D]">with Peer-Reviewed Science.</span>
           </h1>
 
-          {/* Subcopy */}
-          <p
-            className={`text-white/80 text-base md:text-lg mb-8 md:mb-10 max-w-xl mx-auto leading-relaxed transition-all duration-900 ${
-              heroMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`}
-            style={{ transitionTimingFunction: EASE_ENTRANCE, transitionDelay: heroMounted ? '600ms' : '0ms' }}
-          >
-            Separating Indian gym folklore from empirical metabolic literature. Peer-reviewed clinical evidence, zero bro-science.
+          <p className="text-base sm:text-lg text-[#5E5E61] max-w-2xl leading-relaxed mb-8">
+            Separating Indian gym folklore from empirical metabolic literature. Every dossier is rigorously cross-referenced with ICMR-NIN IFCT standards and randomized controlled clinical trials.
           </p>
 
-          {/* CTA Button */}
-          <div
-            className={`transition-all duration-900 ${
-              heroMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`}
-            style={{ transitionTimingFunction: EASE_ENTRANCE, transitionDelay: heroMounted ? '800ms' : '0ms' }}
+          <button
+            type="button"
+            onClick={scrollToDossiers}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[#08482D] hover:bg-[#5B6E2C] text-[#F3F6F4] text-sm font-semibold rounded-full transition-all cursor-pointer shadow-xs"
           >
-            <button
-              type="button"
-              onClick={scrollToDossiers}
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#5B6E2C] hover:bg-[#7D8D39] text-[#F3F6F4] text-sm md:text-base font-semibold rounded-full transition-all cursor-pointer shadow-lg border border-[#7D8D39]/50"
-            >
-              <span>Explore Evidence Dossiers</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
+            <span>Explore Evidence Dossiers</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
       </section>
 
