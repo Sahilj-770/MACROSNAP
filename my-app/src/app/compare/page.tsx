@@ -90,9 +90,9 @@ export default function ComparePage() {
   const loserCost = isAWinner ? costB : costA
   const costRatio = (Math.max(costA, costB) / Math.min(costA, costB)).toFixed(1)
 
-  // Scale tilt calculation (-16 deg to +16 deg based on advantage)
+  // Scale tilt calculation with logarithmic damping (-9.5 deg to +9.5 deg)
   const rawRatio = Math.max(costA, costB) / Math.min(costA, costB)
-  const clampedTilt = Math.min(18, Math.max(8, rawRatio * 2.5))
+  const clampedTilt = Math.min(9.5, Math.max(4.0, Math.log2(rawRatio) * 3.5))
   const tiltDeg = isAWinner ? -clampedTilt : clampedTilt
 
   // Monthly savings calculation (assuming 30g daily protein consumption)
@@ -260,126 +260,236 @@ export default function ComparePage() {
           </div>
 
           {/* Physical Balance Scale SVG Rig */}
-          <div className="relative w-full max-w-2xl h-56 sm:h-64 flex items-center justify-center my-4 select-none">
-            {/* Top Anchor Ring & Mounting Pivot */}
-            <div className="absolute top-2 z-20 flex flex-col items-center">
-              <div className="w-6 h-6 rounded-full border-3 border-[#5B6E2C] bg-white shadow-xs" />
-              <div className="w-2 h-10 bg-[#5B6E2C] rounded-sm -mt-1 shadow-xs" />
-            </div>
-
-            {/* Fulcrum Stand Base */}
-            <div className="absolute bottom-2 z-10 flex flex-col items-center">
-              <div className="w-0 h-0 border-l-[22px] border-l-transparent border-r-[22px] border-r-transparent border-b-[48px] border-b-[#101410] shadow-sm" />
-              <div className="w-24 h-3 bg-[#5B6E2C] rounded-full shadow-xs -mt-1" />
-            </div>
-
-            {/* Central Engraved Dial & Needle Gauge */}
-            <div className="absolute top-12 z-30 w-24 h-24 rounded-full bg-white border-2 border-[#5B6E2C] shadow-md flex flex-col items-center justify-center text-center p-1.5">
-              <div className="text-[9px] font-mono uppercase text-[#7D8D39] font-bold">DELTA</div>
-              <div className="font-display text-base font-bold text-[#FF5A22] leading-tight">
-                {costRatio}×
-              </div>
-              <div className="text-[8px] font-mono text-[#101410] font-semibold">VALUE ADVANTAGE</div>
-              {/* Dial Arc Needle */}
-              <div
-                className="absolute w-1 h-8 bg-[#FF5A22] rounded-full origin-bottom bottom-12 transition-transform duration-700 ease-out"
-                style={{ transform: `rotate(${tiltDeg * 2}deg)` }}
-              />
-            </div>
-
-            {/* Rotating Brass Balance Beam */}
-            <div
-              className="relative w-full h-4 bg-linear-to-r from-[#5B6E2C] via-[#101410] to-[#7D8D39] rounded-full shadow-md transition-transform duration-700 ease-out flex items-center justify-between px-2 sm:px-4 z-10"
-              style={{
-                transform: `rotate(${tiltDeg}deg)`,
-                transformOrigin: 'center center',
-              }}
+          <div className="w-full max-w-2xl my-2 select-none flex justify-center">
+            <svg
+              viewBox="0 0 680 280"
+              className="w-full h-auto max-h-[320px] overflow-visible"
+              aria-label={`Kirana balance scale comparing ${foodA.name} and ${foodB.name}`}
             >
-              {/* Beam Calibration Tick Marks */}
-              <div className="absolute inset-x-8 top-0 bottom-0 flex justify-between items-center pointer-events-none opacity-40">
-                {[...Array(17)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="w-[1.5px] bg-white rounded-full"
-                    style={{ height: i % 4 === 0 ? '8px' : '4px' }}
+              <defs>
+                <linearGradient id="beamGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#5B6E2C" />
+                  <stop offset="50%" stopColor="#101410" />
+                  <stop offset="100%" stopColor="#7D8D39" />
+                </linearGradient>
+                <linearGradient id="pillarGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#2A3816" />
+                  <stop offset="100%" stopColor="#101410" />
+                </linearGradient>
+                <linearGradient id="panWinnerGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#E4F0D5" />
+                  <stop offset="100%" stopColor="#BACF9C" />
+                </linearGradient>
+                <linearGradient id="panStandardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#FFFFFF" />
+                  <stop offset="100%" stopColor="#E2E8E4" />
+                </linearGradient>
+                <filter id="scaleDropShadow" x="-15%" y="-15%" width="130%" height="130%">
+                  <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#101410" floodOpacity="0.12" />
+                </filter>
+              </defs>
+
+              {/* Fulcrum Pedestal Base */}
+              <rect x="250" y="252" width="180" height="12" rx="6" fill="#5B6E2C" filter="url(#scaleDropShadow)" />
+              <rect x="270" y="246" width="140" height="6" rx="3" fill="#3D4B1C" />
+
+              {/* Fulcrum Stand Pillar */}
+              <rect x="335" y="115" width="10" height="132" rx="2" fill="url(#pillarGrad)" />
+
+              {/* Fulcrum Triangular Apex Wedge */}
+              <polygon points="340,115 316,180 364,180" fill="#101410" opacity="0.95" />
+
+              {/* Top Suspension Ring & Anchor */}
+              <circle cx="340" cy="38" r="14" stroke="#5B6E2C" strokeWidth="4" fill="#FFFFFF" />
+              <line x1="340" y1="52" x2="340" y2="115" stroke="#5B6E2C" strokeWidth="4" strokeLinecap="round" />
+
+              {/* Rotating Brass Balance Beam */}
+              <g
+                transform={`rotate(${tiltDeg}, 340, 115)`}
+                style={{ transition: 'transform 0.75s cubic-bezier(0.34, 1.35, 0.64, 1)' }}
+              >
+                {/* Main Beam */}
+                <rect x="75" y="111" width="530" height="8" rx="4" fill="url(#beamGrad)" filter="url(#scaleDropShadow)" />
+
+                {/* Beam Calibration Tick Marks */}
+                {Array.from({ length: 23 }).map((_, i) => {
+                  const tx = 95 + i * 22.2
+                  return (
+                    <line
+                      key={i}
+                      x1={tx}
+                      y1={111}
+                      x2={tx}
+                      y2={i % 5 === 0 ? 119 : 115}
+                      stroke="#FFFFFF"
+                      strokeOpacity={0.45}
+                      strokeWidth={i % 5 === 0 ? 1.5 : 1}
+                    />
+                  )
+                })}
+
+                {/* Beam Pivot Eyelets */}
+                <circle cx="95" cy="115" r="5" fill="#FFFFFF" stroke="#5B6E2C" strokeWidth="2.5" />
+                <circle cx="585" cy="115" r="5" fill="#FFFFFF" stroke="#5B6E2C" strokeWidth="2.5" />
+
+                {/* Left Pan Suspension Rig (Food A) */}
+                <g
+                  transform={`translate(95, 115) rotate(${-tiltDeg})`}
+                  style={{ transition: 'transform 0.75s cubic-bezier(0.34, 1.35, 0.64, 1)' }}
+                >
+                  {/* High-tensile Kirana Suspension Cables */}
+                  <line x1="0" y1="0" x2="-38" y2="58" stroke="#5B6E2C" strokeWidth="1.75" strokeOpacity="0.85" />
+                  <line x1="0" y1="0" x2="38" y2="58" stroke="#5B6E2C" strokeWidth="1.75" strokeOpacity="0.85" />
+                  <circle cx="0" cy="0" r="3" fill="#5B6E2C" />
+
+                  {/* Stainless Steel Pan Dish */}
+                  <ellipse cx="0" cy="62" rx="48" ry="9" fill="#101410" fillOpacity="0.08" />
+                  <ellipse
+                    cx="0"
+                    cy="60"
+                    rx="48"
+                    ry="9"
+                    fill={isAWinner ? 'url(#panWinnerGrad)' : 'url(#panStandardGrad)'}
+                    stroke={isAWinner ? '#5B6E2C' : '#8A9977'}
+                    strokeWidth="2"
+                  />
+
+                  {/* Floating Food Cutout Avatar on the Pan */}
+                  <foreignObject x="-23" y="14" width="46" height="46" className="overflow-visible pointer-events-none">
+                    <div className="w-[46px] h-[46px] rounded-full overflow-hidden border-2 border-white shadow-md bg-white">
+                      <img
+                        src={foodA.imageUrl || '/images/food/food_0.webp'}
+                        alt={foodA.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </foreignObject>
+
+                  {/* Dedicated Price Badge Pill */}
+                  <g transform="translate(0, 72)">
+                    <rect
+                      x="-50"
+                      y="0"
+                      width="100"
+                      height="22"
+                      rx="11"
+                      fill={isAWinner ? '#08482D' : '#101410'}
+                      stroke={isAWinner ? '#7D8D39' : '#3D4B1C'}
+                      strokeWidth="1.5"
+                      filter="url(#scaleDropShadow)"
+                    />
+                    <text
+                      x="0"
+                      y="15"
+                      textAnchor="middle"
+                      fill="#FFFFFF"
+                      fontSize="10.5"
+                      fontFamily="monospace"
+                      fontWeight="bold"
+                    >
+                      A • ₹{costA.toFixed(1)}/10g
+                    </text>
+                  </g>
+                </g>
+
+                {/* Right Pan Suspension Rig (Food B) */}
+                <g
+                  transform={`translate(585, 115) rotate(${-tiltDeg})`}
+                  style={{ transition: 'transform 0.75s cubic-bezier(0.34, 1.35, 0.64, 1)' }}
+                >
+                  {/* High-tensile Kirana Suspension Cables */}
+                  <line x1="0" y1="0" x2="-38" y2="58" stroke="#7D8D39" strokeWidth="1.75" strokeOpacity="0.85" />
+                  <line x1="0" y1="0" x2="38" y2="58" stroke="#7D8D39" strokeWidth="1.75" strokeOpacity="0.85" />
+                  <circle cx="0" cy="0" r="3" fill="#7D8D39" />
+
+                  {/* Stainless Steel Pan Dish */}
+                  <ellipse cx="0" cy="62" rx="48" ry="9" fill="#101410" fillOpacity="0.08" />
+                  <ellipse
+                    cx="0"
+                    cy="60"
+                    rx="48"
+                    ry="9"
+                    fill={!isAWinner ? 'url(#panWinnerGrad)' : 'url(#panStandardGrad)'}
+                    stroke={!isAWinner ? '#5B6E2C' : '#8A9977'}
+                    strokeWidth="2"
+                  />
+
+                  {/* Floating Food Cutout Avatar on the Pan */}
+                  <foreignObject x="-23" y="14" width="46" height="46" className="overflow-visible pointer-events-none">
+                    <div className="w-[46px] h-[46px] rounded-full overflow-hidden border-2 border-white shadow-md bg-white">
+                      <img
+                        src={foodB.imageUrl || '/images/food/food_1.webp'}
+                        alt={foodB.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </foreignObject>
+
+                  {/* Dedicated Price Badge Pill */}
+                  <g transform="translate(0, 72)">
+                    <rect
+                      x="-50"
+                      y="0"
+                      width="100"
+                      height="22"
+                      rx="11"
+                      fill={!isAWinner ? '#08482D' : '#101410'}
+                      stroke={!isAWinner ? '#7D8D39' : '#3D4B1C'}
+                      strokeWidth="1.5"
+                      filter="url(#scaleDropShadow)"
+                    />
+                    <text
+                      x="0"
+                      y="15"
+                      textAnchor="middle"
+                      fill="#FFFFFF"
+                      fontSize="10.5"
+                      fontFamily="monospace"
+                      fontWeight="bold"
+                    >
+                      B • ₹{costB.toFixed(1)}/10g
+                    </text>
+                  </g>
+                </g>
+              </g>
+
+              {/* Central Precision Dial Gauge */}
+              <g transform="translate(340, 115)">
+                <circle cx="0" cy="0" r="44" fill="#FFFFFF" stroke="#5B6E2C" strokeWidth="3" filter="url(#scaleDropShadow)" />
+                <circle cx="0" cy="0" r="38" fill="none" stroke="#5B6E2C" strokeWidth="0.75" strokeDasharray="2,2" opacity="0.5" />
+                {[-36, -24, -12, 0, 12, 24, 36].map((deg) => (
+                  <line
+                    key={deg}
+                    x1="0"
+                    y1="-38"
+                    x2="0"
+                    y2="-32"
+                    stroke="#7D8D39"
+                    strokeWidth="1"
+                    transform={`rotate(${deg})`}
                   />
                 ))}
-              </div>
-
-              {/* Left Pan Suspension Rig (Food A) */}
-              <div
-                className="relative -ml-4 sm:-ml-6 flex flex-col items-center transition-transform duration-700 ease-out"
-                style={{
-                  transform: `rotate(${-tiltDeg}deg)`,
-                  transformOrigin: 'top center',
-                }}
-              >
-                {/* Suspension Cables */}
-                <div className="w-20 sm:w-28 h-20 sm:h-24 relative flex justify-between">
-                  <div className="w-[1.5px] h-full bg-[#5B6E2C]/60 transform rotate-12 origin-top" />
-                  <div className="w-[1.5px] h-full bg-[#5B6E2C]/60 transform -rotate-12 origin-top" />
-                </div>
-                {/* Stainless Kirana Weighing Pan */}
-                <div
-                  className={`w-28 sm:w-36 h-8 sm:h-10 rounded-full border-2 flex items-center justify-center relative shadow-md transition-all ${
-                    isAWinner
-                      ? 'bg-linear-to-b from-[#DAE7C7] to-[#BACF9C] border-[#5B6E2C] ring-2 ring-[#5B6E2C]/30'
-                      : 'bg-linear-to-b from-white to-[#E4ECE7] border-[#5B6E2C]/30'
-                  }`}
+                {/* Dial Arc Needle */}
+                <g
+                  transform={`rotate(${tiltDeg * 2.2})`}
+                  style={{ transition: 'transform 0.75s cubic-bezier(0.34, 1.35, 0.64, 1)' }}
                 >
-                  {/* Floating Food Cutout Avatar on the Pan */}
-                  <div className="absolute -top-7 w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden border-2 border-white shadow-md bg-white">
-                    <Image
-                      src={foodA.imageUrl || '/images/food/food_0.webp'}
-                      alt={foodA.name}
-                      fill
-                      sizes="56px"
-                      className="object-cover"
-                    />
-                  </div>
-                  <span className="text-[10px] font-mono font-bold text-[#101410] mt-3">
-                    A &bull; ₹{costA.toFixed(1)}
-                  </span>
-                </div>
-              </div>
-
-              {/* Right Pan Suspension Rig (Food B) */}
-              <div
-                className="relative -mr-4 sm:-mr-6 flex flex-col items-center transition-transform duration-700 ease-out"
-                style={{
-                  transform: `rotate(${-tiltDeg}deg)`,
-                  transformOrigin: 'top center',
-                }}
-              >
-                {/* Suspension Cables */}
-                <div className="w-20 sm:w-28 h-20 sm:h-24 relative flex justify-between">
-                  <div className="w-[1.5px] h-full bg-[#7D8D39]/60 transform rotate-12 origin-top" />
-                  <div className="w-[1.5px] h-full bg-[#7D8D39]/60 transform -rotate-12 origin-top" />
-                </div>
-                {/* Stainless Kirana Weighing Pan */}
-                <div
-                  className={`w-28 sm:w-36 h-8 sm:h-10 rounded-full border-2 flex items-center justify-center relative shadow-md transition-all ${
-                    !isAWinner
-                      ? 'bg-linear-to-b from-[#DAE7C7] to-[#BACF9C] border-[#5B6E2C] ring-2 ring-[#5B6E2C]/30'
-                      : 'bg-linear-to-b from-white to-[#E4ECE7] border-[#5B6E2C]/30'
-                  }`}
-                >
-                  {/* Floating Food Cutout Avatar on the Pan */}
-                  <div className="absolute -top-7 w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden border-2 border-white shadow-md bg-white">
-                    <Image
-                      src={foodB.imageUrl || '/images/food/food_1.webp'}
-                      alt={foodB.name}
-                      fill
-                      sizes="56px"
-                      className="object-cover"
-                    />
-                  </div>
-                  <span className="text-[10px] font-mono font-bold text-[#101410] mt-3">
-                    B &bull; ₹{costB.toFixed(1)}
-                  </span>
-                </div>
-              </div>
-            </div>
+                  <line x1="0" y1="6" x2="0" y2="-34" stroke="#FF5A22" strokeWidth="2.5" strokeLinecap="round" />
+                  <circle cx="0" cy="0" r="4" fill="#FF5A22" />
+                </g>
+                {/* Dial Readings */}
+                <text x="0" y="-10" textAnchor="middle" fill="#7D8D39" fontSize="8" fontFamily="monospace" fontWeight="bold" letterSpacing="1">
+                  DELTA
+                </text>
+                <text x="0" y="10" textAnchor="middle" fill="#FF5A22" fontSize="15" fontFamily="var(--font-display, sans-serif)" fontWeight="900">
+                  {costRatio}×
+                </text>
+                <text x="0" y="23" textAnchor="middle" fill="#101410" fontSize="7" fontFamily="monospace" fontWeight="bold" letterSpacing="0.5">
+                  VALUE ADVANTAGE
+                </text>
+                <circle cx="0" cy="0" r="2.5" fill="#5B6E2C" />
+              </g>
+            </svg>
           </div>
 
           {/* Dynamic Winner Verdict Banner */}
