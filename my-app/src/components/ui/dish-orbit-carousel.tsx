@@ -352,11 +352,11 @@ const CSS =
 
   ".dsh-rate{position:relative;display:inline-flex;margin:0 0 14px 6px}" +
 
-  ".dsh-badge{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;min-width:68px;height:64px;padding:4px 12px 6px;border-radius:12px;box-sizing:border-box}" +
+  ".dsh-badge{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;min-width:76px;height:66px;padding:5px 12px 6px;border-radius:14px;box-sizing:border-box;overflow:visible}" +
 
   ".dsh-badge svg{width:13px;height:13px;margin-top:3px;fill:var(--color-foreground);opacity:.85}" +
 
-  ".dsh-num{font-size:32px;font-weight:700;letter-spacing:-.03em;line-height:1;text-align:center;color:var(--color-foreground)}" +
+  ".dsh-num{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1;text-align:center;color:var(--color-foreground);display:block;white-space:nowrap}" +
 
   ".dsh-chef{font-size:19px;font-weight:600;letter-spacing:-.01em;margin:0}" +
 

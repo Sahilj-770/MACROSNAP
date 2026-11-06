@@ -7,7 +7,18 @@ import { useUserStore } from '@/store/useUserStore'
 import { ChefHat, Sparkles, BookOpen, Utensils, ArrowUpRight, ShoppingBag, Check, MousePointerClick } from 'lucide-react'
 import Link from 'next/link'
 
-const DISH_PALETTE = ['#5B6E2C', '#7D8D39', '#FF5A22', '#08482D']
+const DISH_PALETTE = [
+  '#5B6E2C', // Olive
+  '#7D8D39', // Sage
+  '#FF5A22', // Tangerine
+  '#08482D', // Forest Green
+  '#C05621', // Terracotta
+  '#3182CE', // Slate Cobalt
+  '#2C7A7B', // Deep Teal
+  '#805AD5', // Royal Plum
+  '#D69E2E', // Warm Turmeric
+  '#4A5568', // Slate Charcoal
+]
 
 const DISHES_DATA: Dish[] = RECIPE_DATABASE.map((r, i) => {
   const parts = r.title.split(' ')
@@ -18,9 +29,9 @@ const DISHES_DATA: Dish[] = RECIPE_DATABASE.map((r, i) => {
     subtitle,
     image: r.imageUrl || `/images/food/food_${i % 10}.webp`,
     alt: r.title,
-    eyebrow: `#0${i + 1} Most Loved Bioavailable Recipe`,
+    eyebrow: `#${String(i + 1).padStart(2, '0')} Most Loved Bioavailable Recipe`,
     label: `${r.hindiTitle || r.title}`,
-    rating: Number((4.8 + (i % 3) * 0.1).toFixed(1)),
+    rating: Number((4.7 + ((i * 3) % 4) * 0.1).toFixed(1)),
     chef: r.hindiTitle || 'MacroSnap Kitchen Lab',
     kitchen: `Prep: ${r.prepTimeMinutes}m • Cook: ${r.cookTimeMinutes}m • ₹${r.estimatedCostPerServingInr}/serv`,
     description: `${r.tagline} Provides ${r.totalProteinPerServingG}g protein for ₹${r.estimatedCostPerServingInr} (${r.caloriesPerServing} kcal).`,
@@ -158,7 +169,7 @@ export default function RecipesPage() {
                 <div>
                   <div className="flex items-center justify-between text-xs text-[#7D8D39] font-mono mb-2">
                     <span className={isSelected ? 'text-[#FF5A22] font-bold' : ''}>
-                      {isSelected ? '● ACTIVE DISH' : `RECIPE 0${index + 1}`}
+                      {isSelected ? '● ACTIVE DISH' : `RECIPE ${String(index + 1).padStart(2, '0')}`}
                     </span>
                     <span>{recipe.prepTimeMinutes + recipe.cookTimeMinutes} mins</span>
                   </div>
