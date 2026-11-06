@@ -18,14 +18,14 @@ const RAW_STAPLES = [
   { id: 'peanuts', staple: 'Roasted Peanuts', protein: '26g / 100g', cost: '₹7.69 / 10g', tag: 'Dense Energy', image: '/images/food/food_9.webp' },
 ]
 
-// 20-card continuous loop: 2x seamless repetition ensures zero gaps across all screen widths
-const CARDS_DATA = [...RAW_STAPLES, ...RAW_STAPLES].map((item, idx) => ({
+// 30-card continuous loop: 3x seamless repetition ensures zero gaps, zero intervals, and ample off-screen buffer
+const CARDS_DATA = [...RAW_STAPLES, ...RAW_STAPLES, ...RAW_STAPLES].map((item, idx) => ({
   ...item,
   uniqueIndex: idx,
 }))
 
 const CARD_PITCH = 190
-const TOTAL_PITCH = CARDS_DATA.length * CARD_PITCH // 3800u
+const TOTAL_PITCH = CARDS_DATA.length * CARD_PITCH // 5700u
 
 export function ReelmarkBotanicalHero() {
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -62,10 +62,13 @@ export function ReelmarkBotanicalHero() {
     updateUnit()
     window.addEventListener('resize', updateUnit)
 
-    // Preload all 10 images into browser cache immediately for zero-latency scroll
+    // Preload and hardware-decode all staple images immediately into GPU cache
     RAW_STAPLES.forEach((item) => {
       const img = new Image()
       img.src = item.image
+      if (typeof img.decode === 'function') {
+        img.decode().catch(() => {})
+      }
     })
 
     const t = setTimeout(() => setMounted(true), 100)
@@ -174,11 +177,12 @@ export function ReelmarkBotanicalHero() {
         cardEl.style.width = `calc(${w} * var(--u))`
         cardEl.style.height = `calc(${totalH} * var(--u))`
 
-        // Visibility culling: generous offscreen bounds ensure cards are fully rendered before entering
-        if (x < -380 || x > 1920) {
-          cardEl.style.display = 'none'
+        // Generous pre-render buffer: cards are kept fully loaded and decoded well before entering screen
+        // Use visibility instead of display: none to preserve decoded image bitmaps in GPU memory
+        if (x < -800 || x > 2600) {
+          cardEl.style.visibility = 'hidden'
         } else {
-          cardEl.style.display = 'block'
+          cardEl.style.visibility = 'visible'
         }
       }
 
@@ -237,7 +241,11 @@ export function ReelmarkBotanicalHero() {
         1440x1080 CONTAINED STAGE
         ========================================================================
       */}
-      <div className="relative w-full max-w-[1440px] h-[920px] lg:h-[1080px] mx-auto overflow-hidden">
+      <div className="relative w-full max-w-[1440px] h-[920px] lg:h-[1080px] mx-auto overflow-visible">
+        {/* Soft Edge Gradient Vignettes: Cards glide seamlessly into view */}
+        <div className="absolute inset-y-0 -left-28 w-36 sm:w-64 bg-gradient-to-r from-[#F5F8EF] via-[#F5F8EF]/80 to-transparent z-20 pointer-events-none" />
+        <div className="absolute inset-y-0 -right-28 w-36 sm:w-64 bg-gradient-to-l from-[#F5F8EF] via-[#F5F8EF]/80 to-transparent z-20 pointer-events-none" />
+
         {/* Mint Badge: (575, 115) 292x37 */}
         <div
           className={`absolute left-1/2 -translate-x-1/2 top-28 lg:top-[calc(115*var(--u))] z-20 flex items-center justify-center px-5 py-2 rounded-full bg-[#DAE7C7] border border-[#08482D]/15 text-[#08482D] text-xs lg:text-[calc(16.6*var(--u))] font-sans font-medium shadow-2xs transition-all duration-700 ${
@@ -348,7 +356,7 @@ export function ReelmarkBotanicalHero() {
                     src={card.image}
                     alt={card.staple}
                     loading="eager"
-                    decoding="sync"
+                    decoding="async"
                     className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none transition-transform duration-500 hover:scale-105"
                   />
 
