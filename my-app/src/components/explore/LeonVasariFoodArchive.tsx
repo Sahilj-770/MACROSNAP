@@ -82,9 +82,12 @@ export function LeonVasariFoodArchive() {
   const [detailOpen, setDetailOpen] = useState(false)
   const [addedToast, setAddedToast] = useState<string | null>(null)
 
-  // Custom Cursor State
-  const [cursorPos, setCursorPos] = useState({ x: -100, y: -100 })
+  // High-Performance Cursor & Dimension Refs (Avoids 60fps React re-renders)
+  const cursorRef = useRef<HTMLDivElement | null>(null)
+  const prevCursorModeRef = useRef<'default' | 'spine' | 'cover' | 'button'>('default')
   const [cursorMode, setCursorMode] = useState<'default' | 'spine' | 'cover' | 'button'>('default')
+  const activeIndexRef = useRef(0)
+  const dimRef = useRef({ H: 420, ws: 71, d: 221, gap: 13, vw: 1200, vh: 800, isMobile: false })
 
   const addToBasket = useUserStore((state) => state.addToBasket)
   const activeFood = FOOD_ARCHIVE_ITEMS[activeIndex] || FOOD_ARCHIVE_ITEMS[0]!
@@ -138,6 +141,30 @@ export function LeonVasariFoodArchive() {
     else setActiveCategory('all')
   }, [activeIndex])
 
+  // Pre-compute viewport dimensions outside the 60fps RAF loop
+  useEffect(() => {
+    const updateDimensions = () => {
+      const vw = window.innerWidth
+      const vh = window.innerHeight
+      const isMobile = vw <= 768
+      const H = isMobile ? Math.min(vw * 0.62, vh * 0.42) : Math.min(vh * 0.48, vw * 0.32)
+      const ws = (H * 142) / 840 // spine width
+      const d = (H * 474) / 900 // cover width
+      const gap = H * 0.032
+      dimRef.current = { H, ws, d, gap, vw, vh, isMobile }
+
+      if (stageRef.current) {
+        stageRef.current.style.setProperty('--H', `${H}px`)
+        stageRef.current.style.setProperty('--ws', `${ws}px`)
+        stageRef.current.style.setProperty('--d', `${d}px`)
+      }
+    }
+
+    updateDimensions()
+    window.addEventListener('resize', updateDimensions, { passive: true })
+    return () => window.removeEventListener('resize', updateDimensions)
+  }, [])
+
   // Main Animation Loop
   useEffect(() => {
     let animId: number
@@ -154,19 +181,21 @@ export function LeonVasariFoodArchive() {
         return
       }
 
-      // Smooth cursor lerp
-      st.cursorX += (st.targetCursorX - st.cursorX) * (1 - Math.exp(-16 * dt))
-      st.cursorY += (st.targetCursorY - st.cursorY) * (1 - Math.exp(-16 * dt))
-      setCursorPos({ x: st.cursorX, y: st.cursorY })
+      // 1. Direct GPU Cursor Transform (0 React Re-renders!)
+      st.cursorX += (st.targetCursorX - st.cursorX) * (1 - Math.exp(-24 * dt))
+      st.cursorY += (st.targetCursorY - st.cursorY) * (1 - Math.exp(-24 * dt))
+      if (cursorRef.current) {
+        cursorRef.current.style.transform = `translate3d(${st.cursorX.toFixed(1)}px, ${st.cursorY.toFixed(1)}px, 0)`
+      }
 
-      // Spring physics for shelf scroll position s towards target T
-      const springK = st.isDragging ? 18 : 5.2
+      // 2. Snappy, Critically Damped Spring Physics for Shelf Position
+      const springK = st.isDragging ? 22 : 9.0
       st.s += (st.T - st.s) * (1 - Math.exp(-springK * dt))
-      if (Math.abs(st.T - st.s) < 1e-4) {
+      if (Math.abs(st.T - st.s) < 0.0005) {
         st.s = st.T
       }
 
-      // Keep s normalized within [0, 36)
+      // Normalize s within [0, 36)
       while (st.s >= 36) {
         st.s -= 12
         st.T -= 12
@@ -176,27 +205,17 @@ export function LeonVasariFoodArchive() {
         st.T += 12
       }
 
-      // Active item index
+      // 3. Active item index (Deduplicated: updates ONLY when value changes!)
       const currActive = ((Math.round(st.s) % 12) + 12) % 12
-      setActiveIndex((prev) => (prev !== currActive ? currActive : prev))
-
-      // Dimensions calculated dynamically from viewport
-      const vw = window.innerWidth
-      const vh = window.innerHeight
-      const isMobile = vw <= 768
-      const H = isMobile ? Math.min(vw * 0.62, vh * 0.42) : Math.min(vh * 0.48, vw * 0.32)
-      const ws = (H * 142) / 840 // spine width
-      const d = (H * 474) / 900 // cover width
-      const gap = H * 0.032
-
-      // Write CSS variables on stage
-      if (stageRef.current) {
-        stageRef.current.style.setProperty('--H', `${H}px`)
-        stageRef.current.style.setProperty('--ws', `${ws}px`)
-        stageRef.current.style.setProperty('--d', `${d}px`)
+      if (currActive !== activeIndexRef.current) {
+        activeIndexRef.current = currActive
+        setActiveIndex(currActive)
       }
 
-      // Cursor tilt calculation when hovering active cover
+      // Read pre-computed dimensions (Zero style property sets in RAF!)
+      const { H, ws, d, gap, vw, vh, isMobile } = dimRef.current
+
+      // 4. Cursor Cover Tilt Calculation
       const cx = vw / 2
       const cy = vh / 2
       const onCover =
@@ -209,44 +228,48 @@ export function LeonVasariFoodArchive() {
       if (onCover) {
         const targetTiltY = ((st.targetCursorX - cx) / (0.55 * d)) * 9
         const targetTiltX = -((st.targetCursorY - cy) / (H / 2)) * 6
-        st.tiltY += (targetTiltY - st.tiltY) * (1 - Math.exp(-7 * dt))
-        st.tiltX += (targetTiltX - st.tiltX) * (1 - Math.exp(-7 * dt))
+        st.tiltY += (targetTiltY - st.tiltY) * (1 - Math.exp(-9 * dt))
+        st.tiltX += (targetTiltX - st.tiltX) * (1 - Math.exp(-9 * dt))
       } else {
-        const driftTiltY = ((st.targetCursorX - cx) / vw) * 5
-        st.tiltY += (driftTiltY - st.tiltY) * (1 - Math.exp(-7 * dt))
-        st.tiltX += (0 - st.tiltX) * (1 - Math.exp(-7 * dt))
+        st.tiltY += (0 - st.tiltY) * (1 - Math.exp(-9 * dt))
+        st.tiltX += (0 - st.tiltX) * (1 - Math.exp(-9 * dt))
       }
 
-      // Update Cursor Mode
+      // 5. Cursor Mode (Deduplicated: updates ONLY on mode transition!)
       if (!isMobile) {
+        let targetMode: 'default' | 'spine' | 'cover' | 'button' = 'default'
         if (onCover) {
-          setCursorMode('cover')
+          targetMode = 'cover'
         } else if (st.hoverVirtualIdx !== -1) {
           const hoveredRelative = ((((st.hoverVirtualIdx - st.s) % 36) + 36) % 36) - 18
-          if (Math.abs(hoveredRelative) > 0.5) {
-            setCursorMode('spine')
-          } else {
-            setCursorMode('cover')
-          }
-        } else {
-          setCursorMode('default')
+          targetMode = Math.abs(hoveredRelative) > 0.5 ? 'spine' : 'cover'
+        }
+        if (targetMode !== prevCursorModeRef.current) {
+          prevCursorModeRef.current = targetMode
+          setCursorMode(targetMode)
         }
       }
 
-      // Render each of the 36 tapes in 3D
+      // 6. Viewport Culling & 3D Transform Batching
+      const maxVisibleR = isMobile ? 6 : Math.min(10, Math.ceil(vw / (2 * (ws + gap))) + 1)
+
       tapeElsRef.current.forEach((el, vIdx) => {
         if (!el) return
 
         // Relative index r in [-18, 18]
-        let r = ((((vIdx - st.s) % 36) + 36) % 36) - 18
+        const r = ((((vIdx - st.s) % 36) + 36) % 36) - 18
         const absR = Math.abs(r)
 
-        // Culling: off-screen tapes beyond horizontal range
-        if (absR > 14) {
-          el.style.visibility = 'hidden'
+        // Strict Culling: completely hide tapes outside viewport cone
+        if (absR > maxVisibleR) {
+          if (el.style.display !== 'none') {
+            el.style.display = 'none'
+          }
           return
         }
-        el.style.visibility = 'visible'
+        if (el.style.display !== '') {
+          el.style.display = ''
+        }
 
         // Smooth placement X with neighbor push B(r)
         const B = pushStep(r)
@@ -258,7 +281,7 @@ export function LeonVasariFoodArchive() {
         // Hover lift animation per spine
         const isHovered = st.hoverVirtualIdx === vIdx && absR > 0.5
         const targetLift = isHovered ? 1 : 0
-        st.liftValues[vIdx] += (targetLift - (st.liftValues[vIdx] || 0)) * (1 - Math.exp(-12 * dt))
+        st.liftValues[vIdx] += (targetLift - (st.liftValues[vIdx] || 0)) * (1 - Math.exp(-14 * dt))
         const lift = st.liftValues[vIdx] || 0
 
         // 3D Transformations
@@ -268,12 +291,18 @@ export function LeonVasariFoodArchive() {
         const z = o * 0.22 * H
         const y = -o * 0.025 * H - lift * 0.048 * H
 
-        el.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateZ(${rotZ}deg) rotateX(${rotX}deg) rotateY(${rotY}deg)`
-        el.style.zIndex = String(Math.round(100 - absR * 4))
+        el.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, ${z.toFixed(2)}px) rotateZ(${rotZ.toFixed(2)}deg) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg)`
+        
+        const targetZ = String(Math.round(100 - absR * 4))
+        if (el.style.zIndex !== targetZ) {
+          el.style.zIndex = targetZ
+        }
 
-        // Shading: spine darkens to 55%, cover brightens from 50% dark to fully lit
-        el.style.setProperty('--shade-sp', String(o * 0.55))
-        el.style.setProperty('--shade-cv', String((1 - o) * 0.5))
+        // Shading: ONLY update shade properties on the active & immediate transitioning tapes!
+        if (absR < 1.4) {
+          el.style.setProperty('--shade-sp', (o * 0.55).toFixed(3))
+          el.style.setProperty('--shade-cv', ((1 - o) * 0.5).toFixed(3))
+        }
       })
 
       animId = requestAnimationFrame(loop)
@@ -287,8 +316,9 @@ export function LeonVasariFoodArchive() {
   const handleWheel = (e: React.WheelEvent) => {
     if (stateRef.current.detailOpen) return
     const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY
-    if (Math.abs(delta) > 2) {
-      stateRef.current.T += delta * 0.004
+    if (Math.abs(delta) > 1) {
+      const normDelta = Math.sign(delta) * Math.min(Math.abs(delta) * 0.003, 1.2)
+      stateRef.current.T += normDelta
     }
   }
 
@@ -330,8 +360,14 @@ export function LeonVasariFoodArchive() {
     }
   }
 
-  // Keyboard navigation
+  // Global Pointer & Keyboard Navigation
   useEffect(() => {
+    const onGlobalPointerMove = (e: PointerEvent) => {
+      stateRef.current.targetCursorX = e.clientX
+      stateRef.current.targetCursorY = e.clientY
+    }
+    window.addEventListener('pointermove', onGlobalPointerMove, { passive: true })
+
     const onKeyDown = (e: KeyboardEvent) => {
       if (stateRef.current.detailOpen) {
         if (e.key === 'Escape') closeDetail()
@@ -346,7 +382,11 @@ export function LeonVasariFoodArchive() {
       }
     }
     window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
+
+    return () => {
+      window.removeEventListener('pointermove', onGlobalPointerMove)
+      window.removeEventListener('keydown', onKeyDown)
+    }
   }, [])
 
   // Step left / right handlers
@@ -415,8 +455,8 @@ export function LeonVasariFoodArchive() {
             },
           ],
           {
-            duration: 950,
-            easing: 'cubic-bezier(0.76, 0, 0.18, 1)',
+            duration: 650,
+            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
             fill: 'both',
           }
         )
@@ -431,8 +471,8 @@ export function LeonVasariFoodArchive() {
           const delay = Number(c.dataset.delay || 0)
           setTimeout(() => {
             c.setAttribute('r', '780')
-            c.style.transition = 'r 1.4s cubic-bezier(0.16, 1, 0.3, 1)'
-          }, delay + 450)
+            c.style.transition = 'r 0.9s cubic-bezier(0.16, 1, 0.3, 1)'
+          }, delay + 200)
         })
       }
     }, 20)
@@ -447,8 +487,8 @@ export function LeonVasariFoodArchive() {
           { clipPath: 'inset(25% 25% 25% 25% round 12px)', transform: 'rotate(-4deg)', opacity: 0 },
         ],
         {
-          duration: 450,
-          easing: 'cubic-bezier(0.76, 0, 0.18, 1)',
+          duration: 320,
+          easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
           fill: 'both',
         }
       )
@@ -540,11 +580,12 @@ export function LeonVasariFoodArchive() {
         ========================================================================
       */}
       <div
+        ref={cursorRef}
         className="hidden md:block pointer-events-none fixed z-50 will-change-transform"
         style={{
           left: 0,
           top: 0,
-          transform: `translate3d(${cursorPos.x}px, ${cursorPos.y}px, 0)`,
+          transform: 'translate3d(-100px, -100px, 0)',
         }}
       >
         <div
@@ -723,7 +764,7 @@ export function LeonVasariFoodArchive() {
 
                   {/* Shading overlay: darkens as the spine turns away */}
                   <div
-                    className="absolute inset-0 bg-black pointer-events-none transition-opacity duration-75"
+                    className="absolute inset-0 bg-black pointer-events-none"
                     style={{ opacity: 'var(--shade-sp, 0)' }}
                   />
                 </div>
@@ -834,7 +875,7 @@ export function LeonVasariFoodArchive() {
 
                   {/* Shading overlay: brightens as cover turns forward */}
                   <div
-                    className="absolute inset-0 bg-black pointer-events-none transition-opacity duration-75"
+                    className="absolute inset-0 bg-black pointer-events-none"
                     style={{ opacity: 'var(--shade-cv, 0.5)' }}
                   />
                 </div>
